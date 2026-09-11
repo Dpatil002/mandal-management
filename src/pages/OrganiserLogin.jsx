@@ -51,7 +51,7 @@ export function OrganiserLogin({ onBackToPublic }) {
     setIsSubmitting(false);
 
     if (!res.success) {
-      setError(res.error || 'Incorrect PIN / अयोग्य पिन. कृपया योग्य ४-अंकी कोड टाका (PIN: 2026).');
+      setError(res.error || 'Incorrect PIN / अयोग्य पिन. कृपया योग्य ४-अंकी कोड टाका.');
     }
   };
 
@@ -175,18 +175,9 @@ export function OrganiserLogin({ onBackToPublic }) {
 
               {/* Mandal PIN */}
               <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[#6B5E57]" htmlFor="organizer-pin">
-                    Mandal PIN (2026)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setPin('2026')}
-                    className="text-[11px] text-[#8B2616] font-bold hover:underline cursor-pointer"
-                  >
-                    Use PIN
-                  </button>
-                </div>
+                <label className="text-xs font-semibold text-[#6B5E57]" htmlFor="organizer-pin">
+                  Mandal PIN
+                </label>
                 <div className="relative flex items-center">
                   <div className="absolute left-3.5 pointer-events-none text-[#6B5E57]/60 flex items-center">
                     <span className="material-symbols-outlined text-[18px]">lock</span>

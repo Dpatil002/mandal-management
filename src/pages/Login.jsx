@@ -137,9 +137,6 @@ export function Login() {
                 />
               ))}
             </div>
-            <p className="text-[11px] text-slate-500">
-              Default demo PIN for {organizers.find(o => o.id === selectedOrgId)?.name}: <strong className="text-amber-400 font-mono">{organizers.find(o => o.id === selectedOrgId)?.pin}</strong>
-            </p>
           </div>
 
           {/* Numeric Keypad */}
