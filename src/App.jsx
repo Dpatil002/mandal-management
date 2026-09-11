@@ -108,14 +108,14 @@ export function App() {
               <PublicHome
                 onNavigateToPay={() => setPublicTab('vargani')}
                 onNavigateToSchedule={() => setPublicTab('schedule')}
-                onNavigateToCommittee={() => setPublicTab('committee')}
+                onNavigateToCommittee={() => setPublicTab('mandal')}
               />
             )}
             {publicTab === 'vargani' && (
               <PublicPayVargani onNavigateHome={() => setPublicTab('home')} />
             )}
             {publicTab === 'schedule' && <PublicTodaySchedule />}
-            {publicTab === 'committee' && (
+            {(publicTab === 'mandal' || publicTab === 'committee') && (
               <PublicMandalCommittee onOpenLogin={() => setIsLoginOpen(true)} />
             )}
           </>

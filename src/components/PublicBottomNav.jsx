@@ -9,13 +9,7 @@ export function PublicBottomNav({ activeTab, setActiveTab, onOpenLogin }) {
   ];
 
   const handleTabClick = (tabId) => {
-    if (tabId === 'mandal') {
-      if (onOpenLogin) {
-        onOpenLogin();
-      }
-    } else {
-      setActiveTab(tabId);
-    }
+    setActiveTab(tabId);
   };
 
   return (
