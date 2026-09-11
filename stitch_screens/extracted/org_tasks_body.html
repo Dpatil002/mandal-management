@@ -1,0 +1,196 @@
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-4 flex items-center justify-between gap-3 border-b border-[#F0DFD5] bg-white/90 backdrop-blur-xl"><div class="flex items-center gap-3 min-w-0 flex-1"><button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full text-[#241913] hover:bg-[#FFEAE0] transition-colors shrink-0" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Indrayani Vihar Logo" class="w-9 h-9 rounded-full object-cover shrink-0 border border-[#F0DFD5]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoHBYCXGgmQOStA5LYk8K1ODn3h5ZVJr5xE-_1ENQj-LQEqQhirfkXfzEmfu6KJPuFHBBZ2N8b-oHndhoHm-1pTdi8vDKq3PyvYXo1nXyuDNi7NPO9le39onNf_T5_6PekUZUwTkDuxwkeGLGSJK4DdrFmmGjmGZkVpjJiz4U_61legdzirwSuyS9vKAuftloGASpKE60mCh7X7pcwHsARsWa6B3_B26OEBe1gC69LSweNnhgKaovDFmBuJMZ7wq9RosY"><div class="flex flex-col min-w-0"><span class="font-bold text-base text-[#6B0E03] truncate leading-tight">Indrayani Vihar</span><h1 class="text-xs text-[#57423E] font-medium truncate">Organiser Dashboard</h1></div></div><div class="w-9 h-9 rounded-full bg-[#8B2616] flex items-center justify-center shrink-0 shadow-sm text-white"><span class="material-symbols-outlined text-[18px]">person</span></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full px-4 py-4 max-w-xl mx-auto space-y-4"><div class="flex flex-col bg-white rounded-xl p-4 border border-[#F0DFD5] shadow-xs"><div class="flex items-center justify-between gap-3"><div><span class="inline-flex items-center gap-1 text-[#8B2616] text-[11px] font-semibold bg-[#FFF2EB] border border-[#F5DACB] px-2.5 py-1 rounded-lg mb-1.5"><span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">volunteer_activism</span>सेवा कार्यसूची</span><h2 class="text-lg font-bold text-[#241913]">Mandal Tasks / उत्सव कामे</h2><p class="text-xs text-[#57423E] mt-0.5">Simple checklist for mandal sevekaris &amp; volunteers</p></div><div class="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-[#FFEAE0] text-[#6B0E03] shrink-0 border border-[#F5DACB]"><span class="text-xl leading-none font-bold" id="counter-progress">5</span><span class="text-[11px] font-medium text-[#57423E] mt-0.5">Pending</span></div></div><div class="mt-4 pt-1"><form class="flex items-center gap-2" id="quick-add-form" onsubmit="event.preventDefault(); addNewTask();"><div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full"><div class="flex-1 flex items-center bg-white border border-[#D9C4B7] rounded-xl px-3.5 py-2.5"><span class="material-symbols-outlined text-[#8B716C] text-[18px] mr-2 shrink-0">add_task</span><input aria-label="New task description" class="w-full bg-transparent text-[#241913] placeholder:text-[#8B716C] text-sm focus:outline-none" id="new-task-input" placeholder="Add task (उदा. प्रसाद वाटप वाटणी...)" type="text"></div><div class="flex items-center gap-2"><div class="flex items-center bg-white border border-[#D9C4B7] rounded-xl px-2.5 py-2 shrink-0"><span class="material-symbols-outlined text-[#8B716C] text-[18px] mr-1.5 shrink-0">person_add</span><select aria-label="Assign To / जबाबदारी द्या" class="bg-transparent text-xs font-semibold text-[#241913] focus:outline-none cursor-pointer pr-1" id="task-assignee-select"><option value="Sachin Joshi">Sachin Joshi</option><option value="Vijay Pawar">Vijay Pawar</option><option value="Amit Kadam">Amit Kadam</option><option value="Sunita Deshmukh">Sunita Deshmukh</option><option value="Ramesh Shinde">Ramesh Shinde</option><option value="Pranav Patil">Pranav Patil</option></select></div><button aria-label="Add task" class="rounded-xl px-4 py-2.5 bg-[#8B2616] text-white font-semibold text-xs shadow-sm flex items-center gap-1 shrink-0 hover:bg-[#6B0E03] active:scale-95 transition-all" type="submit"><span class="material-symbols-outlined text-[16px]">add</span><span class="">Add / जोडा</span></button></div></div></form></div></div><div aria-label="Task filters" class="flex items-center gap-2 overflow-x-auto pb-1" role="tablist"><button aria-selected="true" class="rounded-full px-3.5 py-1.5 text-xs font-semibold bg-[#8B2616] text-white shadow-sm flex items-center gap-1.5 transition-all shrink-0" id="filter-all" onclick="setFilter('all')" role="tab"><span class="">All</span><span class="px-1.5 py-0.2 bg-white/20 text-white rounded-full text-[10px] leading-none" id="count-all">9</span></button><button aria-selected="false" class="rounded-full px-3.5 py-1.5 text-xs font-semibold border border-[#D9C4B7] bg-white text-[#6B5E57] hover:bg-[#FFF8F6] flex items-center gap-1.5 transition-all shrink-0" id="filter-todo" onclick="setFilter('todo')" role="tab"><span class="">To Do</span><span class="px-1.5 py-0.2 bg-[#FFEAE0] text-[#8B2616] rounded-full text-[10px] leading-none font-bold" id="count-todo">5</span></button><button aria-selected="false" class="rounded-full px-3.5 py-1.5 text-xs font-semibold border border-[#D9C4B7] bg-white text-[#6B5E57] hover:bg-[#FFF8F6] flex items-center gap-1.5 transition-all shrink-0" id="filter-done" onclick="setFilter('done')" role="tab"><span class="">Done</span><span class="px-1.5 py-0.2 bg-[#E6F4EA] text-[#0E5138] rounded-full text-[10px] leading-none font-bold" id="count-done">4</span></button></div><div class="flex flex-col space-y-2.5" id="tasks-container"><div class="task-item group flex items-start gap-3 bg-white border border-[#F0DFD5] rounded-xl p-3.5 shadow-xs transition-all" data-status="todo" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md border-2 border-[#D9C4B7] bg-white flex items-center justify-center text-transparent transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-semibold text-[#241913] leading-snug">Arrange fresh red flowers, garikhe (durva), and champa garlands for 8:00 PM Maha Aarti</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF2EB] border border-[#F5DACB] text-[11px] font-semibold text-[#8B2616]"><span class="material-symbols-outlined text-[13px]">schedule</span>Due 5:00 PM Today</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FAF5F2] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#8B2616]">account_circle</span>Sachin Joshi</span></div></div></div><div class="task-item group flex items-start gap-3 bg-white border border-[#F0DFD5] rounded-xl p-3.5 shadow-xs transition-all" data-status="todo" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md border-2 border-[#D9C4B7] bg-white flex items-center justify-center text-transparent transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-semibold text-[#241913] leading-snug">Check drinking water camper refill and disposable cups near pandal entrance</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF2EB] border border-[#F5DACB] text-[11px] font-semibold text-[#8B2616]"><span class="material-symbols-outlined text-[13px]">today</span>Today</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FAF5F2] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#8B2616]">account_circle</span>Vijay Pawar</span></div></div></div><div class="task-item group flex items-start gap-3 bg-white border border-[#F0DFD5] rounded-xl p-3.5 shadow-xs transition-all" data-status="todo" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md border-2 border-[#D9C4B7] bg-white flex items-center justify-center text-transparent transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-semibold text-[#241913] leading-snug">Coordinate backup generator diesel fuel test with society maintenance</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF8F6] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[13px]">event</span>Tomorrow Morning</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FAF5F2] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#8B2616]">account_circle</span>Ramesh Shinde</span></div></div></div><div class="task-item group flex items-start gap-3 bg-white border border-[#F0DFD5] rounded-xl p-3.5 shadow-xs transition-all" data-status="todo" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md border-2 border-[#D9C4B7] bg-white flex items-center justify-center text-transparent transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-semibold text-[#241913] leading-snug">Print and paste QR code standees at Gate 1 and Wing C foyer</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF8F6] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[13px]">qr_code</span>Tomorrow</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FAF5F2] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#8B2616]">account_circle</span>Pranav Patil</span></div></div></div><div class="task-item group flex items-start gap-3 bg-white border border-[#F0DFD5] rounded-xl p-3.5 shadow-xs transition-all" data-status="todo" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md border-2 border-[#D9C4B7] bg-white flex items-center justify-center text-transparent transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-semibold text-[#241913] leading-snug">Confirm arrival timing of sound technician for children's dance show</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF2EB] border border-[#F5DACB] text-[11px] font-semibold text-[#8B2616]"><span class="material-symbols-outlined text-[13px]">mic</span>Today 4:30 PM</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FAF5F2] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#8B2616]">account_circle</span>Amit Kadam</span></div></div></div><div class="pt-2 pb-1 flex items-center justify-between" id="done-divider" style="display: flex;"><span class="text-xs font-bold text-[#0E5138] uppercase tracking-wider flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">task_alt</span>Completed / पूर्ण झालेली कामे</span><span class="flex-1 ml-3 h-[1px] bg-[#E0D0C5]"></span></div><div class="task-item group flex items-start gap-3 bg-[#FAF5F2] border border-[#F0DFD5] rounded-xl p-3.5 shadow-none opacity-85 transition-all" data-status="done" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md bg-[#003D28] text-white flex items-center justify-center shadow-xs transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-medium text-[#57423E] line-through leading-snug">Obtain local police permission letter for loudspeaker until 10:00 PM</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#E6F4EA] border border-[#BDE5D0] text-[11px] font-semibold text-[#0E5138]"><span class="material-symbols-outlined text-[13px]">verified</span>Done yesterday</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF8F6] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#0E5138]">account_circle</span>Ramesh Shinde</span></div></div></div><div class="task-item group flex items-start gap-3 bg-[#FAF5F2] border border-[#F0DFD5] rounded-xl p-3.5 shadow-none opacity-85 transition-all" data-status="done" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md bg-[#003D28] text-white flex items-center justify-center shadow-xs transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-medium text-[#57423E] line-through leading-snug">Collect 200kg bhog modak order tokens from confectioner</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#E6F4EA] border border-[#BDE5D0] text-[11px] font-semibold text-[#0E5138]"><span class="material-symbols-outlined text-[13px]">done</span>Done</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF8F6] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#0E5138]">account_circle</span>Sunita Deshmukh</span></div></div></div><div class="task-item group flex items-start gap-3 bg-[#FAF5F2] border border-[#F0DFD5] rounded-xl p-3.5 shadow-none opacity-85 transition-all" data-status="done" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md bg-[#003D28] text-white flex items-center justify-center shadow-xs transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-medium text-[#57423E] line-through leading-snug">Clean and arrange stage seating mats for evening devotees</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#E6F4EA] border border-[#BDE5D0] text-[11px] font-semibold text-[#0E5138]"><span class="material-symbols-outlined text-[13px]">done</span>Done</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF8F6] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#0E5138]">account_circle</span>Sachin Joshi</span></div></div></div><div class="task-item group flex items-start gap-3 bg-[#FAF5F2] border border-[#F0DFD5] rounded-xl p-3.5 shadow-none opacity-85 transition-all" data-status="done" style="display: flex;"><button aria-label="Toggle task completion" class="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg hover:bg-[#FFEAE0] transition-colors mt-0.5" onclick="toggleTask(this)" type="button"><div class="checkbox-box w-5 h-5 rounded-md bg-[#003D28] text-white flex items-center justify-center shadow-xs transition-all"><span class="material-symbols-outlined text-[16px]">check</span></div></button><div class="flex-1 min-w-0"><p class="task-title text-sm font-medium text-[#57423E] line-through leading-snug">Distribute society circular regarding parking guidelines during utsav</p><div class="flex items-center gap-2 mt-2"><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#E6F4EA] border border-[#BDE5D0] text-[11px] font-semibold text-[#0E5138]"><span class="material-symbols-outlined text-[13px]">done</span>Done</span><span class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 bg-[#FFF8F6] border border-[#E8D3C7] text-[11px] font-semibold text-[#57423E]"><span class="material-symbols-outlined text-[14px] text-[#0E5138]">account_circle</span>Vijay Pawar</span></div></div></div><div class="flex flex-col items-center justify-center p-4 bg-[#FFF8F6] border border-[#F5DACB] rounded-xl text-center shadow-xs transition-all"><div class="w-14 h-14 rounded-full bg-[#FFEAE0] flex items-center justify-center mb-1.5 border border-[#F5DACB]"><svg class="w-8 h-8 opacity-85" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 6V11" stroke="#8B2616" stroke-width="2.5" stroke-linecap="round"></path><path d="M17 14C17 10.134 20.134 7 24 7C27.866 7 31 10.134 31 14V23C31 25.5 33 27 34 28H14C15 27 17 25.5 17 23V14Z" stroke="#8B2616" stroke-width="2.5" fill="#FD8359" fill-opacity="0.2" stroke-linejoin="round"></path><path d="M21 28C21 29.657 22.343 31 24 31C25.657 31 27 29.657 27 28" stroke="#8B2616" stroke-width="2.5" stroke-linecap="round"></path><path d="M11 38C11 35 16 33 24 33C32 33 37 35 37 38C37 41.5 31 43 24 43C17 43 11 41.5 11 38Z" fill="#FFEAE0" stroke="#A23F1A" stroke-width="2"></path><path d="M24 33C24 33 27 29.5 27 27C27 25.343 25.657 24 24 24C22.343 24 21 25.343 21 27C21 29.5 24 33 24 33Z" fill="#FD8359" stroke="#8B2616" stroke-width="1.5"></path><circle cx="24" cy="27.5" r="1.5" fill="#8B2616"></circle></svg></div><h4 class="text-sm font-bold text-[#6B0E03] leading-snug">सर्व सेवा कार्ये पूर्ण!</h4><p class="text-xs text-[#57423E] mt-0.5">All tasks completed for today • गणपती बाप्पा मोरया</p></div></div><div class="bg-white border border-[#F0DFD5] rounded-xl p-3.5 flex items-center gap-3 shadow-xs"><div class="w-9 h-9 rounded-full bg-[#FFEAE0] text-[#8B2616] flex items-center justify-center shrink-0 border border-[#F5DACB]"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">groups</span></div><div class="min-w-0 flex-1"><h4 class="text-sm font-bold text-[#6B0E03] leading-snug">एकत्रित सेवा भाव</h4><p class="text-xs text-[#57423E] leading-tight mt-0.5">Tap any task to mark complete. Changes reflect instantly for all pandal sevekaris.</p></div></div></div>
+<script>
+  let currentFilter = 'all';
+
+  function updateCounts() {
+    const items = document.querySelectorAll('.task-item');
+    let todoCount = 0;
+    let doneCount = 0;
+
+    items.forEach(item => {
+      if (item.getAttribute('data-status') === 'done') {
+        doneCount++;
+      } else {
+        todoCount++;
+      }
+    });
+
+    const totalCount = items.length;
+
+    const countAllEl = document.getElementById('count-all');
+    const countTodoEl = document.getElementById('count-todo');
+    const countDoneEl = document.getElementById('count-done');
+    const progressEl = document.getElementById('counter-progress');
+
+    if (countAllEl) countAllEl.innerText = totalCount;
+    if (countTodoEl) countTodoEl.innerText = todoCount;
+    if (countDoneEl) countDoneEl.innerText = doneCount;
+    if (progressEl) progressEl.innerText = todoCount;
+
+    applyFilter(currentFilter);
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    const tabs = {
+      all: document.getElementById('filter-all'),
+      todo: document.getElementById('filter-todo'),
+      done: document.getElementById('filter-done')
+    };
+
+    Object.keys(tabs).forEach(k => {
+      const btn = tabs[k];
+      if (!btn) return;
+      if (k === filter) {
+        btn.className = 'min-h-[44px] px-space-md rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm flex items-center gap-1.5 transition-colors';
+        btn.setAttribute('aria-selected', 'true');
+      } else {
+        btn.className = 'min-h-[44px] px-space-md rounded-full font-label-md text-label-md bg-surface-container-low text-on-surface-variant hover:bg-surface-container flex items-center gap-1.5 transition-colors';
+        btn.setAttribute('aria-selected', 'false');
+      }
+    });
+
+    applyFilter(filter);
+  }
+
+  function applyFilter(filter) {
+    const items = document.querySelectorAll('.task-item');
+    const divider = document.getElementById('done-divider');
+
+    items.forEach(item => {
+      const status = item.getAttribute('data-status');
+      if (filter === 'all') {
+        item.style.display = 'flex';
+      } else if (filter === 'todo') {
+        item.style.display = status === 'todo' ? 'flex' : 'none';
+      } else if (filter === 'done') {
+        item.style.display = status === 'done' ? 'flex' : 'none';
+      }
+    });
+
+    if (divider) {
+      if (filter === 'todo') {
+        divider.style.display = 'none';
+      } else if (filter === 'done') {
+        divider.style.display = 'none';
+      } else {
+        divider.style.display = 'flex';
+      }
+    }
+  }
+
+  function toggleTask(buttonEl) {
+    const item = buttonEl.closest('.task-item');
+    if (!item) return;
+
+    const currentStatus = item.getAttribute('data-status');
+    const titleEl = item.querySelector('.task-title');
+    const boxEl = item.querySelector('.checkbox-box');
+    const badgeContainer = item.querySelector('.flex.items-center.gap-2');
+
+    if (currentStatus === 'todo') {
+      // Mark as Done
+      item.setAttribute('data-status', 'done');
+      item.classList.remove('bg-surface-container-lowest', 'shadow-sm');
+      item.classList.add('bg-surface-container-low/70', 'opacity-80');
+
+      if (titleEl) {
+        titleEl.classList.add('line-through', 'text-on-surface-variant');
+        titleEl.classList.remove('text-on-surface');
+      }
+
+      if (boxEl) {
+        boxEl.classList.remove('bg-surface-container', 'text-transparent');
+        boxEl.classList.add('bg-tertiary-container', 'text-on-tertiary', 'shadow-xs');
+      }
+
+      if (badgeContainer) {
+        badgeContainer.innerHTML = `
+          <span class="inline-flex items-center gap-1 text-[12px] font-medium text-on-tertiary-fixed-variant bg-tertiary-fixed/60 px-2 py-0.5 rounded-md">
+            <span class="material-symbols-outlined text-[13px]">done</span>
+            Just now
+          </span>
+        `;
+      }
+    } else {
+      // Mark as To-Do
+      item.setAttribute('data-status', 'todo');
+      item.classList.remove('bg-surface-container-low/70', 'opacity-80');
+      item.classList.add('bg-surface-container-lowest', 'shadow-sm');
+
+      if (titleEl) {
+        titleEl.classList.remove('line-through', 'text-on-surface-variant');
+        titleEl.classList.add('text-on-surface');
+      }
+
+      if (boxEl) {
+        boxEl.classList.remove('bg-tertiary-container', 'text-on-tertiary', 'shadow-xs');
+        boxEl.classList.add('bg-surface-container', 'text-transparent');
+      }
+
+      if (badgeContainer) {
+        badgeContainer.innerHTML = `
+          <span class="inline-flex items-center gap-1 text-[12px] font-medium text-secondary bg-secondary-fixed px-2 py-0.5 rounded-md">
+            <span class="material-symbols-outlined text-[13px]">schedule</span>
+            Today
+          </span>
+        `;
+      }
+    }
+
+    updateCounts();
+  }
+
+  function addNewTask() {
+    const input = document.getElementById('new-task-input');
+    if (!input || !input.value.trim()) return;
+
+    const taskText = input.value.trim();
+    const container = document.getElementById('tasks-container');
+    const divider = document.getElementById('done-divider');
+
+    const newTaskEl = document.createElement('div');
+    newTaskEl.className = 'task-item group flex items-start bg-surface-container-lowest rounded-xl p-space-sm shadow-sm transition-all';
+    newTaskEl.setAttribute('data-status', 'todo');
+
+    newTaskEl.innerHTML = `
+      <button 
+        type="button" 
+        onclick="toggleTask(this)" 
+        aria-label="Toggle task completion" 
+        class="w-12 h-12 flex items-center justify-center shrink-0 rounded-lg hover:bg-surface-container-high transition-colors"
+      >
+        <div class="checkbox-box w-6 h-6 rounded-md bg-surface-container flex items-center justify-center text-transparent transition-all">
+          <span class="material-symbols-outlined text-[18px]">check</span>
+        </div>
+      </button>
+      <div class="flex-1 min-w-0 pt-2.5 pr-2">
+        <p class="task-title font-title-md text-title-md text-on-surface leading-snug">
+          ${taskText}
+        </p>
+        <div class="flex items-center gap-2 mt-1.5">
+          <span class="inline-flex items-center gap-1 text-[12px] font-medium text-secondary bg-secondary-fixed px-2 py-0.5 rounded-md">
+            <span class="material-symbols-outlined text-[13px]">schedule</span>
+            Added just now
+          </span>
+        </div>
+      </div>
+    `;
+
+    if (divider && divider.parentNode === container) {
+      container.insertBefore(newTaskEl, divider);
+    } else {
+      container.prepend(newTaskEl);
+    }
+
+    input.value = '';
+    updateCounts();
+  }
+
+  document.addEventListener('DOMContentLoaded', updateCounts);
+</script></main>
+
+
+
+
+
