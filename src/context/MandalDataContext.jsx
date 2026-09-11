@@ -343,6 +343,42 @@ const INITIAL_DHOL_MAINTENANCE = [
   }
 ];
 
+const INITIAL_DHOL_STORAGE = [
+  {
+    id: 'ds-1',
+    personName: 'Sachin Joshi',
+    phone: '9820011223',
+    location: 'A-Wing Parking Storage',
+    dholCount: 8,
+    tashaCount: 4,
+    status: 'In Storage',
+    date: '2026-09-01',
+    notes: 'Includes 8 pairs of sticks & 4 stands'
+  },
+  {
+    id: 'ds-2',
+    personName: 'Vijay Pawar',
+    phone: '9820044556',
+    location: 'B-Wing Ground Floor Society Store',
+    dholCount: 10,
+    tashaCount: 5,
+    status: 'In Storage',
+    date: '2026-09-01',
+    notes: 'Covered with waterproof tarp'
+  },
+  {
+    id: 'ds-3',
+    personName: 'Ramesh Shinde',
+    phone: '9820022334',
+    location: 'C-Wing Basement Room',
+    dholCount: 6,
+    tashaCount: 3,
+    status: 'In Storage',
+    date: '2026-09-02',
+    notes: 'Kept with Dhwaja & poles'
+  }
+];
+
 const INITIAL_SCHEDULE = [
   { id: 'sc-1', time: '07:30 AM', title: 'Morning Aarti & Abhishek', marathiTitle: 'सकाळची मंगल आरती व अभिषेक', type: 'aarti', priest: 'Pandit Sharma', mankari: 'Deshmukh Family (A-102)' },
   { id: 'sc-2', time: '10:00 AM', title: 'Devotee Darshan & Bhajana Mandal', marathiTitle: 'भाविकांचे दर्शन व महिला भजन मंडळ', type: 'darshan', mankari: 'Mahila Bhajan Mandal' },
@@ -414,6 +450,15 @@ export function MandalDataProvider({ children }) {
     }
   });
 
+  const [dholStorage, setDholStorage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('iv_dhol_storage');
+      return saved ? JSON.parse(saved) : INITIAL_DHOL_STORAGE;
+    } catch {
+      return INITIAL_DHOL_STORAGE;
+    }
+  });
+
   const [schedule, setSchedule] = useState(() => {
     try {
       const saved = localStorage.getItem('iv_schedule');
@@ -480,6 +525,10 @@ export function MandalDataProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('iv_dhol_maintenance', JSON.stringify(dholMaintenance));
   }, [dholMaintenance]);
+
+  useEffect(() => {
+    localStorage.setItem('iv_dhol_storage', JSON.stringify(dholStorage));
+  }, [dholStorage]);
 
   useEffect(() => {
     localStorage.setItem('iv_schedule', JSON.stringify(schedule));
@@ -755,6 +804,42 @@ export function MandalDataProvider({ children }) {
     }
   };
 
+  // Dhol Storage Assignments (Given to Storage)
+  const addDholStorage = (item) => {
+    const newItem = {
+      id: `ds-${Date.now()}`,
+      personName: item.personName || 'कार्यकर्ता',
+      phone: item.phone || '',
+      location: item.location || 'सोसायटी साठवणूक',
+      dholCount: Number(item.dholCount) || 0,
+      tashaCount: Number(item.tashaCount) || 0,
+      status: item.status || 'In Storage',
+      date: item.date || new Date().toISOString().slice(0, 10),
+      notes: item.notes || ''
+    };
+    setDholStorage(prev => [newItem, ...prev]);
+    return newItem;
+  };
+
+  const updateDholStorage = (id, updatedFields) => {
+    setDholStorage(prev =>
+      prev.map(item =>
+        item.id === id
+          ? {
+              ...item,
+              ...updatedFields,
+              dholCount: updatedFields.dholCount !== undefined ? Number(updatedFields.dholCount) : item.dholCount,
+              tashaCount: updatedFields.tashaCount !== undefined ? Number(updatedFields.tashaCount) : item.tashaCount
+            }
+          : item
+      )
+    );
+  };
+
+  const deleteDholStorage = (id) => {
+    setDholStorage(prev => prev.filter(item => item.id !== id));
+  };
+
   return (
     <MandalDataContext.Provider
       value={{
@@ -764,6 +849,7 @@ export function MandalDataProvider({ children }) {
         tasks,
         dholInventory,
         dholMaintenance,
+        dholStorage,
         schedule,
         publicContent,
         mankariList,
@@ -781,6 +867,9 @@ export function MandalDataProvider({ children }) {
         deleteTask,
         addDholMaintenance,
         updateDholInventory,
+        addDholStorage,
+        updateDholStorage,
+        deleteDholStorage,
         updateMandalConfig,
         updatePublicContent,
         updateMankariList,
