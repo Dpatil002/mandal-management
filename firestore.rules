@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Public Content & Festival Configuration (readable by everyone, editable by organizers)
+    match /mandalConfig/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /culturalEvents/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /mankariList/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /publicContent/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Vargani / Donations (Public can create submission, organizers can verify/update/delete)
+    match /vargani/{docId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+    
+    // Expenses, Tasks, and Dhol-Tasha
+    match /expenses/{docId} {
+      allow read, write: if true;
+    }
+    
+    match /tasks/{docId} {
+      allow read, write: if true;
+    }
+    
+    match /dholStorage/{docId} {
+      allow read, write: if true;
+    }
+    
+    match /dholMaintenance/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
