@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFirestore, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Configure Firebase using Vite's environment variables
@@ -38,11 +38,12 @@ const app = initializeApp(activeConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Enable offline IndexedDB persistence for Firestore
+// Enable multi-tab offline IndexedDB persistence for Firestore
 if (typeof window !== "undefined") {
-  enableIndexedDbPersistence(db).catch((err) => {
+  enableMultiTabIndexedDbPersistence(db).catch((err) => {
     if (err.code === "failed-precondition") {
-      console.warn("Firestore offline persistence: multiple tabs open");
+      // Fallback if multiple tabs already opened before multi-tab was active
+      enableIndexedDbPersistence(db).catch(() => {});
     } else if (err.code === "unimplemented") {
       console.warn("Firestore offline persistence not supported in this browser");
     }
