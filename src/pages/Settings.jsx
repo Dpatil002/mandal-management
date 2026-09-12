@@ -162,55 +162,6 @@ export function Settings({ onClose }) {
           </div>
         </div>
 
-        {/* Bank Account Details */}
-        <div className="pt-3 border-t border-white/10 space-y-3">
-          <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-            Official Bank Account Details (Fallback for Public Pay Vargani)
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Bank Name & Branch</label>
-              <input
-                type="text"
-                placeholder="e.g. State Bank of India, Lohegaon"
-                value={formData.bankName || ''}
-                onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                className="input-field text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Account Holder Name</label>
-              <input
-                type="text"
-                placeholder="e.g. Indrayani Vihar Mitra Mandal"
-                value={formData.bankAccountName || ''}
-                onChange={(e) => setFormData({ ...formData, bankAccountName: e.target.value })}
-                className="input-field text-xs"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Account Number</label>
-              <input
-                type="text"
-                placeholder="e.g. 123456789012"
-                value={formData.bankAccountNumber || ''}
-                onChange={(e) => setFormData({ ...formData, bankAccountNumber: e.target.value })}
-                className="input-field text-xs font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">IFSC Code</label>
-              <input
-                type="text"
-                placeholder="e.g. SBIN0001234"
-                value={formData.bankIfsc || ''}
-                onChange={(e) => setFormData({ ...formData, bankIfsc: e.target.value.toUpperCase() })}
-                className="input-field text-xs font-mono uppercase"
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="pt-2 flex justify-end">
           <button
             type="submit"

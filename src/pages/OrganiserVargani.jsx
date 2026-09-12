@@ -62,13 +62,12 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setIsPaymentDetailsOpen(true)}
-              title="Payment QR & Bank Details"
-              className="flex items-center justify-center gap-1 rounded-xl px-3 py-2.5 bg-white text-[#8B2616] font-bold text-xs border border-[#D9C4B7] shadow-2xs hover:bg-[#FAF6EE] active:scale-95 transition-all cursor-pointer"
+              title="Payment QR & UPI Settings"
+              className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 bg-white text-[#8B2616] font-bold text-xs border border-[#D9C4B7] shadow-2xs hover:bg-[#FAF6EE] active:scale-95 transition-all cursor-pointer"
               type="button"
             >
               <span className="material-symbols-outlined text-[17px]">qr_code_2</span>
-              <span className="hidden sm:inline">Payment Details</span>
-              <span className="sm:hidden">QR / Bank</span>
+              <span>Payment QR</span>
             </button>
             <button
               onClick={onOpenAddVargani}
@@ -373,7 +372,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
             onClick={() => setIsPaymentDetailsOpen(true)}
             className="py-2 px-3 bg-white border border-[#D9C4B7] text-[#6b0e03] rounded-xl text-xs font-bold hover:bg-[#FAF6EE] transition-all cursor-pointer"
           >
-            बदला / Manage
+            बदला / Manage QR
           </button>
           <a
             href="/assets/mandal_qr_final.png"
@@ -386,7 +385,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
         </div>
       </div>
 
-      {/* Payment QR and Bank Details Modal */}
+      {/* Payment QR and UPI Settings Modal */}
       <PaymentDetailsModal
         isOpen={isPaymentDetailsOpen}
         onClose={() => setIsPaymentDetailsOpen(false)}

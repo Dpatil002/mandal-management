@@ -19,10 +19,6 @@ const INITIAL_MANDAL_CONFIG = {
   targetGoal: 250000,
   driveUrl: 'https://drive.google.com/drive/folders/1rzx_qCusszWSmDoCKxi4mjw53ebjHPao?usp=sharing',
   qrCodeUrl: '',
-  bankName: 'State Bank of India, Lohegaon',
-  bankAccountName: 'Indrayani Vihar Mitra Mandal',
-  bankAccountNumber: '',
-  bankIfsc: '',
   helplinePhone: '9820011223'
 };
 

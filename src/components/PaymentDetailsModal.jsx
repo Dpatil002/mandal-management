@@ -6,12 +6,8 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
   const { config, updateMandalConfig } = useMandalData();
 
   const [formData, setFormData] = useState({
-    upiId: config.upiId || 'indrayanivihar@upi',
-    qrCodeUrl: config.qrCodeUrl || '',
-    bankName: config.bankName || '',
-    bankAccountName: config.bankAccountName || '',
-    bankAccountNumber: config.bankAccountNumber || '',
-    bankIfsc: config.bankIfsc || ''
+    upiId: config.upiId || 'indrayani-vihar-mitra-mandal@sbi',
+    qrCodeUrl: config.qrCodeUrl || ''
   });
 
   const [previewQr, setPreviewQr] = useState(config.qrCodeUrl || '');
@@ -21,12 +17,8 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        upiId: config.upiId || 'indrayanivihar@upi',
-        qrCodeUrl: config.qrCodeUrl || '',
-        bankName: config.bankName || '',
-        bankAccountName: config.bankAccountName || '',
-        bankAccountNumber: config.bankAccountNumber || '',
-        bankIfsc: config.bankIfsc || ''
+        upiId: config.upiId || 'indrayani-vihar-mitra-mandal@sbi',
+        qrCodeUrl: config.qrCodeUrl || ''
       });
       setPreviewQr(config.qrCodeUrl || '');
       setSaveSuccess(false);
@@ -45,7 +37,7 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
       return;
     }
 
-    // Limit size to 1.5MB for snappy Firestore sync
+    // Limit size to 1.5MB for snappy sync
     if (file.size > 1.5 * 1024 * 1024) {
       setErrorMessage('QR image size should be under 1.5 MB.');
       return;
@@ -76,11 +68,7 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
 
     updateMandalConfig({
       upiId: formData.upiId.trim(),
-      qrCodeUrl: formData.qrCodeUrl,
-      bankName: formData.bankName.trim(),
-      bankAccountName: formData.bankAccountName.trim(),
-      bankAccountNumber: formData.bankAccountNumber.trim(),
-      bankIfsc: formData.bankIfsc.trim().toUpperCase()
+      qrCodeUrl: formData.qrCodeUrl
     });
 
     setSaveSuccess(true);
@@ -106,8 +94,8 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
               <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#8B2616] leading-tight">Payment &amp; Bank Details</h3>
-              <p className="text-[11px] text-[#6B5E57]">पेमेंट QR कोड व बँक तपशील</p>
+              <h3 className="text-base font-bold text-[#8B2616] leading-tight">Payment QR &amp; UPI Settings</h3>
+              <p className="text-[11px] text-[#6B5E57]">पेमेंट QR कोड व UPI आयडी व्यवस्थापन</p>
             </div>
           </div>
           <button
@@ -119,12 +107,12 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Scrollable Form Body */}
+        {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto py-3.5 space-y-4">
           {saveSuccess && (
             <div className="p-2.5 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold rounded-xl flex items-center gap-2 shadow-xs animate-fade-in">
               <span className="material-symbols-outlined text-[18px] text-emerald-600">check_circle</span>
-              <span>Payment &amp; Bank details updated live!</span>
+              <span>Payment QR &amp; UPI settings updated live!</span>
             </div>
           )}
 
@@ -135,7 +123,7 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* Section 1: Payment QR Code */}
+          {/* Section 1: Payment QR Code Image Upload */}
           <div className="bg-white p-3.5 rounded-2xl border border-[#F0DFD5] shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-[#241913] flex items-center gap-1.5">
@@ -163,7 +151,7 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
                   />
                 ) : (
                   <QRCodeSVG
-                    value={`upi://pay?pa=${formData.upiId || 'indrayanivihar@upi'}&pn=Indrayani+Vihar+Mitra+Mandal&cu=INR`}
+                    value={`upi://pay?pa=${formData.upiId || 'indrayani-vihar-mitra-mandal@sbi'}&pn=Indrayani+Vihar+Mitra+Mandal&cu=INR`}
                     size={70}
                     level="M"
                   />
@@ -173,7 +161,7 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
               <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                 <p className="text-[11px] text-[#6B5E57] leading-tight">
                   {previewQr
-                    ? 'Custom scanner image will be shown to donors on the Pay Vargani screen.'
+                    ? 'Custom uploaded QR standee is active for public donors.'
                     : 'Auto-generated dynamic QR from Mandal UPI ID.'}
                 </p>
 
@@ -204,80 +192,14 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
               id="modal-upi-id"
               type="text"
               required
-              placeholder="e.g. indrayanivihar@sbi"
+              placeholder="e.g. indrayani-vihar-mitra-mandal@sbi"
               value={formData.upiId}
               onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
               className="w-full bg-[#FFF8F6] text-[#8B2616] font-mono font-bold border border-[#DECDB9] rounded-xl px-3 py-2 text-xs focus:border-[#8B2616] focus:outline-none"
             />
-          </div>
-
-          {/* Section 3: Bank Details (Fallback for Public) */}
-          <div className="bg-white p-3.5 rounded-2xl border border-[#F0DFD5] shadow-xs space-y-3">
-            <div>
-              <h4 className="text-xs font-bold text-[#241913] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[#8B2616] text-[16px]">account_balance</span>
-                <span>Bank Account Details (बँक तपशील)</span>
-              </h4>
-              <p className="text-[10.5px] text-[#6B5E57] mt-0.5">
-                Shown to donors on the Public Pay screen as a fallback option
-              </p>
-            </div>
-
-            <div className="space-y-2.5">
-              <div>
-                <label className="block text-[11px] font-semibold text-[#6B5E57] mb-1">
-                  Bank &amp; Branch Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. State Bank of India, Lohegaon"
-                  value={formData.bankName}
-                  onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                  className="w-full bg-[#FFF8F6] text-[#241913] border border-[#DECDB9] rounded-xl px-3 py-2 text-xs focus:border-[#8B2616] focus:outline-none placeholder:text-[#6B5E57]/40"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-[#6B5E57] mb-1">
-                  Account Name (खातेदाराचे नाव)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Indrayani Vihar Mitra Mandal"
-                  value={formData.bankAccountName}
-                  onChange={(e) => setFormData({ ...formData, bankAccountName: e.target.value })}
-                  className="w-full bg-[#FFF8F6] text-[#241913] border border-[#DECDB9] rounded-xl px-3 py-2 text-xs focus:border-[#8B2616] focus:outline-none placeholder:text-[#6B5E57]/40"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#6B5E57] mb-1">
-                    Account Number (खाते क्र.)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 123456789012"
-                    value={formData.bankAccountNumber}
-                    onChange={(e) => setFormData({ ...formData, bankAccountNumber: e.target.value })}
-                    className="w-full bg-[#FFF8F6] text-[#241913] font-mono border border-[#DECDB9] rounded-xl px-3 py-2 text-xs focus:border-[#8B2616] focus:outline-none placeholder:text-[#6B5E57]/40"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-[#6B5E57] mb-1">
-                    IFSC Code
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. SBIN0001234"
-                    value={formData.bankIfsc}
-                    onChange={(e) => setFormData({ ...formData, bankIfsc: e.target.value.toUpperCase() })}
-                    className="w-full bg-[#FFF8F6] text-[#241913] font-mono uppercase border border-[#DECDB9] rounded-xl px-3 py-2 text-xs focus:border-[#8B2616] focus:outline-none placeholder:text-[#6B5E57]/40"
-                  />
-                </div>
-              </div>
-            </div>
+            <p className="text-[10.5px] text-[#6B5E57]">
+              UPI links (GPay, PhonePe, Paytm, BHIM) on the public screen will automatically use this ID.
+            </p>
           </div>
 
           {/* Action Buttons */}
