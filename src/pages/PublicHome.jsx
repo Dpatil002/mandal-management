@@ -96,7 +96,7 @@ export function PublicHome({ onNavigateToPay, onNavigateToSchedule, onNavigateTo
           <div className="grid grid-cols-2 gap-2.5">
             <a
               className="min-h-[48px] py-3 px-3 rounded-2xl bg-[#1C5D6C] text-white font-bold text-xs shadow-md hover:bg-[#154652] active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all text-center"
-              href={config.driveUrl || 'https://drive.google.com'}
+              href={config.driveUrl || 'https://drive.google.com/drive/folders/1rzx_qCusszWSmDoCKxi4mjw53ebjHPao?usp=sharing'}
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -106,7 +106,7 @@ export function PublicHome({ onNavigateToPay, onNavigateToSchedule, onNavigateTo
 
             <a
               className="min-h-[48px] py-3 px-3 rounded-2xl bg-white border border-[#1C5D6C] text-[#1C5D6C] font-bold text-xs shadow-xs hover:bg-[#E2F1F4] active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all text-center"
-              href={config.driveUrl || 'https://drive.google.com'}
+              href={config.driveUrl || 'https://drive.google.com/drive/folders/1rzx_qCusszWSmDoCKxi4mjw53ebjHPao?usp=sharing'}
               rel="noopener noreferrer"
               target="_blank"
             >

@@ -17,7 +17,7 @@ const INITIAL_MANDAL_CONFIG = {
   president: 'Sachin Joshi',
   treasurer: 'Vijay Pawar',
   targetGoal: 250000,
-  driveUrl: 'https://photos.google.com/',
+  driveUrl: 'https://drive.google.com/drive/folders/1rzx_qCusszWSmDoCKxi4mjw53ebjHPao?usp=sharing',
   qrCodeUrl: '',
   bankName: 'State Bank of India, Lohegaon',
   bankAccountName: 'Indrayani Vihar Mitra Mandal',
