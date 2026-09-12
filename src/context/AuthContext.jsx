@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { db, isConfigured } from '../firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -40,6 +42,7 @@ export function AuthProvider({ children }) {
     }
   });
 
+  // Local storage persistence fallback
   useEffect(() => {
     localStorage.setItem('mandal_organizers', JSON.stringify(organizers));
   }, [organizers]);
@@ -51,6 +54,27 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('mandal_active_organizer');
     }
   }, [currentOrganizer]);
+
+  // Live Firestore subscription for Organisers list
+  useEffect(() => {
+    if (!isConfigured || !db) return;
+
+    try {
+      const unsubOrganizers = onSnapshot(doc(db, 'organizers', 'main'), (snapshot) => {
+        if (snapshot.exists() && Array.isArray(snapshot.data()?.list)) {
+          const list = snapshot.data().list.map(o => ({ ...o, pin: MASTER_PIN }));
+          setOrganizers(list);
+        } else {
+          // Seed default organizers into Firestore if empty
+          setDoc(doc(db, 'organizers', 'main'), { list: DEFAULT_ORGANIZERS }, { merge: true }).catch(() => {});
+        }
+      }, (err) => console.warn('Firestore Organizers listener error:', err));
+
+      return () => unsubOrganizers();
+    } catch (e) {
+      console.warn('Firestore organizers subscription fallback:', e);
+    }
+  }, []);
 
   // Login via developer-locked MASTER_PIN (1995) and name/mobile
   const loginWithPin = (pin, name, phone, selectedOrgId) => {
@@ -79,7 +103,7 @@ export function AuthProvider({ children }) {
       const oPhone = (o.phone || '').replace(/\D/g, '').slice(-10);
       const oName = (o.name || '').trim().toLowerCase();
       if (cleanPhone && oPhone && oPhone === cleanPhone) return true;
-      if (cleanName && oName === cleanName) return true;
+      if (cleanName && oName && oName === cleanName) return true;
       return false;
     });
 
@@ -99,7 +123,7 @@ export function AuthProvider({ children }) {
     setCurrentOrganizer(null);
   };
 
-  const addOrganizer = ({ name, phone }) => {
+  const addOrganizer = async ({ name, phone }) => {
     if (!name || !name.trim()) return null;
     const newOrg = {
       id: `org-${Date.now()}`,
@@ -107,24 +131,32 @@ export function AuthProvider({ children }) {
       phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : '',
       pin: MASTER_PIN
     };
-    setOrganizers(prev => [...prev, newOrg]);
+    const updated = [...organizers, newOrg];
+    setOrganizers(updated);
+
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'organizers', 'main'), { list: updated }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore addOrganizer error:', e);
+      }
+    }
     return newOrg;
   };
 
-  const updateOrganizer = (id, { name, phone }) => {
-    setOrganizers(prev =>
-      prev.map(o => {
-        if (o.id === id) {
-          return {
-            ...o,
-            name: name ? name.trim() : o.name,
-            phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : o.phone,
-            pin: MASTER_PIN
-          };
-        }
-        return o;
-      })
-    );
+  const updateOrganizer = async (id, { name, phone }) => {
+    const updated = organizers.map(o => {
+      if (o.id === id) {
+        return {
+          ...o,
+          name: name ? name.trim() : o.name,
+          phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : o.phone,
+          pin: MASTER_PIN
+        };
+      }
+      return o;
+    });
+    setOrganizers(updated);
 
     if (currentOrganizer?.id === id) {
       setCurrentOrganizer(prev => ({
@@ -134,12 +166,29 @@ export function AuthProvider({ children }) {
         pin: MASTER_PIN
       }));
     }
+
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'organizers', 'main'), { list: updated }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updateOrganizer error:', e);
+      }
+    }
   };
 
-  const removeOrganizer = (id) => {
-    setOrganizers(prev => prev.filter(o => o.id !== id));
+  const removeOrganizer = async (id) => {
+    const updated = organizers.filter(o => o.id !== id);
+    setOrganizers(updated);
     if (currentOrganizer?.id === id) {
       setCurrentOrganizer(null);
+    }
+
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'organizers', 'main'), { list: updated }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore removeOrganizer error:', e);
+      }
     }
   };
 

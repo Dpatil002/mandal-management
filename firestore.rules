@@ -45,5 +45,10 @@ service cloud.firestore {
     match /dholMaintenance/{docId} {
       allow read, write: if true;
     }
+
+    match /organizers/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
