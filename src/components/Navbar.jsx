@@ -21,7 +21,7 @@ export function Navbar({ onOpenSettings }) {
                 {config.name || 'श्री गणेश उत्सव मंडळ'}
               </h1>
               <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                <Sparkles className="w-3 h-3" /> {config.year || 2026}
+                <Sparkles className="w-3 h-3" /> {config.year || 2026} • 31 years completed (Est. 1995)
               </span>
             </div>
             <p className="text-xs text-slate-400 truncate">

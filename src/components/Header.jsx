@@ -35,7 +35,7 @@ export function Header({ isOrganiserMode, onOpenLogin }) {
               )}
             </h1>
             <p className="text-xs font-bold text-[#C94709] leading-snug font-['Mukta','Plus_Jakarta_Sans',sans-serif]">
-              {config.subtitle || 'सार्वजनिक गणेशोत्सव २०२६ • ३२ वे वर्ष'}
+              {config.subtitle || 'सार्वजनिक गणेशोत्सव २०२६ • ३१ वर्षे पूर्ण (Est. 1995)'}
             </p>
           </div>
         </div>

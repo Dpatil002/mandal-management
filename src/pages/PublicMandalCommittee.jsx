@@ -47,18 +47,18 @@ export function PublicMandalCommittee({ onOpenLogin }) {
             {config?.location || 'Indrayani Vihar, Lohegaon, Pune'}
           </p>
 
-          {/* Heritage Badges: Estb. 1998 & 28 Years Completed */}
+          {/* Heritage Badges: Estb. 1995 & 31 Years Completed */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7A1C16]/10 border border-[#7A1C16]/20 text-[#7A1C16]">
               <span className="material-symbols-outlined text-[15px]">history_edu</span>
-              <span className="text-xs font-extrabold tracking-tight">Estb. 1998</span>
-              <span className="text-[11px] font-semibold text-[#7A1C16]/80">(स्थापना १९९८)</span>
+              <span className="text-xs font-extrabold tracking-tight">Estb. 1995</span>
+              <span className="text-[11px] font-semibold text-[#7A1C16]/80">(स्थापना १९९५)</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#E65A15]/15 border border-[#E65A15]/30 text-[#A23F1A]">
               <span className="material-symbols-outlined text-[15px]">verified</span>
-              <span className="text-xs font-extrabold tracking-tight">28 Years Completed</span>
-              <span className="text-[11px] font-semibold text-[#A23F1A]/80">(२८ वर्षे पूर्ण)</span>
+              <span className="text-xs font-extrabold tracking-tight">31 Years Completed</span>
+              <span className="text-[11px] font-semibold text-[#A23F1A]/80">(३१ वर्षे पूर्ण)</span>
             </div>
           </div>
         </div>

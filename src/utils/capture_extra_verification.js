@@ -55,7 +55,7 @@ async function main() {
 
   const pinInput = await page.$('#organizer-pin');
   if (pinInput) {
-    await pinInput.type('2026');
+    await pinInput.type('1995');
     const submitBtn = await page.$('#submit-btn');
     if (submitBtn) {
       await submitBtn.click();

@@ -109,3 +109,12 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.18s ease-out forwards;
 }
+
+/* Reusable Standardized Home Screen Card Spacing */
+.home-card-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.5rem; /* 24px standardized vertical card gap */
+}
+

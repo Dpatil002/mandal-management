@@ -2,13 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+export const MASTER_PIN = '1995';
+
 export const DEFAULT_ORGANIZERS = [
-  { id: 'org-1', name: 'Sachin Joshi', phone: '9820011223', pin: '2026' },
-  { id: 'org-2', name: 'Vijay Pawar', phone: '9820044556', pin: '2026' },
-  { id: 'org-3', name: 'Amit Kadam', phone: '9820077889', pin: '2026' },
-  { id: 'org-4', name: 'Sunita Deshmukh', phone: '9820099001', pin: '2026' },
-  { id: 'org-5', name: 'Ramesh Shinde', phone: '9820022334', pin: '2026' },
-  { id: 'org-6', name: 'Pranav Patil', phone: '9820055667', pin: '2026' }
+  { id: 'org-1', name: 'Sachin Joshi', phone: '9820011223', pin: MASTER_PIN },
+  { id: 'org-2', name: 'Vijay Pawar', phone: '9820044556', pin: MASTER_PIN },
+  { id: 'org-3', name: 'Amit Kadam', phone: '9820077889', pin: MASTER_PIN },
+  { id: 'org-4', name: 'Sunita Deshmukh', phone: '9820099001', pin: MASTER_PIN },
+  { id: 'org-5', name: 'Ramesh Shinde', phone: '9820022334', pin: MASTER_PIN },
+  { id: 'org-6', name: 'Pranav Patil', phone: '9820055667', pin: MASTER_PIN }
 ];
 
 export function AuthProvider({ children }) {
@@ -17,7 +19,7 @@ export function AuthProvider({ children }) {
       const saved = localStorage.getItem('mandal_organizers');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return parsed.map(({ role, ...rest }) => rest);
+        return parsed.map(({ role, ...rest }) => ({ ...rest, pin: MASTER_PIN }));
       }
       return DEFAULT_ORGANIZERS;
     } catch {
@@ -30,7 +32,7 @@ export function AuthProvider({ children }) {
       const saved = localStorage.getItem('mandal_active_organizer');
       if (saved) {
         const { role, ...rest } = JSON.parse(saved);
-        return rest;
+        return { ...rest, pin: MASTER_PIN };
       }
       return null;
     } catch {
@@ -50,19 +52,18 @@ export function AuthProvider({ children }) {
     }
   }, [currentOrganizer]);
 
-  // Login via PIN (2026) and name/mobile
+  // Login via developer-locked MASTER_PIN (1995) and name/mobile
   const loginWithPin = (pin, name, phone, selectedOrgId) => {
-    const MASTER_PIN = '2026';
-    const isValidPin = pin === MASTER_PIN || organizers.some(o => o.pin === pin);
+    const isValidPin = String(pin).trim() === MASTER_PIN;
     if (!isValidPin) {
-      return { success: false, error: 'चुकीचा पिन! कृपया योग्य ४ अंकी पिन टाका (Default: 2026)' };
+      return { success: false, error: 'चुकीचा पिन! कृपया योग्य ४ अंकी पिन टाका.' };
     }
 
     // Must match an active organizer in the list
     if (selectedOrgId) {
       const found = organizers.find(o => o.id === selectedOrgId);
       if (found) {
-        const userSession = { ...found, phone: phone ? phone.trim() : found.phone };
+        const userSession = { ...found, phone: phone ? phone.trim() : found.phone, pin: MASTER_PIN };
         setCurrentOrganizer(userSession);
         return { success: true, organizer: userSession };
       } else {
@@ -89,8 +90,9 @@ export function AuthProvider({ children }) {
       };
     }
 
-    setCurrentOrganizer(matched);
-    return { success: true, organizer: matched };
+    const session = { ...matched, pin: MASTER_PIN };
+    setCurrentOrganizer(session);
+    return { success: true, organizer: session };
   };
 
   const logout = () => {
@@ -103,7 +105,7 @@ export function AuthProvider({ children }) {
       id: `org-${Date.now()}`,
       name: name.trim(),
       phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : '',
-      pin: '2026'
+      pin: MASTER_PIN
     };
     setOrganizers(prev => [...prev, newOrg]);
     return newOrg;
@@ -116,7 +118,8 @@ export function AuthProvider({ children }) {
           return {
             ...o,
             name: name ? name.trim() : o.name,
-            phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : o.phone
+            phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : o.phone,
+            pin: MASTER_PIN
           };
         }
         return o;
@@ -127,7 +130,8 @@ export function AuthProvider({ children }) {
       setCurrentOrganizer(prev => ({
         ...prev,
         name: name ? name.trim() : prev.name,
-        phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : prev.phone
+        phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : prev.phone,
+        pin: MASTER_PIN
       }));
     }
   };
@@ -136,15 +140,6 @@ export function AuthProvider({ children }) {
     setOrganizers(prev => prev.filter(o => o.id !== id));
     if (currentOrganizer?.id === id) {
       setCurrentOrganizer(null);
-    }
-  };
-
-  const updateOrganizerPin = (orgId, newPin) => {
-    setOrganizers(prev =>
-      prev.map(o => (o.id === orgId ? { ...o, pin: newPin } : o))
-    );
-    if (currentOrganizer?.id === orgId) {
-      setCurrentOrganizer(prev => ({ ...prev, pin: newPin }));
     }
   };
 
@@ -158,8 +153,7 @@ export function AuthProvider({ children }) {
         logout,
         addOrganizer,
         updateOrganizer,
-        removeOrganizer,
-        updateOrganizerPin
+        removeOrganizer
       }}
     >
       {children}

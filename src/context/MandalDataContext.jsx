@@ -8,14 +8,21 @@ const MandalDataContext = createContext();
 const INITIAL_MANDAL_CONFIG = {
   name: 'इंद्रायणी विहार मित्र मंडळ',
   englishName: 'Indrayani Vihar Mitra Mandal',
-  subtitle: 'सार्वजनिक गणेशोत्सव २०२६ • ३२ वे वर्ष',
+  subtitle: 'सार्वजनिक गणेशोत्सव २०२६ • ३१ वर्षे पूर्ण (Est. 1995)',
   location: 'Indrayani Vihar, Lohegaon, Pune',
   year: 2026,
+  establishedYear: 1995,
+  yearsCompleted: 31,
   upiId: 'indrayanivihar@upi',
   president: 'Sachin Joshi',
   treasurer: 'Vijay Pawar',
   targetGoal: 250000,
   driveUrl: 'https://photos.google.com/',
+  qrCodeUrl: '',
+  bankName: 'State Bank of India, Lohegaon',
+  bankAccountName: 'Indrayani Vihar Mitra Mandal',
+  bankAccountNumber: '',
+  bankIfsc: '',
   helplinePhone: '9820011223'
 };
 
@@ -560,31 +567,100 @@ export function MandalDataProvider({ children }) {
     };
   }, []);
 
-  // Optional Live Firestore Sync
+  // Comprehensive Live Firestore Real-Time Subscriptions Across All Entities
   useEffect(() => {
     if (!isConfigured || !db) return;
 
     try {
+      // 1. Mandal Config
+      const unsubConfig = onSnapshot(doc(db, 'mandalConfig', 'main'), (snapshot) => {
+        if (snapshot.exists()) {
+          setConfig(prev => ({ ...INITIAL_MANDAL_CONFIG, ...snapshot.data() }));
+        }
+      }, (err) => console.warn('Firestore Config listener:', err));
+
+      // 2. Public Content (Aarti times, announcements, banners)
+      const unsubPublicContent = onSnapshot(doc(db, 'publicContent', 'main'), (snapshot) => {
+        if (snapshot.exists()) {
+          setPublicContent(prev => ({ ...INITIAL_PUBLIC_CONTENT, ...snapshot.data() }));
+        }
+      }, (err) => console.warn('Firestore PublicContent listener:', err));
+
+      // 3. Cultural Events (Day 1-10 Performances)
+      const unsubCultural = onSnapshot(doc(db, 'culturalEvents', 'main'), (snapshot) => {
+        if (snapshot.exists() && Array.isArray(snapshot.data()?.events)) {
+          setCulturalEvents(snapshot.data().events);
+        }
+      }, (err) => console.warn('Firestore CulturalEvents listener:', err));
+
+      // 4. Mankari List
+      const unsubMankari = onSnapshot(doc(db, 'mankariList', 'main'), (snapshot) => {
+        if (snapshot.exists() && Array.isArray(snapshot.data()?.list)) {
+          setMankariList(snapshot.data().list);
+        }
+      }, (err) => console.warn('Firestore MankariList listener:', err));
+
+      // 5. Schedule
+      const unsubSchedule = onSnapshot(doc(db, 'schedule', 'main'), (snapshot) => {
+        if (snapshot.exists() && Array.isArray(snapshot.data()?.list)) {
+          setSchedule(snapshot.data().list);
+        }
+      }, (err) => console.warn('Firestore Schedule listener:', err));
+
+      // 6. Vargani Collection
       const unsubVargani = onSnapshot(collection(db, 'vargani'), (snapshot) => {
         if (!snapshot.empty) {
-          const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
           setVargani(list);
         }
       }, (err) => console.warn('Firestore Vargani listener:', err));
 
+      // 7. Expenses Collection
       const unsubExpenses = onSnapshot(collection(db, 'expenses'), (snapshot) => {
         if (!snapshot.empty) {
-          const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
           setExpenses(list);
         }
       }, (err) => console.warn('Firestore Expenses listener:', err));
 
+      // 8. Tasks Collection
+      const unsubTasks = onSnapshot(collection(db, 'tasks'), (snapshot) => {
+        if (!snapshot.empty) {
+          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          setTasks(list);
+        }
+      }, (err) => console.warn('Firestore Tasks listener:', err));
+
+      // 9. Dhol Storage Collection
+      const unsubDholStorage = onSnapshot(collection(db, 'dholStorage'), (snapshot) => {
+        if (!snapshot.empty) {
+          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          setDholStorage(list);
+        }
+      }, (err) => console.warn('Firestore DholStorage listener:', err));
+
+      // 10. Dhol Maintenance Collection
+      const unsubDholMaint = onSnapshot(collection(db, 'dholMaintenance'), (snapshot) => {
+        if (!snapshot.empty) {
+          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          setDholMaintenance(list);
+        }
+      }, (err) => console.warn('Firestore DholMaintenance listener:', err));
+
       return () => {
+        unsubConfig();
+        unsubPublicContent();
+        unsubCultural();
+        unsubMankari();
+        unsubSchedule();
         unsubVargani();
         unsubExpenses();
+        unsubTasks();
+        unsubDholStorage();
+        unsubDholMaint();
       };
     } catch (e) {
-      console.warn('Firestore subscription fallback:', e);
+      console.warn('Firestore live subscription fallback:', e);
     }
   }, []);
 
@@ -680,28 +756,71 @@ export function MandalDataProvider({ children }) {
   };
 
   // Toggle Daily Task
-  const toggleTask = (id) => {
+  const toggleTask = async (id) => {
+    let updatedStatus = 'done';
     setTasks(prev =>
-      prev.map(t => (t.id === id ? { ...t, status: t.status === 'done' ? 'todo' : 'done' } : t))
+      prev.map(t => {
+        if (t.id === id) {
+          updatedStatus = t.status === 'done' ? 'todo' : 'done';
+          return { ...t, status: updatedStatus };
+        }
+        return t;
+      })
     );
+
+    if (isConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'tasks', id), { status: updatedStatus });
+      } catch (e) {
+        console.warn('Firestore task updateDoc error:', e);
+      }
+    }
   };
 
-  const addTask = (task) => {
-    setTasks(prev => [{ ...task, id: `t-${Date.now()}`, status: 'todo' }, ...prev]);
+  const addTask = async (task) => {
+    const newTask = { ...task, createdAt: new Date().toISOString(), status: 'todo' };
+    if (isConfigured && db) {
+      try {
+        const docRef = await addDoc(collection(db, 'tasks'), newTask);
+        newTask.id = docRef.id;
+      } catch (e) {
+        newTask.id = `t-${Date.now()}`;
+      }
+    } else {
+      newTask.id = `t-${Date.now()}`;
+    }
+    setTasks(prev => [newTask, ...prev]);
+    return newTask;
   };
 
-  const deleteTask = (id) => {
+  const deleteTask = async (id) => {
     setTasks(prev => prev.filter(t => t.id !== id));
+    if (isConfigured && db) {
+      try {
+        await deleteDoc(doc(db, 'tasks', id));
+      } catch (e) {
+        console.warn('Firestore task deleteDoc error:', e);
+      }
+    }
   };
 
   // Add Dhol Maintenance
-  const addDholMaintenance = (entry) => {
+  const addDholMaintenance = async (entry) => {
     const newEntry = {
       ...entry,
-      id: `dm-${Date.now()}`,
       date: entry.date || new Date().toISOString(),
       amount: Number(entry.amount) || 0
     };
+    if (isConfigured && db) {
+      try {
+        const docRef = await addDoc(collection(db, 'dholMaintenance'), newEntry);
+        newEntry.id = docRef.id;
+      } catch (e) {
+        newEntry.id = `dm-${Date.now()}`;
+      }
+    } else {
+      newEntry.id = `dm-${Date.now()}`;
+    }
     setDholMaintenance(prev => [newEntry, ...prev]);
     return newEntry;
   };
@@ -710,9 +829,16 @@ export function MandalDataProvider({ children }) {
     setDholInventory(prev => ({ ...prev, ...newCounts }));
   };
 
-  // Update Config
-  const updateMandalConfig = (newConfig) => {
+  // Update Config (Synced live to Firestore doc mandalConfig/main)
+  const updateMandalConfig = async (newConfig) => {
     setConfig(prev => ({ ...prev, ...newConfig }));
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'mandalConfig', 'main'), newConfig, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updateMandalConfig error:', e);
+      }
+    }
   };
 
   // Dynamic Calculated Aggregates (strict requirement: never hardcoded)
@@ -757,17 +883,31 @@ export function MandalDataProvider({ children }) {
     progressPercent: Math.min(100, Math.round((totalReceived / (config.targetGoal || 250000)) * 100))
   };
 
-  // Update Public Content
-  const updatePublicContent = (newContent) => {
+  // Update Public Content (Synced live to Firestore doc publicContent/main)
+  const updatePublicContent = async (newContent) => {
     setPublicContent(prev => ({ ...prev, ...newContent }));
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'publicContent', 'main'), newContent, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updatePublicContent error:', e);
+      }
+    }
   };
 
-  // Mankari List Management
-  const updateMankariList = (newList) => {
+  // Mankari List Management (Synced live to Firestore doc mankariList/main)
+  const updateMankariList = async (newList) => {
     setMankariList(newList);
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'mankariList', 'main'), { list: newList }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updateMankariList error:', e);
+      }
+    }
   };
 
-  const addMankari = (item) => {
+  const addMankari = async (item) => {
     const newItem = {
       id: `mk-${Date.now()}`,
       day: item.day || 'Day 1',
@@ -776,38 +916,66 @@ export function MandalDataProvider({ children }) {
       flat: item.flat || 'A-101',
       aarti: item.aarti || 'Evening'
     };
-    setMankariList(prev => [newItem, ...prev]);
+    const updated = [newItem, ...mankariList];
+    setMankariList(updated);
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'mankariList', 'main'), { list: updated }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore addMankari error:', e);
+      }
+    }
     return newItem;
   };
 
-  const deleteMankari = (id) => {
-    setMankariList(prev => prev.filter(m => m.id !== id));
+  const deleteMankari = async (id) => {
+    const updated = mankariList.filter(m => m.id !== id);
+    setMankariList(updated);
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'mankariList', 'main'), { list: updated }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore deleteMankari error:', e);
+      }
+    }
   };
 
-  // Cultural Events Day-Wise Management
-  const updateCulturalEvent = (dayNum, updatedData) => {
-    setCulturalEvents(prev =>
-      prev.map(evt => {
-        const evtDay = Number(evt.day);
-        const targetDay = Number(dayNum);
-        if (evtDay === targetDay || evt.id === updatedData?.id) {
-          return { ...evt, ...updatedData, day: targetDay };
-        }
-        return evt;
-      })
-    );
+  // Cultural Events Day-Wise Management (Synced live to Firestore doc culturalEvents/main)
+  const updateCulturalEvent = async (dayNum, updatedData) => {
+    const updatedList = culturalEvents.map(evt => {
+      const evtDay = Number(evt.day);
+      const targetDay = Number(dayNum);
+      if (evtDay === targetDay || evt.id === updatedData?.id) {
+        return { ...evt, ...updatedData, day: targetDay };
+      }
+      return evt;
+    });
+    setCulturalEvents(updatedList);
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'culturalEvents', 'main'), { events: updatedList }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updateCulturalEvent error:', e);
+      }
+    }
   };
 
-  const updateAllCulturalEvents = (newList) => {
+  const updateAllCulturalEvents = async (newList) => {
     if (Array.isArray(newList) && newList.length > 0) {
       setCulturalEvents(newList);
+      if (isConfigured && db) {
+        try {
+          await setDoc(doc(db, 'culturalEvents', 'main'), { events: newList }, { merge: true });
+        } catch (e) {
+          console.warn('Firestore updateAllCulturalEvents error:', e);
+        }
+      }
     }
   };
 
   // Dhol Storage Assignments (Given to Storage)
-  const addDholStorage = (item) => {
+  const addDholStorage = async (item) => {
     const newItem = {
-      id: `ds-${Date.now()}`,
       personName: item.personName || 'कार्यकर्ता',
       phone: item.phone || '',
       location: item.location || 'सोसायटी साठवणूक',
@@ -817,11 +985,21 @@ export function MandalDataProvider({ children }) {
       date: item.date || new Date().toISOString().slice(0, 10),
       notes: item.notes || ''
     };
+    if (isConfigured && db) {
+      try {
+        const docRef = await addDoc(collection(db, 'dholStorage'), newItem);
+        newItem.id = docRef.id;
+      } catch (e) {
+        newItem.id = `ds-${Date.now()}`;
+      }
+    } else {
+      newItem.id = `ds-${Date.now()}`;
+    }
     setDholStorage(prev => [newItem, ...prev]);
     return newItem;
   };
 
-  const updateDholStorage = (id, updatedFields) => {
+  const updateDholStorage = async (id, updatedFields) => {
     setDholStorage(prev =>
       prev.map(item =>
         item.id === id
@@ -834,10 +1012,24 @@ export function MandalDataProvider({ children }) {
           : item
       )
     );
+    if (isConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'dholStorage', id), updatedFields);
+      } catch (e) {
+        console.warn('Firestore updateDholStorage error:', e);
+      }
+    }
   };
 
-  const deleteDholStorage = (id) => {
+  const deleteDholStorage = async (id) => {
     setDholStorage(prev => prev.filter(item => item.id !== id));
+    if (isConfigured && db) {
+      try {
+        await deleteDoc(doc(db, 'dholStorage', id));
+      } catch (e) {
+        console.warn('Firestore deleteDholStorage error:', e);
+      }
+    }
   };
 
   return (

@@ -228,56 +228,147 @@ export function PublicPayVargani({ onNavigateHome }) {
       </div>
 
       {/* UPI QR & Payment */}
-      <div className="flex flex-col bg-white rounded-2xl p-4 shadow-xs gap-3 border border-[#F0DFD5]">
-        <div>
-          <h2 className="text-sm font-bold text-[#241913]">Pay via UPI</h2>
-          <p className="text-xs text-[#6B5E57]">यूपीआय पेमेंट</p>
+      <div className="flex flex-col bg-white rounded-2xl p-4 shadow-xs gap-3.5 border border-[#F0DFD5]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-[#241913]">Pay via UPI</h2>
+            <p className="text-xs text-[#6B5E57]">यूपीआय द्वारे वर्गणी जमा करा</p>
+          </div>
+          <span className="text-[11px] font-bold text-[#14553C] bg-[#EBF7F0] px-2.5 py-0.5 rounded-full border border-[#BDE5CE]">
+            Instant
+          </span>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           <a
-            className="rounded-xl p-2.5 bg-[#FFF8F6] border border-[#F0DFD5] flex flex-col items-center justify-center text-xs font-semibold text-[#241913] hover:bg-[#FFEAE0] active:scale-95 transition-all"
+            className="rounded-xl py-2.5 px-2 bg-[#FFF8F6] border border-[#F0DFD5] flex flex-col items-center justify-center text-xs font-semibold text-[#241913] hover:bg-[#FFEAE0] active:scale-95 transition-all text-center"
             href={upiLinks.gpay}
           >
-            <span>GPay</span>
+            <span className="truncate">GPay</span>
           </a>
           <a
-            className="rounded-xl p-2.5 bg-[#FFF8F6] border border-[#F0DFD5] flex flex-col items-center justify-center text-xs font-semibold text-[#241913] hover:bg-[#FFEAE0] active:scale-95 transition-all"
+            className="rounded-xl py-2.5 px-2 bg-[#FFF8F6] border border-[#F0DFD5] flex flex-col items-center justify-center text-xs font-semibold text-[#241913] hover:bg-[#FFEAE0] active:scale-95 transition-all text-center"
             href={upiLinks.phonepe}
           >
-            <span>PhonePe</span>
+            <span className="truncate">PhonePe</span>
           </a>
           <a
-            className="rounded-xl p-2.5 bg-[#FFF8F6] border border-[#F0DFD5] flex flex-col items-center justify-center text-xs font-semibold text-[#241913] hover:bg-[#FFEAE0] active:scale-95 transition-all"
+            className="rounded-xl py-2.5 px-2 bg-[#FFF8F6] border border-[#F0DFD5] flex flex-col items-center justify-center text-xs font-semibold text-[#241913] hover:bg-[#FFEAE0] active:scale-95 transition-all text-center"
             href={upiLinks.standard}
           >
-            <span>BHIM UPI</span>
+            <span className="truncate">BHIM UPI</span>
           </a>
         </div>
 
-        {/* QR Box */}
-        <div className="flex items-center gap-3 bg-[#FFF1EB]/60 p-2.5 rounded-xl border border-[#F0DFD5]">
-          <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-white p-1 border border-[#F0DFD5] flex items-center justify-center">
-            <QRCodeSVG
-              value={upiLinks.standard || `upi://pay?pa=${config.upiId || 'mandal.indrayani@upi'}&pn=Indrayani+Vihar+Mitra+Mandal&am=${effectiveAmount}&cu=INR`}
-              size={56}
-              level="M"
-            />
+        {/* QR Box (Custom Uploaded QR or Dynamic SVG) */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 bg-[#FFF1EB]/60 p-3 rounded-2xl border border-[#F0DFD5]">
+          <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-white p-1.5 border border-[#F0DFD5] flex items-center justify-center shadow-xs">
+            {config.qrCodeUrl ? (
+              <img
+                src={config.qrCodeUrl}
+                alt="Mandal Payment QR"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <QRCodeSVG
+                value={upiLinks.standard || `upi://pay?pa=${config.upiId || 'indrayanivihar@upi'}&pn=Indrayani+Vihar+Mitra+Mandal&am=${effectiveAmount}&cu=INR`}
+                size={84}
+                level="M"
+              />
+            )}
           </div>
-          <div className="flex flex-col flex-1 min-w-0 text-left">
+          <div className="flex flex-col flex-1 min-w-0 text-center sm:text-left">
             <span className="text-xs text-[#8B2616] font-bold truncate">
-              {config.upiId || 'mandal.indrayani@upi'}
+              {config.upiId || 'indrayanivihar@upi'}
             </span>
-            <button
-              className="mt-1 w-fit px-2.5 py-1 bg-white rounded-lg text-xs font-semibold text-[#241913] border border-[#D9C4B7] hover:bg-[#8B2616] hover:text-white transition-all cursor-pointer"
-              onClick={handleCopyVpa}
-              type="button"
-            >
-              {copiedVpa ? 'Copied! ✓' : 'Copy UPI ID'}
-            </button>
+            <p className="text-[11px] text-[#6B5E57] mt-0.5">
+              स्कॅन करा किंवा UPI ID कॉपी करा
+            </p>
+            <div className="mt-2 flex items-center justify-center sm:justify-start gap-2">
+              <button
+                className="px-3 py-1.5 bg-white rounded-lg text-xs font-bold text-[#241913] border border-[#D9C4B7] hover:bg-[#8B2616] hover:text-white transition-all cursor-pointer shadow-2xs"
+                onClick={handleCopyVpa}
+                type="button"
+              >
+                {copiedVpa ? 'Copied! ✓' : 'Copy UPI ID'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Alternative Fallback: Bank Account Details */}
+      {(config.bankAccountNumber || config.bankAccountName || config.bankIfsc) && (
+        <div className="flex flex-col bg-white rounded-2xl p-4 shadow-xs gap-3 border border-[#F0DFD5]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#FFF1EB] text-[#8B2616] flex items-center justify-center">
+                <span className="material-symbols-outlined text-[16px]">account_balance</span>
+              </div>
+              <div>
+                <h2 className="text-xs font-bold text-[#241913]">Bank Transfer Details</h2>
+                <p className="text-[10px] text-[#6B5E57]">NEFT / IMPS / RTGS बँक खात्यावर वर्गणी</p>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-[#6B5E57] bg-[#FAF6EE] px-2 py-0.5 rounded-md border border-[#EAE0D2]">
+              Fallback
+            </span>
+          </div>
+
+          <div className="rounded-xl bg-[#FFF8F6] p-3 border border-[#F0DFD5] space-y-2 text-xs">
+            {config.bankName && (
+              <div className="flex justify-between items-center py-0.5">
+                <span className="text-[#6B5E57] text-[11px]">Bank &amp; Branch:</span>
+                <span className="font-bold text-[#241913] text-right">{config.bankName}</span>
+              </div>
+            )}
+            {config.bankAccountName && (
+              <div className="flex justify-between items-center py-0.5 border-t border-[#F0DFD5]/60">
+                <span className="text-[#6B5E57] text-[11px]">Account Name:</span>
+                <span className="font-bold text-[#241913] text-right">{config.bankAccountName}</span>
+              </div>
+            )}
+            {config.bankAccountNumber && (
+              <div className="flex justify-between items-center py-0.5 border-t border-[#F0DFD5]/60">
+                <span className="text-[#6B5E57] text-[11px]">Account Number:</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-bold text-[#8B2616]">{config.bankAccountNumber}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(config.bankAccountNumber);
+                      alert('Account Number copied!');
+                    }}
+                    className="p-1 rounded text-[#6B5E57] hover:text-[#8B2616] hover:bg-white"
+                    title="Copy Account Number"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                  </button>
+                </div>
+              </div>
+            )}
+            {config.bankIfsc && (
+              <div className="flex justify-between items-center py-0.5 border-t border-[#F0DFD5]/60">
+                <span className="text-[#6B5E57] text-[11px]">IFSC Code:</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-bold text-[#241913] uppercase">{config.bankIfsc}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(config.bankIfsc);
+                      alert('IFSC Code copied!');
+                    }}
+                    className="p-1 rounded text-[#6B5E57] hover:text-[#8B2616] hover:bg-white"
+                    title="Copy IFSC Code"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Step 3: Screenshot Upload */}
       <div className="flex flex-col bg-white rounded-2xl p-4 shadow-xs gap-3 border border-[#F0DFD5]">

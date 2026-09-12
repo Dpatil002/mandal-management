@@ -5,7 +5,7 @@ export function PublicHome({ onNavigateToPay, onNavigateToSchedule, onNavigateTo
   const { config, publicContent } = useMandalData();
 
   return (
-    <div className="flex flex-col w-full gap-4.5 pb-16 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
+    <div className="home-card-stack pb-20 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
       {/* =========================================================================
           FEATURE 1: PAY VARGANI (TOP CORE FOCUS)
           Deep Maroon (#7A1C16) + Saffron (#E65A15) + Fort Ramparts Motif

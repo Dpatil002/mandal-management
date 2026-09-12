@@ -4,6 +4,8 @@ import { extractTextFromPdf, parseMankariListFromLines } from '../utils/mankariP
 
 export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' }) {
   const {
+    config,
+    updateMandalConfig,
     publicContent,
     updatePublicContent,
     mankariList,
@@ -14,8 +16,9 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
     updateCulturalEvent
   } = useMandalData();
 
-  const [activeTab, setActiveTab] = useState(initialTab || 'cultural'); // 'cultural', 'schedule', 'mankari'
+  const [activeTab, setActiveTab] = useState(initialTab || 'cultural'); // 'cultural', 'schedule', 'mankari', 'media'
   const [formData, setFormData] = useState({ ...publicContent });
+  const [driveUrlInput, setDriveUrlInput] = useState(config.driveUrl || '');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -60,12 +63,27 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
     setFormData({ ...publicContent });
   }, [publicContent]);
 
+  React.useEffect(() => {
+    setDriveUrlInput(config.driveUrl || '');
+  }, [config.driveUrl]);
+
   // Reset activeTab if initialTab changes when opening
   React.useEffect(() => {
     if (isOpen && initialTab) {
       setActiveTab(initialTab);
     }
   }, [isOpen, initialTab]);
+
+  const handleSaveDriveLink = (e) => {
+    e.preventDefault();
+    updateMandalConfig({ driveUrl: driveUrlInput.trim() });
+    setSuccessMessage('Centralised Google Drive link updated for Public View!');
+    setSaveSuccess(true);
+    setTimeout(() => {
+      setSaveSuccess(false);
+      setSuccessMessage('');
+    }, 2000);
+  };
 
   // PDF Upload & Review state
   const [isParsingPdf, setIsParsingPdf] = useState(false);
@@ -207,42 +225,54 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-[#FFF1EB] p-1 rounded-2xl mt-3 border border-[#F0DFD5] gap-1">
+        <div className="flex bg-[#FFF1EB] p-1 rounded-2xl mt-3 border border-[#F0DFD5] gap-1 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('cultural')}
-            className={`flex-1 py-2 px-1 text-[11.5px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer ${
+            className={`flex-1 py-2 px-1 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 shrink-0 min-w-[76px] cursor-pointer ${
               activeTab === 'cultural'
                 ? 'bg-[#8B2616] text-white shadow-xs'
                 : 'text-[#6B5E57] hover:text-[#241913] hover:bg-[#FFEAE0]/50'
             }`}
           >
-            <span className="material-symbols-outlined text-[15px]">theater_comedy</span>
-            <span className="truncate">Cultural Events</span>
+            <span className="material-symbols-outlined text-[14px]">theater_comedy</span>
+            <span className="truncate">Events</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('schedule')}
-            className={`flex-1 py-2 px-1 text-[11.5px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer ${
+            className={`flex-1 py-2 px-1 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 shrink-0 min-w-[76px] cursor-pointer ${
               activeTab === 'schedule'
                 ? 'bg-[#8B2616] text-white shadow-xs'
                 : 'text-[#6B5E57] hover:text-[#241913] hover:bg-[#FFEAE0]/50'
             }`}
           >
-            <span className="material-symbols-outlined text-[15px]">alarm</span>
-            <span className="truncate">Aarti &amp; Messages</span>
+            <span className="material-symbols-outlined text-[14px]">alarm</span>
+            <span className="truncate">Aarti</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('mankari')}
-            className={`flex-1 py-2 px-1 text-[11.5px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer ${
+            className={`flex-1 py-2 px-1 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 shrink-0 min-w-[76px] cursor-pointer ${
               activeTab === 'mankari'
                 ? 'bg-[#8B2616] text-white shadow-xs'
                 : 'text-[#6B5E57] hover:text-[#241913] hover:bg-[#FFEAE0]/50'
             }`}
           >
-            <span className="material-symbols-outlined text-[15px]">family_restroom</span>
-            <span className="truncate">Mankari &amp; PDF</span>
+            <span className="material-symbols-outlined text-[14px]">family_restroom</span>
+            <span className="truncate">Mankari</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('media')}
+            className={`flex-1 py-2 px-1 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 shrink-0 min-w-[76px] cursor-pointer ${
+              activeTab === 'media'
+                ? 'bg-[#1C5D6C] text-white shadow-xs'
+                : 'text-[#6B5E57] hover:text-[#241913] hover:bg-[#FFEAE0]/50'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[14px]">photo_library</span>
+            <span className="truncate">Drive</span>
           </button>
         </div>
 
@@ -561,8 +591,8 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                 <span>Publish Schedule &amp; Messages</span>
               </button>
             </form>
-          ) : (
-            /* TAB 2: Mankari List & PDF Upload */
+          ) : activeTab === 'mankari' ? (
+            /* TAB 3: Mankari List & PDF Upload */
             <div className="space-y-4">
               {/* PDF Upload Area */}
               <div className="bg-white p-4 rounded-2xl border border-[#F0DFD5] space-y-3">
@@ -727,6 +757,64 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                 </div>
               </div>
             </div>
+          ) : (
+            /* =========================================================================
+               TAB 4: Centralised Google Drive Link (Photos & Videos)
+            ========================================================================= */
+            <form onSubmit={handleSaveDriveLink} className="space-y-4 animate-fade-in">
+              <div className="bg-white p-4 rounded-2xl border border-[#F0DFD5] shadow-xs space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#E2F1F4] text-[#1C5D6C] flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[22px]">photo_library</span>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1C5D6C]">Photos &amp; Videos Google Drive</h4>
+                    <p className="text-[11px] text-[#6B5E57]">One single source of truth for public view</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#57423E] leading-relaxed bg-[#FFF8F6] p-3 rounded-xl border border-[#F0DFD5]">
+                  The Google Drive folder link entered here is the <strong>single stored source of truth</strong> across the entire app. Updating it here immediately updates the <em>Open Drive</em> and <em>Upload Photos</em> buttons on the Public Home screen across all devices.
+                </p>
+
+                <div className="space-y-1.5 pt-1">
+                  <label className="text-xs font-bold text-[#241913] block" htmlFor="central-drive-url">
+                    Google Drive Folder URL *
+                  </label>
+                  <input
+                    id="central-drive-url"
+                    type="url"
+                    required
+                    value={driveUrlInput}
+                    onChange={(e) => setDriveUrlInput(e.target.value)}
+                    placeholder="https://drive.google.com/drive/folders/..."
+                    className="w-full border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-3.5 py-2.5 text-xs text-[#241913] font-mono focus:border-[#1C5D6C] outline-none"
+                  />
+                </div>
+
+                {driveUrlInput && (
+                  <div className="pt-1 flex items-center justify-between">
+                    <a
+                      href={driveUrlInput}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#1C5D6C] font-bold hover:underline flex items-center gap-1"
+                    >
+                      <span>Test Drive Link in New Tab</span>
+                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#1C5D6C] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#154652] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">save</span>
+                <span>Save &amp; Update Public View</span>
+              </button>
+            </form>
           )}
         </div>
       </div>

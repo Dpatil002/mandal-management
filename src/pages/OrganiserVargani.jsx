@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { formatCurrency, formatDate, buildWhatsAppShareUrl } from '../utils/formatters';
 import { generateSingleReceiptPDF } from '../utils/pdfGenerator';
+import { PaymentDetailsModal } from '../components/PaymentDetailsModal';
 
 export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
   const { vargani, config, updateVargani, deleteVargani, stats } = useMandalData();
@@ -9,6 +10,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'pending', 'verified'
   const [searchQuery, setSearchQuery] = useState('');
   const [unverifyConfirmId, setUnverifyConfirmId] = useState(null);
+  const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
 
   const filteredList = vargani.filter((item) => {
     if (activeFilter === 'pending' && item.status !== 'pending') return false;
@@ -57,14 +59,26 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
             <h2 className="text-xl font-bold text-[#8B2616] truncate">Vargani Records</h2>
             <span className="text-xs text-[#6B5E57]">वर्गणी नोंदवही २०२६</span>
           </div>
-          <button
-            onClick={onOpenAddVargani}
-            className="shrink-0 flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 bg-[#8B2616] text-white font-semibold text-xs shadow-xs hover:bg-[#731E11] active:scale-95 transition-all cursor-pointer"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[16px]">add_circle</span>
-            <span className="whitespace-nowrap">Add Vargani</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setIsPaymentDetailsOpen(true)}
+              title="Payment QR & Bank Details"
+              className="flex items-center justify-center gap-1 rounded-xl px-3 py-2.5 bg-white text-[#8B2616] font-bold text-xs border border-[#D9C4B7] shadow-2xs hover:bg-[#FAF6EE] active:scale-95 transition-all cursor-pointer"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[17px]">qr_code_2</span>
+              <span className="hidden sm:inline">Payment Details</span>
+              <span className="sm:hidden">QR / Bank</span>
+            </button>
+            <button
+              onClick={onOpenAddVargani}
+              className="shrink-0 flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 bg-[#8B2616] text-white font-semibold text-xs shadow-xs hover:bg-[#731E11] active:scale-95 transition-all cursor-pointer"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[16px]">add_circle</span>
+              <span className="whitespace-nowrap">Add Vargani</span>
+            </button>
+          </div>
         </div>
 
         {/* Festive Total Collected Strip */}
@@ -353,15 +367,30 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
             <span className="text-xs text-[#6B5E57]">सोसायटी नोटीस बोर्ड व प्रवेशद्वारावर लावण्यासाठी प्रिंट करा</span>
           </div>
         </div>
-        <a
-          href="/assets/mandal_qr_final.png"
-          download="Indrayani_Mandal_UPI_QR.png"
-          className="shrink-0 py-2.5 px-3.5 bg-[#6b0e03] hover:bg-[#8b2616] text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all"
-        >
-          <span className="material-symbols-outlined text-[16px]">download</span>
-          <span>QR डाऊनलोड</span>
-        </a>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsPaymentDetailsOpen(true)}
+            className="py-2 px-3 bg-white border border-[#D9C4B7] text-[#6b0e03] rounded-xl text-xs font-bold hover:bg-[#FAF6EE] transition-all cursor-pointer"
+          >
+            बदला / Manage
+          </button>
+          <a
+            href="/assets/mandal_qr_final.png"
+            download="Indrayani_Mandal_UPI_QR.png"
+            className="py-2 px-3 bg-[#6b0e03] hover:bg-[#8b2616] text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-[15px]">download</span>
+            <span>QR डाऊनलोड</span>
+          </a>
+        </div>
       </div>
+
+      {/* Payment QR and Bank Details Modal */}
+      <PaymentDetailsModal
+        isOpen={isPaymentDetailsOpen}
+        onClose={() => setIsPaymentDetailsOpen(false)}
+      />
     </div>
   );
 }

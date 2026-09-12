@@ -4,20 +4,16 @@ import { useAuth } from '../context/AuthContext';
 import { 
   Settings as SettingsIcon, 
   Save, 
-  QrCode, 
   Users, 
-  ShieldCheck, 
   Flame, 
-  Key, 
   Plus, 
   Check, 
-  Database,
-  RotateCcw
+  Database
 } from 'lucide-react';
 
 export function Settings({ onClose }) {
   const { config, updateMandalConfig, isConfigured } = useMandalData();
-  const { organizers, updateOrganizerPin, addOrganizer } = useAuth();
+  const { organizers, addOrganizer } = useAuth();
 
   const [formData, setFormData] = useState({ ...config });
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -26,10 +22,6 @@ export function Settings({ onClose }) {
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgPhone, setNewOrgPhone] = useState('');
-  const [newOrgPin, setNewOrgPin] = useState('1111');
-
-  // PIN edit map
-  const [pinEdits, setPinEdits] = useState({});
 
   const handleSaveConfig = (e) => {
     e.preventDefault();
@@ -38,25 +30,13 @@ export function Settings({ onClose }) {
     setTimeout(() => setSavedSuccess(false), 2500);
   };
 
-  const handleUpdatePin = (orgId) => {
-    const newPin = pinEdits[orgId];
-    if (newPin && newPin.length === 4) {
-      updateOrganizerPin(orgId, newPin);
-      setPinEdits(prev => ({ ...prev, [orgId]: '' }));
-      alert('PIN updated successfully!');
-    } else {
-      alert('Please enter a valid 4-digit PIN');
-    }
-  };
-
   const handleAddOrganizer = (e) => {
     e.preventDefault();
     if (!newOrgName.trim()) return;
 
     addOrganizer({
       name: newOrgName.trim(),
-      phone: newOrgPhone,
-      pin: newOrgPin || '1111'
+      phone: newOrgPhone
     });
 
     setNewOrgName('');
@@ -106,7 +86,7 @@ export function Settings({ onClose }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Subtitle / Registration No
+              Subtitle / Subtext
             </label>
             <input
               type="text"
@@ -140,6 +120,21 @@ export function Settings({ onClose }) {
             />
           </div>
 
+          {/* Centralized Google Drive Link */}
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-amber-300 mb-1 flex items-center justify-between">
+              <span>Google Drive Folder Link (Photos & Videos) *</span>
+              <span className="text-[10px] text-slate-400 font-normal">Single source for public media</span>
+            </label>
+            <input
+              type="url"
+              value={formData.driveUrl || ''}
+              onChange={(e) => setFormData({ ...formData, driveUrl: e.target.value })}
+              placeholder="https://drive.google.com/drive/folders/..."
+              className="input-field text-xs font-mono text-cyan-300"
+            />
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
               Official UPI VPA / QR ID (उदा. mandal@upi) *
@@ -167,25 +162,74 @@ export function Settings({ onClose }) {
           </div>
         </div>
 
+        {/* Bank Account Details */}
+        <div className="pt-3 border-t border-white/10 space-y-3">
+          <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+            Official Bank Account Details (Fallback for Public Pay Vargani)
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Bank Name & Branch</label>
+              <input
+                type="text"
+                placeholder="e.g. State Bank of India, Lohegaon"
+                value={formData.bankName || ''}
+                onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                className="input-field text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Account Holder Name</label>
+              <input
+                type="text"
+                placeholder="e.g. Indrayani Vihar Mitra Mandal"
+                value={formData.bankAccountName || ''}
+                onChange={(e) => setFormData({ ...formData, bankAccountName: e.target.value })}
+                className="input-field text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Account Number</label>
+              <input
+                type="text"
+                placeholder="e.g. 123456789012"
+                value={formData.bankAccountNumber || ''}
+                onChange={(e) => setFormData({ ...formData, bankAccountNumber: e.target.value })}
+                className="input-field text-xs font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">IFSC Code</label>
+              <input
+                type="text"
+                placeholder="e.g. SBIN0001234"
+                value={formData.bankIfsc || ''}
+                onChange={(e) => setFormData({ ...formData, bankIfsc: e.target.value.toUpperCase() })}
+                className="input-field text-xs font-mono uppercase"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="pt-2 flex justify-end">
           <button
             type="submit"
             className="btn-saffron py-2.5 px-5 text-xs font-bold flex items-center gap-2"
           >
-            <Save className="w-4 h-4" /> Save Mandal Profile
+            <Save className="w-4 h-4" /> Save Settings
           </button>
         </div>
       </form>
 
-      {/* Organisers & PIN Security */}
+      {/* Organisers List Summary (Developer-Locked PIN) */}
       <div className="glass-card p-5 bg-slate-900/80 border-white/10 space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-white/10">
           <div>
             <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-              <Key className="w-4 h-4" /> Organisers & Access PINs (कार्यकर्ते व गुप्त पिन)
+              <Users className="w-4 h-4" /> Committee Organisers ({organizers.length} Members)
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              4-digit client-side PIN access for each committee member
+              Committee member profiles with shared secure PIN access
             </p>
           </div>
 
@@ -217,14 +261,6 @@ export function Settings({ onClose }) {
                 onChange={(e) => setNewOrgPhone(e.target.value)}
                 className="input-field text-xs"
               />
-              <input
-                type="password"
-                maxLength={4}
-                placeholder="4-Digit PIN (e.g. 1234)"
-                value={newOrgPin}
-                onChange={(e) => setNewOrgPin(e.target.value)}
-                className="input-field text-xs font-mono font-bold"
-              />
             </div>
             <div className="flex justify-end gap-2">
               <button
@@ -244,39 +280,22 @@ export function Settings({ onClose }) {
           </form>
         )}
 
-        {/* Organiser PIN Rows */}
-        <div className="space-y-2.5">
+        {/* Organiser Rows (Clean, No PIN exposure) */}
+        <div className="space-y-2">
           {organizers.map((org) => (
             <div
               key={org.id}
-              className="p-3 rounded-xl bg-slate-950/80 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="p-3 rounded-xl bg-slate-950/80 border border-white/5 flex items-center justify-between gap-3"
             >
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-xs font-bold text-white">{org.name}</h4>
-                </div>
+                <h4 className="text-xs font-bold text-white">{org.name}</h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Phone: {org.phone || '-'} • Current PIN: <span className="text-amber-400 font-mono font-bold">{org.pin}</span>
+                  Phone: {org.phone ? `+91 ${org.phone}` : 'Registered Committee Member'}
                 </p>
               </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <input
-                  type="password"
-                  maxLength={4}
-                  placeholder="New PIN"
-                  value={pinEdits[org.id] || ''}
-                  onChange={(e) => setPinEdits({ ...pinEdits, [org.id]: e.target.value })}
-                  className="w-24 bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-center font-mono font-bold text-amber-400 outline-none focus:border-amber-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleUpdatePin(org.id)}
-                  className="btn-secondary py-1 px-2.5 text-xs text-amber-400 hover:text-white"
-                >
-                  Update PIN
-                </button>
-              </div>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">
+                Active
+              </span>
             </div>
           ))}
         </div>
