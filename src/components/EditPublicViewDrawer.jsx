@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { extractTextFromPdf, parseMankariListFromLines } from '../utils/mankariPdfParser';
+import { FESTIVAL_DAYS_CONFIG, getFestivalDayInfo } from '../utils/festivalSchedule';
 
 export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' }) {
   const {
@@ -24,12 +25,13 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
 
   // Day-Wise Cultural Performance State
   const [selectedCulturalDay, setSelectedCulturalDay] = useState(1);
+  const selectedDayMeta = getFestivalDayInfo(selectedCulturalDay);
   const currentEvent = (culturalEvents || []).find((e) => Number(e.day) === selectedCulturalDay) || {
     day: selectedCulturalDay,
-    dayLabel: `Day ${selectedCulturalDay}`,
-    date: `${selectedCulturalDay + 6} Sept`,
-    title: '',
-    marathiTitle: '',
+    dayLabel: selectedDayMeta.marathiLabel,
+    date: selectedDayMeta.date,
+    title: selectedDayMeta.defaultTitle || '',
+    marathiTitle: selectedDayMeta.defaultMarathiTitle || '',
     time: '06:00 PM',
     location: 'Main Stage (मुख्य मंडप)',
     performers: '',
@@ -44,12 +46,13 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
     if (evt) {
       setCulturalForm({ ...evt });
     } else {
+      const meta = getFestivalDayInfo(selectedCulturalDay);
       setCulturalForm({
         day: selectedCulturalDay,
-        dayLabel: `Day ${selectedCulturalDay}`,
-        date: `${selectedCulturalDay + 6} Sept`,
-        title: '',
-        marathiTitle: '',
+        dayLabel: meta.marathiLabel,
+        date: meta.date,
+        title: meta.defaultTitle || '',
+        marathiTitle: meta.defaultMarathiTitle || '',
         time: '06:00 PM',
         location: 'Main Stage (मुख्य मंडप)',
         performers: '',
@@ -298,28 +301,27 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                     <h4 className="text-xs font-bold text-[#241913]">Select Festival Day (दिवस निवडा)</h4>
                   </div>
                   <span className="text-[11px] font-bold text-[#8B2616] bg-[#FFF1EB] px-2 py-0.5 rounded-full border border-[#F5DACB]">
-                    Day {selectedCulturalDay} of 10
+                    Day {selectedCulturalDay} of 11 • {getFestivalDayInfo(selectedCulturalDay).date}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => {
-                    const evt = (culturalEvents || []).find((e) => Number(e.day) === d);
-                    const isSelected = selectedCulturalDay === d;
+                  {FESTIVAL_DAYS_CONFIG.map((d) => {
+                    const isSelected = selectedCulturalDay === d.day;
                     return (
                       <button
-                        key={d}
+                        key={d.day}
                         type="button"
-                        onClick={() => setSelectedCulturalDay(d)}
+                        onClick={() => setSelectedCulturalDay(d.day)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex flex-col items-center min-w-[62px] ${
                           isSelected
                             ? 'bg-[#8B2616] text-white shadow-xs scale-100'
                             : 'bg-[#FFF5EE] text-[#6B5E57] hover:bg-[#FFEAE0] border border-[#F0DFD5]'
                         }`}
                       >
-                        <span className="text-xs">Day {d}</span>
-                        <span className={`text-[9.5px] font-normal ${isSelected ? 'text-white/80' : 'text-[#8B2616]'}`}>
-                          {evt?.date || `${d + 6} Sept`}
+                        <span className="text-xs">Day {d.day}</span>
+                        <span className={`text-[9.5px] font-semibold ${isSelected ? 'text-white/90' : 'text-[#8B2616]'}`}>
+                          {d.date}
                         </span>
                       </button>
                     );
@@ -449,15 +451,15 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                 </button>
               </form>
 
-              {/* All 10 Days Schedule Overview */}
+              {/* All 11 Days Schedule Overview */}
               <div className="bg-white p-3.5 rounded-2xl border border-[#F0DFD5] shadow-xs space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-[#241913]">All 10 Days Cultural Schedule</h4>
-                    <p className="text-[11px] text-[#6B5E57]">Tap any day to edit</p>
+                    <h4 className="text-xs font-bold text-[#241913]">All 11 Days Cultural Schedule</h4>
+                    <p className="text-[11px] text-[#6B5E57]">14 Sep – 25 Sep • Tap any day to edit</p>
                   </div>
-                  <span className="text-[11px] font-bold text-[#8B2616] bg-[#FFF1EB] px-2.5 py-0.5 rounded-full">
-                    10 Days Total
+                  <span className="text-[11px] font-bold text-[#8B2616] bg-[#FFF1EB] px-2.5 py-0.5 rounded-full border border-[#F5DACB]">
+                    11 Days Total
                   </span>
                 </div>
 
@@ -652,8 +654,8 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                           onChange={(e) => handleReviewItemChange(idx, 'day', e.target.value)}
                           className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-lg px-2 py-1 text-[11px] font-bold text-[#8B2616] outline-none"
                         >
-                          {['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7', 'Day 8', 'Day 9', 'Day 10'].map((d) => (
-                            <option key={d} value={d}>{d}</option>
+                          {FESTIVAL_DAYS_CONFIG.map((d) => (
+                            <option key={d.day} value={`Day ${d.day}`}>Day {d.day} ({d.date})</option>
                           ))}
                         </select>
                         <input
@@ -701,8 +703,8 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                     onChange={(e) => setNewMankari({ ...newMankari, day: e.target.value })}
                     className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-2.5 py-2 text-xs font-bold text-[#8B2616] outline-none"
                   >
-                    {['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7', 'Day 8', 'Day 9', 'Day 10'].map((d) => (
-                      <option key={d} value={d}>{d}</option>
+                    {FESTIVAL_DAYS_CONFIG.map((d) => (
+                      <option key={d.day} value={`Day ${d.day}`}>Day {d.day} ({d.date})</option>
                     ))}
                   </select>
                   <input

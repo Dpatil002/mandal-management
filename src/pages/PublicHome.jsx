@@ -123,11 +123,11 @@ export function PublicHome({ onNavigateToPay, onNavigateToSchedule, onNavigateTo
       <div className="rounded-3xl p-5 bg-[#FFFDF9] border border-[#EAE0D2] shadow-xs flex flex-col gap-4">
         <div className="flex items-center justify-between pb-1 border-b border-[#EAE0D2]/70">
           <div>
-            <h3 className="text-base font-bold text-[#7A1C16]">Today's Schedule</h3>
-            <span className="text-xs text-[#6B5E57]">आजचे नियोजन व महाआरती</span>
+            <h3 className="text-base font-bold text-[#7A1C16]">Festival Schedule (वेळापत्रक)</h3>
+            <span className="text-xs text-[#6B5E57]">१४ सप्टें – २५ सप्टें • आजचे नियोजन व महाआरती</span>
           </div>
           <span className="px-2.5 py-1 rounded-full bg-[#EBF7F0] text-[#14553C] text-xs font-bold border border-[#BDE5CE]">
-            Day 4 • चतुर्थी
+            14-25 Sep (11 Days)
           </span>
         </div>
 

@@ -49,8 +49,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-1',
     day: 1,
-    dayLabel: 'Day 1 • गणेश चतुर्थी',
-    date: '07 Sept',
+    dayLabel: 'Day 1 • 14 Sep • गणेश चतुर्थी',
+    date: '14 Sep',
     title: 'Ganesh Stapan & Atharvashirsha Pathan',
     marathiTitle: 'गणेश स्थापना व सामूहिक अथर्वशीर्ष पठण',
     time: '06:00 PM',
@@ -61,8 +61,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-2',
     day: 2,
-    dayLabel: 'Day 2 • ऋषीपंचमी',
-    date: '08 Sept',
+    dayLabel: 'Day 2 • 15 Sep • ऋषीपंचमी',
+    date: '15 Sep',
     title: 'Drawing & Modak Making Competition',
     marathiTitle: 'बाल चित्रकला व पर्यावरणपूरक मोदक स्पर्धा',
     time: '05:30 PM',
@@ -73,8 +73,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-3',
     day: 3,
-    dayLabel: 'Day 3 • तृतीया',
-    date: '09 Sept',
+    dayLabel: 'Day 3 • 16 Sep • तृतीया',
+    date: '16 Sep',
     title: 'Mahila Bhajan Mandal & Traditional Songs',
     marathiTitle: 'महिला भजन मंडळ व पारंपरिक भक्तीगीते',
     time: '06:30 PM',
@@ -85,8 +85,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-4',
     day: 4,
-    dayLabel: 'Day 4 • चतुर्थी',
-    date: '10 Sept',
+    dayLabel: 'Day 4 • 17 Sep • चतुर्थी',
+    date: '17 Sep',
     title: 'Children Dance, Drama & Skits',
     marathiTitle: 'बाल गोपाळ नृत्य, नाटिका व कलाविष्कार',
     time: '06:00 PM',
@@ -97,8 +97,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-5',
     day: 5,
-    dayLabel: 'Day 5 • पंचमी',
-    date: '11 Sept',
+    dayLabel: 'Day 5 • 18 Sep • पंचमी',
+    date: '18 Sep',
     title: 'Musical Night & Classical Sugam Sangeet',
     marathiTitle: 'सुगम संगीत संध्या व वाद्यवृंद',
     time: '07:00 PM',
@@ -109,8 +109,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-6',
     day: 6,
-    dayLabel: 'Day 6 • षष्ठी',
-    date: '12 Sept',
+    dayLabel: 'Day 6 • 19 Sep • गौरी आगमन',
+    date: '19 Sep',
     title: 'Fancy Dress Competition (Historical & Saints)',
     marathiTitle: 'भव्य वेशभूषा स्पर्धा (संत व क्रांतिकारक)',
     time: '05:30 PM',
@@ -121,8 +121,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-7',
     day: 7,
-    dayLabel: 'Day 7 • सप्तमी',
-    date: '13 Sept',
+    dayLabel: 'Day 7 • 20 Sep • गौरी पूजन',
+    date: '20 Sep',
     title: 'Family Antakshari & Fun Cultural Games',
     marathiTitle: 'कौटुंबिक अंताक्षरी व सांस्कृतिक खेळ',
     time: '06:30 PM',
@@ -133,8 +133,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-8',
     day: 8,
-    dayLabel: 'Day 8 • अष्टमी',
-    date: '14 Sept',
+    dayLabel: 'Day 8 • 21 Sep • गौरी विसर्जन',
+    date: '21 Sep',
     title: 'Dhol-Tasha & Traditional Lezim Showcase',
     marathiTitle: 'ढोल-ताशा व पारंपरिक लेझीम प्रात्यक्षिक',
     time: '06:00 PM',
@@ -145,8 +145,8 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-9',
     day: 9,
-    dayLabel: 'Day 9 • नवमी',
-    date: '15 Sept',
+    dayLabel: 'Day 9 • 22 Sep • नवमी',
+    date: '22 Sep',
     title: 'Shree Satyanarayan Pooja & Bhajan Sandhya',
     marathiTitle: 'श्री सत्यनारायण महापूजा व महाप्रसाद',
     time: '05:00 PM',
@@ -157,9 +157,21 @@ const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-10',
     day: 10,
-    dayLabel: 'Day 10 • अनंत चतुर्दशी',
-    date: '16 Sept',
-    title: 'Grand Farewell Miravnuk & Aarti',
+    dayLabel: 'Day 10 • 23 Sep • दशमी',
+    date: '23 Sep',
+    title: 'Mega Drama & Cultural Orchestra',
+    marathiTitle: 'महा-नाट्य व संगीत रजनी',
+    time: '06:00 PM',
+    location: 'Main Stage (मुख्य मंडप)',
+    performers: 'Indrayani Natya Mandal',
+    description: 'भव्य सांस्कृतिक महानाट्य व संगीत सादरीकरण'
+  },
+  {
+    id: 'ce-11',
+    day: 11,
+    dayLabel: 'Day 11 • 25 Sep • अनंत चतुर्दशी',
+    date: '25 Sep',
+    title: 'Grand Farewell Miravnuk & Visarjan Aarti',
     marathiTitle: 'भव्य विसर्जन मिरवणूक व निरोप आरती',
     time: '04:00 PM',
     location: 'Indrayani Vihar to Visarjan Ghat',
@@ -169,18 +181,20 @@ const INITIAL_CULTURAL_EVENTS = [
 ];
 
 const INITIAL_MANKARI_LIST = [
-  { id: 'mk-1', day: 'Day 1', date: '07 Sept', family: 'कदम परिवार', flat: 'A-102', aarti: 'Evening' },
-  { id: 'mk-2', day: 'Day 1', date: '07 Sept', family: 'पाटील कुटुंब', flat: 'B-304', aarti: 'Evening' },
-  { id: 'mk-3', day: 'Day 2', date: '08 Sept', family: 'पवार परिवार', flat: 'C-201', aarti: 'Evening' },
-  { id: 'mk-4', day: 'Day 3', date: '09 Sept', family: 'जोशी कुटुंब', flat: 'A-504', aarti: 'Evening' },
-  { id: 'mk-5', day: 'Day 4', date: '10 Sept', family: 'श्रीमंत कदम परिवार', flat: 'A-102', aarti: 'Evening' },
-  { id: 'mk-6', day: 'Day 4', date: '10 Sept', family: 'पाटील कुटुंब', flat: 'B-304', aarti: 'Evening' },
-  { id: 'mk-7', day: 'Day 4', date: '10 Sept', family: 'देशमुख परिवार', flat: 'C-201', aarti: 'Evening' },
-  { id: 'mk-8', day: 'Day 4', date: '10 Sept', family: 'जोशी कुटुंब', flat: 'A-504', aarti: 'Evening' },
-  { id: 'mk-9', day: 'Day 4', date: '10 Sept', family: 'सावंत परिवार', flat: 'B-101', aarti: 'Evening' },
-  { id: 'mk-10', day: 'Day 4', date: '10 Sept', family: 'कुलकर्णी परिवार', flat: 'D-302', aarti: 'Evening' },
-  { id: 'mk-11', day: 'Day 5', date: '11 Sept', family: 'शिंदे परिवार', flat: 'B-202', aarti: 'Evening' },
-  { id: 'mk-12', day: 'Day 6', date: '12 Sept', family: 'गायकवाड कुटुंब', flat: 'C-405', aarti: 'Evening' }
+  { id: 'mk-1', day: 'Day 1', date: '14 Sep', family: 'कदम परिवार', flat: 'A-102', aarti: 'Evening' },
+  { id: 'mk-2', day: 'Day 1', date: '14 Sep', family: 'पाटील कुटुंब', flat: 'B-304', aarti: 'Evening' },
+  { id: 'mk-3', day: 'Day 2', date: '15 Sep', family: 'पवार परिवार', flat: 'C-201', aarti: 'Evening' },
+  { id: 'mk-4', day: 'Day 3', date: '16 Sep', family: 'जोशी कुटुंब', flat: 'A-504', aarti: 'Evening' },
+  { id: 'mk-5', day: 'Day 4', date: '17 Sep', family: 'श्रीमंत कदम परिवार', flat: 'A-102', aarti: 'Evening' },
+  { id: 'mk-6', day: 'Day 4', date: '17 Sep', family: 'पाटील कुटुंब', flat: 'B-304', aarti: 'Evening' },
+  { id: 'mk-7', day: 'Day 4', date: '17 Sep', family: 'देशमुख परिवार', flat: 'C-201', aarti: 'Evening' },
+  { id: 'mk-8', day: 'Day 5', date: '18 Sep', family: 'जोशी कुटुंब', flat: 'A-504', aarti: 'Evening' },
+  { id: 'mk-9', day: 'Day 6', date: '19 Sep', family: 'सावंत परिवार', flat: 'B-101', aarti: 'Evening' },
+  { id: 'mk-10', day: 'Day 7', date: '20 Sep', family: 'कुलकर्णी परिवार', flat: 'D-302', aarti: 'Evening' },
+  { id: 'mk-11', day: 'Day 8', date: '21 Sep', family: 'शिंदे परिवार', flat: 'B-202', aarti: 'Evening' },
+  { id: 'mk-12', day: 'Day 9', date: '22 Sep', family: 'गायकवाड कुटुंब', flat: 'C-405', aarti: 'Evening' },
+  { id: 'mk-13', day: 'Day 10', date: '23 Sep', family: 'मोरे परिवार', flat: 'A-301', aarti: 'Evening' },
+  { id: 'mk-14', day: 'Day 11', date: '25 Sep', family: 'समस्त इंद्रायणी विहार रहिवासी', flat: 'All Wings', aarti: 'Maha Aarti' }
 ];
 
 const INITIAL_VARGANI = [

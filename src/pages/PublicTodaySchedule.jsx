@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
+import { FESTIVAL_DAYS_CONFIG, getFestivalDayInfo } from '../utils/festivalSchedule';
 
 const STITCH_CULTURAL_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFng43v9k73E7rH9_KFkaLPsFhywivy85J8itC8lxdWV6PbbDiTMQ4zuDsp-40MxVf7p69j0RNzORcrkvo9PV-HM-fMFEUosY4XmP7cBXoMxoIyLwJlDOn_gVhrSLWHr_veLBht6ul3wciriUrXl17ms6pRuNx_mTfGVGPMzxSJrp4gBCFA1we-j27bWbUIqwIgS5JVzH2Ye9xH2mVXLhTj_MTEDk-RCCV0K1Sb03kFiostkj6M4xMhw';
 
@@ -21,6 +22,8 @@ export function PublicTodaySchedule() {
   const eventForDay = (culturalEvents || []).find((e) => Number(e.day) === selectedDay) ||
     (publicContent?.events || []).find((e) => Number(e.day) === selectedDay);
 
+  const dayInfo = getFestivalDayInfo(selectedDay);
+
   return (
     <div className="flex flex-col w-full gap-3.5 pb-12 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
       {/* Date & Title Header Card */}
@@ -30,32 +33,41 @@ export function PublicTodaySchedule() {
             <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>
               calendar_today
             </span>
-            Day {selectedDay} • उत्सव दिवस {selectedDay}
+            Day {selectedDay} • {dayInfo.date} • {dayInfo.tithi || `उत्सव दिवस ${selectedDay}`}
           </span>
-          <span className="text-xs font-semibold text-[#A23F1A]">Aarti &amp; Mankari</span>
+          <span className="text-xs font-semibold text-[#A23F1A] bg-[#FFF5EE] px-2.5 py-0.5 rounded-full border border-[#F0DFD5]">
+            {dayInfo.date}
+          </span>
         </div>
         <h2 className="text-xl font-bold text-[#241913] tracking-tight mt-0.5">
-          Festival Schedule
+          Festival Schedule (वेळापत्रक)
         </h2>
         <p className="text-xs text-[#6B5E57]">
-          Daily rituals and mankari list
+          १४ सप्टेंबर ते २५ सप्टेंबर • Daily rituals, cultural events &amp; mankari list
         </p>
 
-        {/* Day Selector Tabs */}
+        {/* Day Selector Tabs with Dates */}
         <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 no-scrollbar border-t border-[#F0DFD5]/70 mt-1">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
-            <button
-              key={d}
-              onClick={() => setSelectedDay(d)}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                selectedDay === d
-                  ? 'bg-[#8B2616] text-white shadow-xs'
-                  : 'bg-[#FFF5EE] text-[#6B5E57] hover:bg-[#FFEAE0]'
-              }`}
-            >
-              Day {d}
-            </button>
-          ))}
+          {FESTIVAL_DAYS_CONFIG.map((d) => {
+            const isSelected = selectedDay === d.day;
+            return (
+              <button
+                key={d.day}
+                type="button"
+                onClick={() => setSelectedDay(d.day)}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex flex-col items-center min-w-[64px] ${
+                  isSelected
+                    ? 'bg-[#8B2616] text-white shadow-xs'
+                    : 'bg-[#FFF5EE] text-[#6B5E57] hover:bg-[#FFEAE0] border border-[#F0DFD5]'
+                }`}
+              >
+                <span className="text-xs leading-tight">Day {d.day}</span>
+                <span className={`text-[10px] font-semibold leading-tight ${isSelected ? 'text-white/90' : 'text-[#8B2616]'}`}>
+                  {d.date}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -186,7 +198,7 @@ export function PublicTodaySchedule() {
             <span>Cultural Event • सांस्कृतिक कार्यक्रम</span>
           </span>
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF2EB] border border-[#F5DACB] text-xs font-bold text-[#8B2616]">
-            Day {selectedDay}
+            Day {selectedDay} • {dayInfo.date}
           </span>
         </div>
 
