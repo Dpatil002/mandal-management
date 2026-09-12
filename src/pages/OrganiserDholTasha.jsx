@@ -160,28 +160,22 @@ export function OrganiserDholTasha() {
     <div className="flex flex-col w-full px-4 pt-2 pb-24 max-w-xl mx-auto space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
       
       {/* Hero Banner Card */}
-      <div className="relative w-full rounded-3xl overflow-hidden shadow-sm bg-[#FFF1EB] border border-[#F0DFD5]">
-        <div className="relative h-36 sm:h-44 w-full">
+      <div className="relative w-full rounded-2xl overflow-hidden shadow-xs bg-[#FFF1EB] border border-[#F0DFD5]">
+        <div className="relative h-24 sm:h-28 w-full">
           <img
             alt="Dhol-Tasha"
             className="w-full h-full object-cover"
             src={STITCH_DHOL_PHOTO}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#6B0E03]/95 via-[#6B0E03]/50 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between text-white">
-            <div className="flex flex-col">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#E65A15] text-[10px] font-black tracking-wider uppercase w-fit mb-1 shadow-xs">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#6B0E03]/90 via-[#6B0E03]/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-3.5 flex items-center justify-between text-white">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-full bg-[#E65A15] text-[11px] font-black tracking-wider uppercase shadow-xs">
                 Indrayani Yuva Pathak
               </span>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
-                Dhol-Tasha Inventory & Storage
-              </h1>
-              <p className="text-xs text-[#FFDAD4] font-medium mt-0.5">
-                वाद्य साठा, साठवणूक वाटप व देखभाल
-              </p>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-xs font-extrabold text-[#FD8359] block">
+              <span className="text-xs font-black text-white bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/20">
                 {totalUnits} Total Units
               </span>
             </div>

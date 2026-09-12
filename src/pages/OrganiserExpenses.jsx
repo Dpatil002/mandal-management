@@ -47,17 +47,7 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
   const remaining = Math.max(0, budget - stats.totalExpenses);
 
   return (
-    <div className="flex flex-col w-full px-4 max-w-xl mx-auto pb-20 space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
-      {/* Top Header */}
-      <div className="pt-2 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-[#8B2616]">Festival Expenses</h2>
-          <p className="text-xs text-[#6B5E57]">उत्सव खर्च नोंदवही २०२६</p>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-white border border-[#F0DFD5] flex items-center justify-center text-[#8B2616] shadow-xs">
-          <span className="material-symbols-outlined text-[20px]">receipt_long</span>
-        </div>
-      </div>
+    <div className="flex flex-col w-full px-4 max-w-xl mx-auto pb-20 space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in pt-1">
 
       {/* Total Outflow Progress Card */}
       <section className="w-full rounded-2xl bg-white/95 border border-[#F0DFD5] p-4 text-[#241913] shadow-xs relative overflow-hidden">

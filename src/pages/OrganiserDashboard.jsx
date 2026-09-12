@@ -41,20 +41,7 @@ export function OrganiserDashboard({
           </button>
         </div>
 
-        <div className="flex flex-row items-baseline justify-between gap-1 pt-1">
-          <div>
-            <h2 className="text-xl font-bold text-[#8B2616]">Organiser Portal</h2>
-            <span className="text-xs text-[#6B5E57]">उत्सव समिती २०२६</span>
-          </div>
-          <div className="inline-flex items-center gap-1 bg-[#F0DFD5]/50 px-2.5 py-1 rounded-full">
-            <span className="material-symbols-outlined text-[#8B2616] text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              verified_user
-            </span>
-            <span className="text-xs text-[#241913] font-medium">Mandal Sevekari</span>
-          </div>
-        </div>
-
-        <div className="mt-2 pt-2.5 border-t border-[#F0DFD5]/70 flex items-center justify-between gap-2 bg-[#FFF1EB]/50 rounded-xl p-2.5">
+        <div className="mt-1 flex items-center justify-between gap-2 bg-[#FFF1EB]/50 rounded-xl p-2.5">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-full bg-[#8B2616] text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
               {currentOrganizer?.name?.slice(0, 2).toUpperCase() || 'RS'}

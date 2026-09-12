@@ -52,50 +52,50 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
 
   return (
     <div className="flex flex-col w-full px-4 pb-20 max-w-xl mx-auto font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in space-y-4">
-      {/* Top Stats Bar & Quick Add Banner */}
-      <div className="w-full pt-2 flex flex-col gap-2">
+      {/* Top Action Bar with live pending count & action buttons */}
+      <div className="w-full pt-1 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-col min-w-0">
-            <h2 className="text-xl font-bold text-[#8B2616] truncate">Vargani Records</h2>
-            <span className="text-xs text-[#6B5E57]">वर्गणी नोंदवही २०२६</span>
+          <div className="flex items-center gap-1.5 text-xs text-[#6B5E57] font-semibold truncate">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${stats.pendingCount > 0 ? 'bg-[#FD8359] animate-pulse' : 'bg-emerald-500'}`}></span>
+            <span className="truncate">{stats.pendingCount > 0 ? `${stats.pendingCount} Pending Verification` : `${stats.verifiedCount} Donors Verified`}</span>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setIsPaymentDetailsOpen(true)}
               title="Payment QR & UPI Settings"
-              className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 bg-white text-[#8B2616] font-bold text-xs border border-[#D9C4B7] shadow-2xs hover:bg-[#FAF6EE] active:scale-95 transition-all cursor-pointer"
+              className="flex items-center justify-center gap-1 rounded-xl px-2.5 py-2 bg-white text-[#8B2616] font-bold text-xs border border-[#D9C4B7] shadow-2xs hover:bg-[#FAF6EE] active:scale-95 transition-all cursor-pointer"
               type="button"
             >
-              <span className="material-symbols-outlined text-[17px]">qr_code_2</span>
-              <span>Payment QR</span>
+              <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
+              <span>QR Details</span>
             </button>
             <button
               onClick={onOpenAddVargani}
-              className="shrink-0 flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 bg-[#8B2616] text-white font-semibold text-xs shadow-xs hover:bg-[#731E11] active:scale-95 transition-all cursor-pointer"
+              className="flex items-center justify-center gap-1 rounded-xl px-3 py-2 bg-[#8B2616] text-white font-bold text-xs shadow-xs hover:bg-[#731E11] active:scale-95 transition-all cursor-pointer"
               type="button"
             >
-              <span className="material-symbols-outlined text-[16px]">add_circle</span>
-              <span className="whitespace-nowrap">Add Vargani</span>
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              <span>Add Vargani</span>
             </button>
           </div>
         </div>
 
         {/* Festive Total Collected Strip */}
-        <div className="w-full rounded-2xl p-4 bg-white/95 border border-[#F0DFD5] shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#FD8359]/20 flex items-center justify-center text-[#6F2000] shadow-xs shrink-0">
-              <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+        <div className="w-full rounded-2xl p-3.5 bg-white/95 border border-[#F0DFD5] shadow-xs flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-full bg-[#FD8359]/20 flex items-center justify-center text-[#6F2000] shadow-xs shrink-0">
+              <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
             </div>
             <div className="flex flex-col">
               <span className="text-base font-bold text-[#241913]">{formatCurrency(stats.totalReceived)}</span>
-              <span className="text-xs text-[#6B5E57]">Total Collected</span>
+              <span className="text-[11px] text-[#6B5E57]">Total Collected</span>
             </div>
           </div>
           <div className="flex flex-col items-end">
-            <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#14553c] text-[#8ac8a7] px-2.5 py-0.5 rounded-full">
-              <span className="material-symbols-outlined text-[14px]">trending_up</span> {stats.progressPercent}%
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#14553c] text-[#8ac8a7] px-2 py-0.5 rounded-full">
+              <span className="material-symbols-outlined text-[13px]">trending_up</span> {stats.progressPercent}%
             </span>
-            <span className="text-xs text-[#6B5E57] mt-0.5">{stats.verifiedCount} Donors</span>
+            <span className="text-[11px] text-[#6B5E57] mt-0.5">{stats.verifiedCount} Donors</span>
           </div>
         </div>
       </div>
@@ -301,49 +301,49 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
                   </div>
                 ) : (
                   /* Verified Receipt Footer Details */
-                  <div className="pt-2 border-t border-[#F0DFD5] bg-[#fff1eb]/60 px-3 py-2 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[#6b0e03] text-[18px]">receipt</span>
-                      <span className="text-xs text-[#6B5E57] font-medium">
-                        ई-पावती क्र: <strong className="text-[#241913]">{item.receiptNo}</strong>
+                  <div className="pt-2 border-t border-[#F0DFD5] bg-[#fff1eb]/60 px-3 py-2 rounded-xl flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="material-symbols-outlined text-[#6b0e03] text-[16px] shrink-0">receipt</span>
+                      <span className="text-xs text-[#6B5E57] truncate">
+                        पावती क्र: <strong className="text-[#241913] font-bold">{item.receiptNo}</strong>
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                       <button
                         onClick={() => handleWhatsAppShare(item)}
-                        className="h-8 px-3 flex items-center gap-1 bg-white border border-[#D9C4B7] text-[#6b0e03] hover:bg-[#ffeae0] rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                        className="h-7 px-2.5 flex items-center gap-1 bg-white border border-[#D9C4B7] text-[#6b0e03] hover:bg-[#ffeae0] rounded-lg text-[11px] font-bold transition-colors cursor-pointer"
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-[15px]">share</span>
-                        <span>WhatsApp पावती</span>
+                        <span className="material-symbols-outlined text-[14px]">share</span>
+                        <span>WhatsApp</span>
                       </button>
 
                       <button
                         onClick={() => handleDownloadSinglePDF(item)}
-                        className="w-8 h-8 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#241913] hover:bg-[#ffeae0] rounded-lg text-xs transition-colors cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#241913] hover:bg-[#ffeae0] rounded-lg text-xs transition-colors cursor-pointer"
                         title="Download PDF"
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-[15px]">picture_as_pdf</span>
+                        <span className="material-symbols-outlined text-[14px]">picture_as_pdf</span>
                       </button>
 
                       {unverifyConfirmId === item.id ? (
                         <button
                           onClick={() => handleUnverify(item.id)}
-                          className="px-2 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold"
+                          className="px-2 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold cursor-pointer"
                           title="Confirm Un-verify"
                         >
-                          Unverify
+                          Confirm
                         </button>
                       ) : (
                         <button
                           onClick={() => setUnverifyConfirmId(item.id)}
-                          className="w-8 h-8 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#6B5E57] hover:text-red-600 rounded-lg text-xs transition-colors cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#6B5E57] hover:text-red-600 rounded-lg text-xs transition-colors cursor-pointer"
                           title="Un-verify"
                           type="button"
                         >
-                          <span className="material-symbols-outlined text-[15px]">undo</span>
+                          <span className="material-symbols-outlined text-[14px]">undo</span>
                         </button>
                       )}
                     </div>
@@ -356,31 +356,31 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
       </div>
 
       {/* Official UPI QR Standee Banner */}
-      <div className="w-full bg-[#ffeae0] p-4 rounded-2xl flex items-center justify-between gap-3 shadow-xs border border-[#F0DFD5]">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-2xs shrink-0 text-[#6b0e03]">
-            <span className="material-symbols-outlined text-[28px]">qr_code_2</span>
+      <div className="w-full bg-[#ffeae0] p-3.5 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs border border-[#F0DFD5]">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-2xs shrink-0 text-[#6b0e03]">
+            <span className="material-symbols-outlined text-[24px]">qr_code_2</span>
           </div>
-          <div className="flex flex-col">
-            <h3 className="text-sm font-bold text-[#6b0e03] leading-tight">मंडळाचा अधिकृत UPI QR</h3>
-            <span className="text-xs text-[#6B5E57]">सोसायटी नोटीस बोर्ड व प्रवेशद्वारावर लावण्यासाठी प्रिंट करा</span>
+          <div className="flex flex-col min-w-0">
+            <h3 className="text-xs font-bold text-[#6b0e03] leading-tight truncate">मंडळाचा अधिकृत UPI QR</h3>
+            <span className="text-[11px] text-[#6B5E57] truncate">सोसायटी नोटीस बोर्डासाठी प्रिंट करा</span>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setIsPaymentDetailsOpen(true)}
-            className="py-2 px-3 bg-white border border-[#D9C4B7] text-[#6b0e03] rounded-xl text-xs font-bold hover:bg-[#FAF6EE] transition-all cursor-pointer"
+            className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-[#D9C4B7] text-[#6b0e03] rounded-xl text-xs font-bold hover:bg-[#FAF6EE] transition-all cursor-pointer text-center"
           >
-            बदला / Manage QR
+            Manage QR
           </button>
           <a
             href="/assets/mandal_qr_final.png"
             download="Indrayani_Mandal_UPI_QR.png"
-            className="py-2 px-3 bg-[#6b0e03] hover:bg-[#8b2616] text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95 transition-all"
+            className="flex-1 sm:flex-initial py-2 px-3 bg-[#6b0e03] hover:bg-[#8b2616] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all text-center"
           >
             <span className="material-symbols-outlined text-[15px]">download</span>
-            <span>QR डाऊनलोड</span>
+            <span>Download</span>
           </a>
         </div>
       </div>

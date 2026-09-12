@@ -37,22 +37,21 @@ export function OrganiserTasks() {
   const doneTasks = filteredTasks.filter((t) => t.status === 'done');
 
   return (
-    <div className="flex flex-col w-full px-4 py-4 max-w-xl mx-auto space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in pb-20">
-      {/* Top Header Card with Quick Add Form */}
+    <div className="flex flex-col w-full px-4 pt-1 pb-20 max-w-xl mx-auto space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
+      {/* Quick Add Card with live counts */}
       <div className="flex flex-col bg-white rounded-2xl p-4 border border-[#F0DFD5] shadow-xs">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold text-[#241913]">Mandal Tasks</h2>
-            <p className="text-xs text-[#57423E] mt-0.5">सेवा कार्यसूची २०२६</p>
+        <div className="flex items-center justify-between gap-3 pb-2 border-b border-[#F0DFD5]/60">
+          <div className="flex items-center gap-2 text-xs text-[#57423E] font-semibold">
+            <span className="w-2 h-2 rounded-full bg-[#FD8359] animate-pulse"></span>
+            <span>{pendingCount} Pending Tasks • {completedCount} Done</span>
           </div>
-          <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-[#FFEAE0] text-[#6B0E03] shrink-0 border border-[#F5DACB]">
-            <span className="text-lg leading-none font-bold">{pendingCount}</span>
-            <span className="text-[10px] font-bold text-[#57423E] mt-0.5">Pending</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFEAE0] text-[#6B0E03] text-xs font-bold border border-[#F5DACB]">
+            <span>{pendingCount} Pending</span>
           </div>
         </div>
 
         {/* Quick Add Inline Form */}
-        <div className="mt-4 pt-1">
+        <div className="mt-2.5">
           <form className="flex items-center gap-2" onSubmit={handleCreateTask}>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
               <div className="flex-1 flex items-center bg-white border border-[#D9C4B7] rounded-xl px-3.5 py-2.5">

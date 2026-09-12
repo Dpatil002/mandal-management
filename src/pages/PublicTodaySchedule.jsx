@@ -33,7 +33,7 @@ export function PublicTodaySchedule() {
             <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>
               calendar_today
             </span>
-            Day {selectedDay} • {dayInfo.date} • {dayInfo.tithi || `उत्सव दिवस ${selectedDay}`}
+            Day {selectedDay} • {dayInfo.tithi || `उत्सव दिवस ${selectedDay}`}
           </span>
           <span className="text-xs font-semibold text-[#A23F1A] bg-[#FFF5EE] px-2.5 py-0.5 rounded-full border border-[#F0DFD5]">
             {dayInfo.date}
