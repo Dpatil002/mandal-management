@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { validateName, validatePhone, validateAmount, sanitizeText } from '../utils/validators';
 
 const STITCH_DHOL_PHOTO =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDYguzE_lt-isdX2R5wvMAf2fxQ24f31kWXNo4SKCDbNyTH-aHiKn7j8OqWRmndXmkja_RS9lm_K5_-tZee7Pr_KUAe0D8LBDnUN6_1dMmoO7eVU7NgWX1Rhe7c8llYjJUDtrGEO9ph10CFYMt_md4K4fEjMTCC38sZrp3Ns-Z2PYHUulPOeKbH70qgQil71TOOnHPW1xQg0NuLD0PkVzRVPKvUGP6Pani3VP1x-w0vAy9j7yD3Udgmgw';
@@ -38,15 +39,16 @@ export function OrganiserDholTasha() {
   const [amount, setAmount] = useState('');
   const [servicedBy, setServicedBy] = useState('');
   const [notes, setNotes] = useState('');
+  const [serviceError, setServiceError] = useState('');
 
   // Delete Confirmation State
   const [deletingId, setDeletingId] = useState(null);
 
   const totalUnits =
-    (dholInventory.dhol || 24) +
-    (dholInventory.tasha || 12) +
-    (dholInventory.dhwaja || 8) +
-    (dholInventory.tol || 16);
+    (Number(dholInventory?.dhol) || 0) +
+    (Number(dholInventory?.tasha) || 0) +
+    (Number(dholInventory?.dhwaja) || 0) +
+    (Number(dholInventory?.tol) || 0);
 
   // Storage Aggregates
   const totalStoredDhols = (dholStorage || [])
@@ -90,40 +92,54 @@ export function OrganiserDholTasha() {
     e.preventDefault();
     setStorageError('');
 
-    if (!personName.trim()) {
-      setStorageError('कृपया व्यक्तीचे नाव लिहा (Please enter person name)');
+    const nameVal = validateName(personName, 2, 100);
+    if (!nameVal.isValid) {
+      setStorageError(nameVal.error);
       return;
     }
 
-    if (Number(dholCount) < 0 || Number(tashaCount) < 0) {
-      setStorageError('ढोल किंवा ताशा संख्या योग्य असावी (Counts must be >= 0)');
+    let cleanPhone = '';
+    if (phone.trim()) {
+      const phoneVal = validatePhone(phone);
+      if (!phoneVal.isValid) {
+        setStorageError(phoneVal.error);
+        return;
+      }
+      cleanPhone = phoneVal.cleanPhone;
+    }
+
+    const dNum = Math.max(0, parseInt(dholCount, 10) || 0);
+    const tNum = Math.max(0, parseInt(tashaCount, 10) || 0);
+
+    if (dNum > 100 || tNum > 100) {
+      setStorageError('संख्या मर्यादा १०० पेक्षा जास्त असू शकत नाही (Count cannot exceed 100)');
       return;
     }
 
-    if (Number(dholCount) === 0 && Number(tashaCount) === 0) {
+    if (dNum === 0 && tNum === 0) {
       setStorageError('किमान १ ढोल किंवा १ ताशा नोंदवा (At least 1 Dhol or Tasha required)');
       return;
     }
 
     if (editingStorageId) {
       updateDholStorage(editingStorageId, {
-        personName: personName.trim(),
-        phone: phone.trim(),
-        location: location.trim() || 'सोसायटी साठवणूक',
-        dholCount: Number(dholCount),
-        tashaCount: Number(tashaCount),
+        personName: nameVal.sanitized,
+        phone: cleanPhone,
+        location: sanitizeText(location) || 'सोसायटी साठवणूक',
+        dholCount: dNum,
+        tashaCount: tNum,
         status: storageStatus,
-        notes: storageNotes.trim()
+        notes: sanitizeText(storageNotes)
       });
     } else {
       addDholStorage({
-        personName: personName.trim(),
-        phone: phone.trim(),
-        location: location.trim() || 'सोसायटी साठवणूक',
-        dholCount: Number(dholCount),
-        tashaCount: Number(tashaCount),
+        personName: nameVal.sanitized,
+        phone: cleanPhone,
+        location: sanitizeText(location) || 'सोसायटी साठवणूक',
+        dholCount: dNum,
+        tashaCount: tNum,
         status: storageStatus,
-        notes: storageNotes.trim()
+        notes: sanitizeText(storageNotes)
       });
     }
 
@@ -140,13 +156,19 @@ export function OrganiserDholTasha() {
   // Handle Service Add
   const handleAddService = (e) => {
     e.preventDefault();
-    if (!amount || Number(amount) <= 0) return;
+    setServiceError('');
+
+    const amtVal = validateAmount(amount, 1, 500000);
+    if (!amtVal.isValid) {
+      setServiceError(amtVal.error);
+      return;
+    }
 
     addDholMaintenance({
-      instrumentType,
-      amount: Number(amount),
-      servicedBy: servicedBy.trim() || 'स्थानिक वादक केंद्र',
-      notes: notes.trim(),
+      instrumentType: sanitizeText(instrumentType) || 'Dhol Service',
+      amount: amtVal.value,
+      servicedBy: sanitizeText(servicedBy) || 'स्थानिक वादक केंद्र',
+      notes: sanitizeText(notes),
       date: new Date().toISOString()
     });
 
@@ -157,7 +179,7 @@ export function OrganiserDholTasha() {
   };
 
   return (
-    <div className="flex flex-col w-full px-4 pt-2 pb-24 max-w-xl mx-auto space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
+    <div className="flex flex-col w-full px-4 pt-2 pb-24 max-w-xl mx-auto space-y-6 sm:space-y-7 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
       
       {/* Hero Banner Card */}
       <div className="relative w-full rounded-2xl overflow-hidden shadow-xs bg-[#FFF1EB] border border-[#F0DFD5]">
@@ -258,7 +280,7 @@ export function OrganiserDholTasha() {
             <div className="grid grid-cols-3 gap-2 pt-1">
               <div className="bg-white rounded-2xl p-3 border border-[#F0DFD5] text-center shadow-xs">
                 <span className="text-lg sm:text-xl font-black text-[#7A1C16] block">
-                  {totalStoredDhols} / {dholInventory.dhol || 24}
+                  {totalStoredDhols} / {dholInventory?.dhol ?? 0}
                 </span>
                 <span className="text-[11px] font-bold text-[#57423E]">Dhols in Storage</span>
                 <span className="text-[10px] text-[#A23F1A] block font-medium mt-0.5">साठवणुकीतील ढोल</span>
@@ -266,7 +288,7 @@ export function OrganiserDholTasha() {
 
               <div className="bg-white rounded-2xl p-3 border border-[#F0DFD5] text-center shadow-xs">
                 <span className="text-lg sm:text-xl font-black text-[#E65A15] block">
-                  {totalStoredTashas} / {dholInventory.tasha || 12}
+                  {totalStoredTashas} / {dholInventory?.tasha ?? 0}
                 </span>
                 <span className="text-[11px] font-bold text-[#57423E]">Tashas in Storage</span>
                 <span className="text-[10px] text-[#A23F1A] block font-medium mt-0.5">साठवणुकीतील ताशा</span>
@@ -428,14 +450,14 @@ export function OrganiserDholTasha() {
                     onClick={() => setIsAddingStorage(false)}
                     className="flex-1 py-2.5 bg-[#FAF4ED] text-[#57423E] font-bold text-xs rounded-xl hover:bg-[#F0DFD5] transition-colors cursor-pointer"
                   >
-                    रद्द करा (Cancel)
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     className="flex-1 py-2.5 bg-[#7A1C16] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#63140F] active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-[16px]">save</span>
-                    <span>{editingStorageId ? 'अपडेट करा (Update)' : 'जतन करा (Save)'}</span>
+                    <span>{editingStorageId ? 'Update Record' : 'Save Record'}</span>
                   </button>
                 </div>
               </form>
@@ -564,14 +586,14 @@ export function OrganiserDholTasha() {
                             onClick={() => setDeletingId(null)}
                             className="px-2 py-1 bg-white text-xs font-semibold rounded-lg border border-red-200 text-gray-700"
                           >
-                            नाही
+                            Cancel
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteStorage(item.id)}
                             className="px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded-lg shadow-xs hover:bg-red-700"
                           >
-                            होय, काढा
+                            Delete
                           </button>
                         </div>
                       </div>
@@ -600,7 +622,7 @@ export function OrganiserDholTasha() {
                 <div className="w-9 h-9 rounded-xl bg-[#FFEAE0] flex items-center justify-center text-[#6B0E03]">
                   <span className="material-symbols-outlined text-[20px]">album</span>
                 </div>
-                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory.dhol || 24}</span>
+                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory?.dhol ?? 0}</span>
               </div>
               <div>
                 <h3 className="text-sm text-[#241913] font-bold">Dhol (ढोल)</h3>
@@ -617,7 +639,7 @@ export function OrganiserDholTasha() {
                 <div className="w-9 h-9 rounded-xl bg-[#FFEAE0] flex items-center justify-center text-[#6B0E03]">
                   <span className="material-symbols-outlined text-[20px]">radio_button_checked</span>
                 </div>
-                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory.tasha || 12}</span>
+                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory?.tasha ?? 0}</span>
               </div>
               <div>
                 <h3 className="text-sm text-[#241913] font-bold">Tasha (ताशा)</h3>
@@ -634,7 +656,7 @@ export function OrganiserDholTasha() {
                 <div className="w-9 h-9 rounded-xl bg-[#FFEAE0] flex items-center justify-center text-[#6B0E03]">
                   <span className="material-symbols-outlined text-[20px]">flag</span>
                 </div>
-                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory.dhwaja || 8}</span>
+                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory?.dhwaja ?? 0}</span>
               </div>
               <div>
                 <h3 className="text-sm text-[#241913] font-bold">Dhwaja (भगवे ध्वज)</h3>
@@ -648,11 +670,11 @@ export function OrganiserDholTasha() {
                 <div className="w-9 h-9 rounded-xl bg-[#FFEAE0] flex items-center justify-center text-[#6B0E03]">
                   <span className="material-symbols-outlined text-[20px]">notifications</span>
                 </div>
-                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory.tol || 16}</span>
+                <span className="text-2xl font-black text-[#6B0E03]">{dholInventory?.tol ?? 0}</span>
               </div>
               <div>
                 <h3 className="text-sm text-[#241913] font-bold">Tol (टोल / झांज)</h3>
-                <span className="text-[11px] text-[#6B5E57] block mt-1">16 Pairs Ready</span>
+                <span className="text-[11px] text-[#6B5E57] block mt-1">{dholInventory?.tol ? `${dholInventory.tol} Pairs Ready` : 'Ready'}</span>
               </div>
             </div>
           </div>
@@ -701,7 +723,7 @@ export function OrganiserDholTasha() {
             type="button"
           >
             <span className="material-symbols-outlined text-[20px]">add_circle</span>
-            <span>+ Add Maintenance Cost / दुरुस्ती खर्च जोडा</span>
+            <span>Add Maintenance Cost</span>
           </button>
 
           {/* Inline Form */}
@@ -718,6 +740,12 @@ export function OrganiserDholTasha() {
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
+
+              {serviceError && (
+                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold">
+                  {serviceError}
+                </div>
+              )}
 
               <form onSubmit={handleAddService} className="space-y-3">
                 <div>
@@ -774,7 +802,7 @@ export function OrganiserDholTasha() {
                   type="submit"
                   className="w-full py-2.5 bg-[#8B2616] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#731E11] active:scale-98 transition-all cursor-pointer"
                 >
-                  जतन करा (Save Record)
+                  Save Record
                 </button>
               </form>
             </div>

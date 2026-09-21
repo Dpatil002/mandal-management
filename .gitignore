@@ -5,10 +5,16 @@ node_modules/
 dist/
 dev-dist/
 
-# Local Environment Variables
+# Local Environment Variables & Secrets
 .env
 .env.local
 .env.*.local
+*.env
+*serviceAccount*.json
+*service-account*.json
+*credentials*.json
+*.pem
+*.key
 
 # Logs
 npm-debug.log*

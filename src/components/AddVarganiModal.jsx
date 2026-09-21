@@ -3,10 +3,11 @@ import confetti from 'canvas-confetti';
 import { X, Check, IndianRupee, User, Phone, MapPin, CreditCard, Sparkles, Image as ImageIcon, QrCode } from 'lucide-react';
 import { useMandalData } from '../context/MandalDataContext';
 import { useAuth } from '../context/AuthContext';
+import { validateName, validatePhone, validateAmount, validateUploadedFile, sanitizeText } from '../utils/validators';
 
 export function AddVarganiModal({ isOpen, onClose, onOpenQr, initialData }) {
   const { addVargani, updateVargani } = useMandalData();
-  const { currentOrganizer } = useAuth();
+  const { currentOrganizer, organizers } = useAuth();
 
   const [formData, setFormData] = useState(() => initialData || {
     donorName: '',
@@ -24,11 +25,17 @@ export function AddVarganiModal({ isOpen, onClose, onOpenQr, initialData }) {
 
   if (!isOpen) return null;
 
-  const quickAmounts = [251, 501, 1001, 2100, 5001, 11000];
+  const quickAmounts = [501, 1001, 2501];
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      const fileVal = validateUploadedFile(file, ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+      if (!fileVal.isValid) {
+        setError(fileVal.error);
+        return;
+      }
+      setError('');
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, receiptUrl: reader.result }));
@@ -41,20 +48,37 @@ export function AddVarganiModal({ isOpen, onClose, onOpenQr, initialData }) {
     e.preventDefault();
     setError('');
 
-    if (!formData.donorName.trim()) {
-      setError('Please enter donor name');
+    const nameVal = validateName(formData.donorName, 2, 100);
+    if (!nameVal.isValid) {
+      setError(nameVal.error);
       return;
     }
 
-    if (!formData.amount || Number(formData.amount) <= 0) {
-      setError('Please enter a valid donation amount');
+    const amtVal = validateAmount(formData.amount, 1, 1000000);
+    if (!amtVal.isValid) {
+      setError(amtVal.error);
       return;
+    }
+
+    let cleanPhone = '';
+    if (formData.phone && formData.phone.trim()) {
+      const phoneVal = validatePhone(formData.phone);
+      if (!phoneVal.isValid) {
+        setError(phoneVal.error);
+        return;
+      }
+      cleanPhone = phoneVal.cleanPhone;
     }
 
     setLoading(true);
     try {
       const payload = {
         ...formData,
+        donorName: nameVal.sanitized,
+        amount: amtVal.value,
+        phone: cleanPhone,
+        address: sanitizeText(formData.address),
+        notes: sanitizeText(formData.notes),
         collectedBy: currentOrganizer ? currentOrganizer.name : 'Organiser'
       };
 
@@ -207,19 +231,26 @@ export function AddVarganiModal({ isOpen, onClose, onOpenQr, initialData }) {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Wing / Flat / Address (पत्ता)
+                Paid To / वर्गणी दिली *
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="e.g. B-204 / Shop 3"
-                  className="input-field pl-10"
-                />
+                <select
+                  value={formData.collectedBy || (organizers[0]?.name || 'Digambar Patil')}
+                  onChange={(e) => setFormData({ ...formData, collectedBy: e.target.value, paidTo: e.target.value })}
+                  className="input-field"
+                >
+                  {organizers && organizers.length > 0 ? (
+                    organizers.map((org) => (
+                      <option key={org.id || org.name} value={org.name}>
+                        {org.name} {org.phone ? `(${org.phone})` : ''}
+                      </option>
+                    ))
+                  ) : (
+                    <option value={currentOrganizer?.name || 'Digambar Patil'}>
+                      {currentOrganizer?.name || 'Digambar Patil'}
+                    </option>
+                  )}
+                </select>
               </div>
             </div>
           </div>

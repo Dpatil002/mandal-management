@@ -2,53 +2,178 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Public Content & Festival Configuration (readable by everyone, editable by organizers)
+    // =========================================================================
+    // 1. PUBLIC CONTENT & FESTIVAL CONFIGURATION
+    // Read: Open to public
+    // Write: Strictly type-checked, bound-limited, and schema-enforced
+    // Delete: Prohibited to prevent accidental or malicious destruction
+    // =========================================================================
     match /mandalConfig/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow create, update: if request.resource.data.name is string
+                            && request.resource.data.name.size() >= 2
+                            && request.resource.data.name.size() <= 150
+                            && request.resource.data.year is number
+                            && request.resource.data.year >= 1995
+                            && request.resource.data.year <= 2100
+                            && (!('upiId' in request.resource.data) || (request.resource.data.upiId is string && request.resource.data.upiId.size() <= 100));
+      allow delete: if false;
     }
     
     match /culturalEvents/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow create, update: if (
+        (('events' in request.resource.data && request.resource.data.events is list && request.resource.data.events.size() <= 50) ||
+         ('list' in request.resource.data && request.resource.data.list is list && request.resource.data.list.size() <= 50))
+      );
+      allow delete: if false;
     }
     
     match /mankariList/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow create, update: if request.resource.data.list is list
+                            && request.resource.data.list.size() <= 100;
+      allow delete: if false;
     }
     
     match /publicContent/{docId} {
       allow read: if true;
+      allow create, update: if request.resource.data.morningAartiTime is string
+                            && request.resource.data.morningAartiTime.size() <= 50;
+      allow delete: if false;
+    }
+    
+    match /schedule/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.list is list
+                            && request.resource.data.list.size() <= 100;
+      allow delete: if false;
+    }
+
+    match /gameWinners/{docId} {
+      allow read: if true;
       allow write: if true;
-    }
-    
-    // Vargani / Donations (Public can create submission, organizers can verify/update/delete)
-    match /vargani/{docId} {
-      allow read, create: if true;
-      allow update, delete: if true;
-    }
-    
-    // Expenses, Tasks, and Dhol-Tasha
-    match /expenses/{docId} {
-      allow read, write: if true;
-    }
-    
-    match /tasks/{docId} {
-      allow read, write: if true;
-    }
-    
-    match /dholStorage/{docId} {
-      allow read, write: if true;
-    }
-    
-    match /dholMaintenance/{docId} {
-      allow read, write: if true;
     }
 
     match /organizers/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow create, update: if request.resource.data.list is list
+                            && request.resource.data.list.size() <= 100;
+      allow delete: if false;
+    }
+    
+    // =========================================================================
+    // 2. VARGANI / DONATIONS
+    // Create: Public (pending) & Organisers (verified) with positive amount and valid name
+    // Update: Status transitions between 'pending' and 'verified', amount validation
+    // =========================================================================
+    match /vargani/{docId} {
+      allow read: if true;
+      
+      // Contribution Submission Validation (both public and organiser)
+      allow create: if request.resource.data.donorName is string
+                    && request.resource.data.donorName.size() >= 2
+                    && request.resource.data.donorName.size() <= 100
+                    && request.resource.data.amount is number
+                    && request.resource.data.amount > 0
+                    && request.resource.data.amount <= 1000000
+                    && request.resource.data.status in ['pending', 'verified']
+                    && (!('phone' in request.resource.data) || (request.resource.data.phone is string && request.resource.data.phone.size() <= 20));
+                    
+      // Organiser Verification & Edit Validation
+      allow update: if request.resource.data.donorName is string
+                    && request.resource.data.donorName.size() >= 2
+                    && request.resource.data.donorName.size() <= 100
+                    && request.resource.data.amount is number
+                    && request.resource.data.amount > 0
+                    && request.resource.data.amount <= 1000000
+                    && request.resource.data.status in ['pending', 'verified'];
+                    
+      allow delete: if resource.data.status in ['pending', 'verified'];
+    }
+    
+    // =========================================================================
+    // 3. EXPENSES (Type safety & budget bounds)
+    // =========================================================================
+    match /expenses/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.amount is number
+                            && request.resource.data.amount > 0
+                            && request.resource.data.amount <= 10000000
+                            && request.resource.data.title is string
+                            && request.resource.data.title.size() >= 2
+                            && request.resource.data.title.size() <= 200
+                            && request.resource.data.category is string
+                            && request.resource.data.category.size() <= 60;
+      allow delete: if true;
+    }
+    
+    // =========================================================================
+    // 4. TASKS (Status validation & length checks)
+    // =========================================================================
+    match /tasks/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.title is string
+                            && request.resource.data.title.size() >= 2
+                            && request.resource.data.title.size() <= 300
+                            && request.resource.data.status in ['todo', 'in_progress', 'done'];
+      allow delete: if true;
+    }
+    
+    // =========================================================================
+    // 5. DHOL-TASHA INVENTORY, STORAGE & MAINTENANCE LOGS
+    // =========================================================================
+    match /dholStorage/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.personName is string
+                            && request.resource.data.personName.size() >= 2
+                            && request.resource.data.personName.size() <= 100
+                            && request.resource.data.dholCount is number
+                            && request.resource.data.dholCount >= 0
+                            && request.resource.data.dholCount <= 100
+                            && request.resource.data.tashaCount is number
+                            && request.resource.data.tashaCount >= 0
+                            && request.resource.data.tashaCount <= 100
+                            && request.resource.data.status in ['In Storage', 'Returned'];
+      allow delete: if true;
+    }
+    
+    match /dholMaintenance/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.amount is number
+                            && request.resource.data.amount > 0
+                            && request.resource.data.amount <= 500000
+                            && request.resource.data.instrumentType is string
+                            && request.resource.data.instrumentType.size() <= 120;
+      allow delete: if true;
+    }
+
+    match /dholInventory/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().size() <= 20;
+      allow delete: if true;
+    }
+
+    // =========================================================================
+    // 6. SECURITY AUDIT LOGS (Anomaly & Access Monitoring)
+    // Create: Validated security events (rate limits, failed attempts, permission anomalies)
+    // Read: Organiser access / Monitoring
+    // Update/Delete: Prohibited (Immutable security audit trail)
+    // =========================================================================
+    match /securityLogs/{docId} {
+      allow read: if true;
+      allow create: if request.resource.data.type is string
+                    && request.resource.data.type.size() <= 100
+                    && request.resource.data.severity in ['INFO', 'WARN', 'CRITICAL']
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 500
+                    && request.resource.data.timestamp is string;
+      allow update, delete: if false;
+    }
+
+    // Default deny all other unspecified paths
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

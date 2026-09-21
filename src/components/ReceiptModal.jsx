@@ -122,17 +122,19 @@ export function ReceiptModal({ isOpen, onClose, varganiItem }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-5 grid grid-cols-2 gap-2.5">
-          <button
-            onClick={handleWhatsAppShare}
-            className="btn-saffron py-2.5 px-3 text-xs bg-gradient-to-r from-emerald-600 to-green-600 shadow-emerald-900/30"
-          >
-            <MessageCircle className="w-4 h-4" /> Share on WhatsApp
-          </button>
+        <div className={`mt-5 ${varganiItem.phone && varganiItem.phone.trim() ? 'grid grid-cols-2 gap-2.5' : 'flex justify-center'}`}>
+          {varganiItem.phone && varganiItem.phone.trim() && (
+            <button
+              onClick={handleWhatsAppShare}
+              className="btn-saffron py-2.5 px-3 text-xs bg-gradient-to-r from-emerald-600 to-green-600 shadow-emerald-900/30"
+            >
+              <MessageCircle className="w-4 h-4" /> Share on WhatsApp
+            </button>
+          )}
           
           <button
             onClick={handleDownloadPDF}
-            className="btn-secondary py-2.5 px-3 text-xs"
+            className={`btn-secondary py-2.5 px-3 text-xs ${!varganiItem.phone || !varganiItem.phone.trim() ? 'w-full' : ''}`}
           >
             <Download className="w-4 h-4" /> Download PDF Slip
           </button>

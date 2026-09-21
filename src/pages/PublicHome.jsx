@@ -1,8 +1,58 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 
 export function PublicHome({ onNavigateToPay, onNavigateToSchedule, onNavigateToCommittee }) {
-  const { config, publicContent } = useMandalData();
+  const { config, publicContent, gameWinners } = useMandalData();
+
+  // Filter valid public game entries (excluding hidden results)
+  const validGameWinners = useMemo(() => {
+    return (gameWinners || []).filter((game) => {
+      if (!game || game.isHidden === true) return false;
+      const hasDirect = !!(game.first?.trim() || game.second?.trim() || game.third?.trim());
+      const hasGirls = !!(game.girls?.first?.trim() || game.girls?.second?.trim() || game.girls?.third?.trim());
+      const hasBoys = !!(game.boys?.first?.trim() || game.boys?.second?.trim() || game.boys?.third?.trim());
+      return hasDirect || hasGirls || hasBoys || !!game.gameName;
+    });
+  }, [gameWinners]);
+
+  // Group winners by Game Name
+  const groupedGameWinners = useMemo(() => {
+    const groups = {};
+    validGameWinners.forEach((item) => {
+      const gName = item.gameName || 'Other Games';
+      if (!groups[gName]) {
+        groups[gName] = [];
+      }
+      const hasDirect = !!(item.first?.trim() || item.second?.trim() || item.third?.trim());
+      if (hasDirect || (!item.girls && !item.boys)) {
+        groups[gName].push(item);
+      } else {
+        if (item.girls && (item.girls.first || item.girls.second || item.girls.third)) {
+          groups[gName].push({
+            id: `${item.id}-girls`,
+            category: item.category ? `${item.category} (Girls)` : 'Girls (मुली)',
+            first: item.girls.first || '',
+            second: item.girls.second || '',
+            third: item.girls.third || ''
+          });
+        }
+        if (item.boys && (item.boys.first || item.boys.second || item.boys.third)) {
+          groups[gName].push({
+            id: `${item.id}-boys`,
+            category: item.category ? `${item.category} (Boys)` : 'Boys (मुले)',
+            first: item.boys.first || '',
+            second: item.boys.second || '',
+            third: item.boys.third || ''
+          });
+        }
+      }
+    });
+
+    return Object.entries(groups).map(([gameName, items]) => ({
+      gameName,
+      items
+    }));
+  }, [validGameWinners]);
 
   return (
     <div className="home-card-stack pb-20 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
@@ -175,6 +225,100 @@ export function PublicHome({ onNavigateToPay, onNavigateToSchedule, onNavigateTo
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
         </button>
       </div>
+
+      {/* =========================================================================
+          FEATURE 4: GAME WINNERS (LIVE PUBLIC DISPLAY)
+          Only displayed when at least one game has recorded winners
+      ========================================================================= */}
+      {validGameWinners.length > 0 && (
+        <div className="rounded-3xl p-5 bg-[#FFFDF9] border border-[#EAE0D2] shadow-xs flex flex-col gap-4">
+          <div className="flex items-center justify-between pb-1 border-b border-[#EAE0D2]/70">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-[#7A1C16] text-[#FAF6EE] flex items-center justify-center shrink-0 shadow-xs">
+                <span className="material-symbols-outlined text-[22px]">emoji_events</span>
+              </div>
+              <div>
+                <h3 className="text-base font-black text-[#7A1C16] tracking-tight">Game Winners (खेळ विजेते)</h3>
+                <span className="text-xs text-[#6B5E57]">स्पर्धा व खेळांचे अधिकृत निकाल</span>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded-full bg-[#FAF0E6] text-[#7A1C16] text-xs font-bold border border-[#EAE0D2]">
+              {validGameWinners.length} {validGameWinners.length === 1 ? 'Record' : 'Categories'}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-3.5">
+            {groupedGameWinners.map(({ gameName, items }) => (
+              <div
+                key={gameName}
+                className="rounded-2xl p-4 bg-[#FAF6EE] border border-[#EAE0D2] flex flex-col gap-3 shadow-2xs"
+              >
+                <div className="flex items-center justify-between border-b border-[#EAE0D2]/70 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#E65A15] text-[20px]">military_tech</span>
+                    <h4 className="text-sm font-black text-[#241913] tracking-tight">{gameName}</h4>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#8B2616] bg-[#FFF5EE] px-2 py-0.5 rounded-full border border-[#F0DFD5]">
+                    {items.length} {items.length === 1 ? 'Category' : 'Categories'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {items.map((item) => {
+                    const has1st = !!(item.first && item.first !== '—');
+                    const has2nd = !!(item.second && item.second !== '—');
+                    const has3rd = !!(item.third && item.third !== '—');
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white/95 rounded-xl p-3 border border-[#EAE0D2] flex flex-col gap-2 shadow-2xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#8B2616] flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#E65A15]"></span>
+                            <span>{item.category || 'General'}</span>
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5 text-xs pt-1 border-t border-[#F0DFD5]/50">
+                          {has1st && (
+                            <div className="flex items-center justify-between gap-2 bg-[#FFF8EB] px-2 py-1 rounded-lg border border-[#F7E1B5]">
+                              <span className="font-bold text-[#946200] text-[10.5px] shrink-0 flex items-center gap-1">
+                                <span>🥇</span> 1st Place
+                              </span>
+                              <span className="font-bold text-[#241913] truncate text-right">{item.first}</span>
+                            </div>
+                          )}
+                          {has2nd && (
+                            <div className="flex items-center justify-between gap-2 bg-[#F6F7F9] px-2 py-1 rounded-lg border border-[#E2E5EB]">
+                              <span className="font-bold text-[#4B5563] text-[10.5px] shrink-0 flex items-center gap-1">
+                                <span>🥈</span> 2nd Place
+                              </span>
+                              <span className="font-semibold text-[#241913] truncate text-right">{item.second}</span>
+                            </div>
+                          )}
+                          {has3rd && (
+                            <div className="flex items-center justify-between gap-2 bg-[#FAF3EB] px-2 py-1 rounded-lg border border-[#ECD9C6]">
+                              <span className="font-bold text-[#A23F1A] text-[10.5px] shrink-0 flex items-center gap-1">
+                                <span>🥉</span> 3rd Place
+                              </span>
+                              <span className="font-semibold text-[#241913] truncate text-right">{item.third}</span>
+                            </div>
+                          )}
+                          {!has1st && !has2nd && !has3rd && (
+                            <span className="text-[11px] text-[#8b716c] italic">निकाल लवकरच घोषित केला जाईल (Awaiting results)</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

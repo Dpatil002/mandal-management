@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../utils/formatters';
+import { getLocalSecurityAuditLogs } from '../utils/securityLogger';
 
 export function OrganiserDashboard({
   onOpenAddVargani,
@@ -13,17 +14,24 @@ export function OrganiserDashboard({
   onNavigateToVargani,
   onNavigateToExpenses,
   onNavigateToTasks,
-  onNavigateToDhol
+  onNavigateToDhol,
+  onNavigateToWinners
 }) {
-  const { stats, vargani, tasks, toggleTask } = useMandalData();
+  const { stats, vargani, tasks, toggleTask, gameWinners } = useMandalData();
   const { currentOrganizer, logout, organizers } = useAuth();
+  const [securityLogs, setSecurityLogs] = useState([]);
+  const [showAllLogs, setShowAllLogs] = useState(false);
+
+  useEffect(() => {
+    setSecurityLogs(getLocalSecurityAuditLogs());
+  }, []);
 
   const pendingVargani = vargani.filter((v) => v.status === 'pending');
   const pendingVarganiSum = pendingVargani.reduce((sum, v) => sum + (Number(v.amount) || 0), 0);
   const pendingTasksCount = tasks.filter((t) => t.status !== 'done').length;
 
   return (
-    <div className="flex flex-col w-full px-4 py-4 max-w-xl mx-auto space-y-4 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
+    <div className="flex flex-col w-full px-4 py-4 max-w-xl mx-auto space-y-6 sm:space-y-7 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
       {/* Portal Context & Header Bar */}
       <div className="flex flex-col gap-2 bg-white/95 border border-[#F0DFD5] p-4 rounded-2xl shadow-xs">
         <div className="flex items-center justify-between">
@@ -37,18 +45,18 @@ export function OrganiserDashboard({
             className="inline-flex items-center gap-1 text-xs text-[#6B5E57] hover:text-[#8B2616] transition-colors py-1 px-2.5 rounded-full hover:bg-[#F0DFD5]/40 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">logout</span>
-            <span>बाहेर पडा (Log out)</span>
+            <span>Log out</span>
           </button>
         </div>
 
         <div className="mt-1 flex items-center justify-between gap-2 bg-[#FFF1EB]/50 rounded-xl p-2.5">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-full bg-[#8B2616] text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
-              {currentOrganizer?.name?.slice(0, 2).toUpperCase() || 'RS'}
+              {currentOrganizer?.name?.slice(0, 2).toUpperCase() || 'IV'}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-[#241913] truncate">{currentOrganizer?.name || 'Ramesh Shinde'}</span>
-              <span className="text-[11px] text-[#6B5E57]">मो. {currentOrganizer?.phone || '98220-12345'}</span>
+              <span className="text-xs font-bold text-[#241913] truncate">{currentOrganizer?.name || 'कार्यकर्ता'}</span>
+              <span className="text-[11px] text-[#6B5E57]">{currentOrganizer?.phone ? `मो. ${currentOrganizer.phone}` : 'Organiser Portal'}</span>
             </div>
           </div>
           {onOpenOrganisers && (
@@ -64,67 +72,88 @@ export function OrganiserDashboard({
         </div>
       </div>
 
-      {/* Quick Management Actions Grid (Cultural Events, Public Schedule & Manage Organisers) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      {/* Quick Management Actions Grid (Cultural Events, Aarti & Mankari, Game Winners & Organisers) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {/* Cultural Events Day-Wise CTA */}
-        <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#FFF1EB] via-[#FFEAE0] to-[#FAF4ED] border border-[#8B2616]/20 shadow-xs">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex flex-col justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#FFF1EB] via-[#FFEAE0] to-[#FAF4ED] border border-[#8B2616]/20 shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-[#8B2616] text-white flex items-center justify-center shrink-0 shadow-xs">
               <span className="material-symbols-outlined text-[18px]">theater_comedy</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Cultural Events</h3>
-              <span className="text-[10.5px] text-[#8B2616] font-semibold truncate">Day 1 to 10 कार्यक्रम</span>
+              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Cultural</h3>
+              <span className="text-[10px] text-[#8B2616] font-semibold truncate">कार्यक्रम</span>
             </div>
           </div>
           <button
             onClick={() => onOpenEditPublic && onOpenEditPublic('cultural')}
             type="button"
-            className="rounded-xl py-1.5 px-2.5 font-bold text-xs bg-[#8B2616] text-white hover:bg-[#6b0e03] active:scale-95 transition-all inline-flex items-center gap-1 shadow-xs shrink-0 cursor-pointer"
+            className="w-full rounded-xl py-1 px-2 font-bold text-[11px] bg-[#8B2616] text-white hover:bg-[#6b0e03] active:scale-95 transition-all inline-flex items-center justify-center gap-1 shadow-xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">edit</span>
+            <span className="material-symbols-outlined text-[13px]">edit</span>
             <span>Edit</span>
           </button>
         </div>
 
         {/* Edit Public View / Aarti & Mankari CTA */}
-        <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-[#FFFDF9] border border-[#EAE0D2] shadow-xs">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex flex-col justify-between gap-2 p-3 rounded-2xl bg-[#FFFDF9] border border-[#EAE0D2] shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-[#FAF6EE] border border-[#EAE0D2] text-[#7A1C16] flex items-center justify-center shrink-0 shadow-2xs">
               <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Aarti &amp; Mankari</h3>
-              <span className="text-[10.5px] text-[#6B5E57] truncate">वेळापत्रक व मानकरी</span>
+              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Mankari</h3>
+              <span className="text-[10px] text-[#6B5E57] truncate">वेळापत्रक</span>
             </div>
           </div>
           <button
             onClick={() => onOpenEditPublic && onOpenEditPublic('mankari')}
             type="button"
-            className="rounded-xl py-1.5 px-2.5 font-bold text-xs bg-white border border-[#DECDB9] text-[#7A1C16] hover:bg-[#FAF6EE] active:scale-95 transition-all inline-flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer"
+            className="w-full rounded-xl py-1 px-2 font-bold text-[11px] bg-white border border-[#DECDB9] text-[#7A1C16] hover:bg-[#FAF6EE] active:scale-95 transition-all inline-flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">tune</span>
+            <span className="material-symbols-outlined text-[13px]">tune</span>
             <span>Set</span>
           </button>
         </div>
 
+        {/* Game Winners CTA */}
+        <div className="flex flex-col justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#FFFBF0] via-[#FFF6E5] to-[#FAF4ED] border border-[#D97706]/20 shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-[#D97706] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <span className="material-symbols-outlined text-[18px]">emoji_events</span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Winners</h3>
+              <span className="text-[10px] text-[#D97706] font-semibold truncate">खेळ विजेते</span>
+            </div>
+          </div>
+          <button
+            onClick={onNavigateToWinners}
+            type="button"
+            className="w-full rounded-xl py-1 px-2 font-bold text-[11px] bg-[#D97706] text-white hover:bg-[#B45309] active:scale-95 transition-all inline-flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[13px]">military_tech</span>
+            <span>Winners ({gameWinners.length})</span>
+          </button>
+        </div>
+
         {/* Manage Organisers CTA */}
-        <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#F5FBFD] via-[#EAF5F8] to-[#FAF6EE] border border-[#1C5D6C]/20 shadow-xs">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex flex-col justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#F5FBFD] via-[#EAF5F8] to-[#FAF6EE] border border-[#1C5D6C]/20 shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-[#1C5D6C] text-white flex items-center justify-center shrink-0 shadow-xs">
               <span className="material-symbols-outlined text-[18px]">groups</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Organisers List</h3>
-              <span className="text-[10.5px] text-[#6B5E57] truncate">कार्यकर्ते व्यवस्थापन</span>
+              <h3 className="text-xs font-bold text-[#241913] leading-tight truncate">Team</h3>
+              <span className="text-[10px] text-[#6B5E57] truncate">कार्यकर्ते</span>
             </div>
           </div>
           <button
             onClick={onOpenOrganisers}
             type="button"
-            className="rounded-xl py-1.5 px-2.5 font-bold text-xs bg-[#1C5D6C] text-white hover:bg-[#154652] active:scale-95 transition-all inline-flex items-center gap-1 shadow-xs shrink-0 cursor-pointer"
+            className="w-full rounded-xl py-1 px-2 font-bold text-[11px] bg-[#1C5D6C] text-white hover:bg-[#154652] active:scale-95 transition-all inline-flex items-center justify-center gap-1 shadow-xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">person_add</span>
+            <span className="material-symbols-outlined text-[13px]">person_add</span>
             <span>Team</span>
           </button>
         </div>
@@ -316,6 +345,24 @@ export function OrganiserDashboard({
               <span className="text-[11px] text-[#6B5E57] font-medium mt-0.5">पथक नियोजन</span>
             </div>
           </button>
+
+          {/* Game Winners */}
+          <button
+            onClick={onNavigateToWinners}
+            className="group flex flex-col justify-between text-left rounded-2xl p-4 bg-white border border-[#F0DFD5] shadow-xs min-h-[100px] active:scale-[0.98] hover:bg-[#FFF5EE] transition-all cursor-pointer col-span-2 sm:col-span-1"
+            type="button"
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="w-9 h-9 rounded-full bg-[#D97706]/10 flex items-center justify-center text-[#D97706]">
+                <span className="material-symbols-outlined text-[20px]">emoji_events</span>
+              </div>
+              <span className="material-symbols-outlined text-[#6B5E57] group-hover:translate-x-0.5 transition-transform text-[18px]">arrow_forward</span>
+            </div>
+            <div className="flex flex-col mt-2">
+              <span className="text-sm font-bold text-[#241913] leading-tight">Game Winners</span>
+              <span className="text-[11px] text-[#6B5E57] font-medium mt-0.5">खेळ व स्पर्धा निकाल</span>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -401,6 +448,14 @@ export function OrganiserDashboard({
               </div>
             );
           })}
+
+          {pendingVargani.length === 0 && tasks.length === 0 && (
+            <div className="p-4 text-center bg-[#FAF6EE] rounded-xl border border-[#EAE0D2] text-xs text-[#6B5E57] flex flex-col items-center justify-center gap-1">
+              <span className="material-symbols-outlined text-[24px] text-[#2E7D32]">task_alt</span>
+              <span className="font-semibold text-[#241913]">सर्व कामे पूर्ण आहेत (No pending tasks)</span>
+              <span className="text-[11px]">नवीन काम जोडण्यासाठी "Tasks" टॅब वापरा</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -420,7 +475,7 @@ export function OrganiserDashboard({
             className="text-xs font-bold text-[#8B2616] bg-[#FFF1EB] hover:bg-[#FFE5DB] px-3 py-1.5 rounded-xl border border-[#F0DFD5] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
           >
             <span className="material-symbols-outlined text-[15px]">edit</span>
-            <span>Edit यादी</span>
+            <span>Edit</span>
           </button>
         </div>
 
@@ -474,6 +529,66 @@ export function OrganiserDashboard({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Security & Health Activity Monitoring */}
+      <div className="flex flex-col gap-3 rounded-2xl p-4 bg-white/95 border border-[#F0DFD5] shadow-xs">
+        <div className="flex items-center justify-between pb-2 border-b border-[#F0DFD5]/60">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[18px]">verified_user</span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-[#241913] leading-tight">Security &amp; Activity Monitor</h3>
+              <p className="text-[11px] text-[#6B5E57]">सुरक्षा व एक्सेस ऑडिट लॉग</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10.5px] font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            HTTPS Enforced
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {securityLogs && securityLogs.length > 0 ? (
+            (showAllLogs ? securityLogs : securityLogs.slice(0, 3)).map((log, idx) => (
+              <div
+                key={idx}
+                className="flex items-start justify-between gap-2 p-2.5 rounded-xl bg-[#FFFDF9] border border-[#F0DFD5] text-xs"
+              >
+                <div className="flex items-start gap-2 min-w-0">
+                  <span className={`material-symbols-outlined text-[16px] shrink-0 mt-0.5 ${
+                    log.severity === 'CRITICAL' ? 'text-red-600' : log.severity === 'WARN' ? 'text-amber-600' : 'text-blue-600'
+                  }`}>
+                    {log.severity === 'CRITICAL' ? 'gpp_bad' : log.severity === 'WARN' ? 'warning' : 'info'}
+                  </span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-[#241913] truncate">{log.type.replace(/_/g, ' ')}</span>
+                    <span className="text-[11px] text-[#6B5E57] line-clamp-1">{log.message}</span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-[#8B716C] shrink-0">
+                  {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="p-3 bg-[#FAF6EE] rounded-xl border border-[#EAE0D2] text-center text-xs text-[#6B5E57] flex items-center justify-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+              <span>No suspicious activities recorded. System health is normal.</span>
+            </div>
+          )}
+
+          {securityLogs && securityLogs.length > 3 && (
+            <button
+              type="button"
+              onClick={() => setShowAllLogs(!showAllLogs)}
+              className="text-xs font-semibold text-[#8B2616] hover:underline pt-1 text-center cursor-pointer"
+            >
+              {showAllLogs ? 'Show less' : `View all ${securityLogs.length} activity events`}
+            </button>
+          )}
         </div>
       </div>
 

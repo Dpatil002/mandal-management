@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { validateName, validatePhone } from '../utils/validators';
 
 export function OrganisersDrawer({ isOpen, onClose }) {
   const { organizers, addOrganizer, updateOrganizer, removeOrganizer, currentOrganizer } = useAuth();
@@ -25,16 +26,19 @@ export function OrganisersDrawer({ isOpen, onClose }) {
     e.preventDefault();
     setAddError('');
 
-    if (!newName.trim()) {
-      setAddError('Please enter organiser name / कृपया नाव टाका.');
-      return;
-    }
-    if (!newPhone.trim() || newPhone.replace(/\D/g, '').length < 10) {
-      setAddError('Please enter a valid 10-digit phone number / योग्य १०-अंकी मोबाईल नंबर टाका.');
+    const nameVal = validateName(newName, 2, 80);
+    if (!nameVal.isValid) {
+      setAddError(nameVal.error);
       return;
     }
 
-    addOrganizer({ name: newName.trim(), phone: newPhone.trim() });
+    const phoneVal = validatePhone(newPhone);
+    if (!phoneVal.isValid) {
+      setAddError(phoneVal.error);
+      return;
+    }
+
+    addOrganizer({ name: nameVal.sanitized, phone: phoneVal.cleanPhone });
     setNewName('');
     setNewPhone('');
     setIsAdding(false);
@@ -51,16 +55,19 @@ export function OrganisersDrawer({ isOpen, onClose }) {
     e.preventDefault();
     setEditError('');
 
-    if (!editName.trim()) {
-      setEditError('Please enter name / कृपया नाव टाका.');
-      return;
-    }
-    if (!editPhone.trim() || editPhone.replace(/\D/g, '').length < 10) {
-      setEditError('Please enter a valid 10-digit phone number / योग्य १०-अंकी मोबाईल नंबर टाका.');
+    const nameVal = validateName(editName, 2, 80);
+    if (!nameVal.isValid) {
+      setEditError(nameVal.error);
       return;
     }
 
-    updateOrganizer(editingId, { name: editName.trim(), phone: editPhone.trim() });
+    const phoneVal = validatePhone(editPhone);
+    if (!phoneVal.isValid) {
+      setEditError(phoneVal.error);
+      return;
+    }
+
+    updateOrganizer(editingId, { name: nameVal.sanitized, phone: phoneVal.cleanPhone });
     setEditingId(null);
   };
 
@@ -107,7 +114,7 @@ export function OrganisersDrawer({ isOpen, onClose }) {
             className="w-full py-3 px-4 rounded-2xl bg-[#7A1C16] text-[#FAF6EE] font-bold text-xs shadow-sm hover:bg-[#63140F] active:scale-[0.99] flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
-            <span>+ Add Organiser • नवीन कार्यकर्ता</span>
+            <span>Add Organiser</span>
           </button>
         ) : (
           <div className="rounded-2xl p-4 bg-[#FFFDF9] border border-[#EAE0D2] shadow-xs flex flex-col gap-3 animate-fade-in">
@@ -163,7 +170,7 @@ export function OrganisersDrawer({ isOpen, onClose }) {
                   type="submit"
                   className="flex-1 py-2.5 rounded-xl bg-[#7A1C16] text-[#FAF6EE] font-bold text-xs shadow-xs hover:bg-[#63140F] transition-all cursor-pointer"
                 >
-                  Save Organiser • नोंदवा
+                  Save Organiser
                 </button>
                 <button
                   type="button"

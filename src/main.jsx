@@ -15,8 +15,33 @@ const updateSW = registerSW({
   onOfflineReady() {
     console.log('[PWA] App is ready for offline festival use. All schedules & assets cached.');
   },
+  onRegisteredSW(swScriptUrl, registration) {
+    if (registration) {
+      // Check for updates on tab focus/visibility
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update().catch(() => {});
+        }
+      });
+      // Check for updates every 30 seconds
+      setInterval(() => {
+        registration.update().catch(() => {});
+      }, 30 * 1000);
+    }
+  },
   immediate: true
 });
+
+// Reload page automatically when new service worker takes control
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

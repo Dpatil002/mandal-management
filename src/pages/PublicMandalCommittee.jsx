@@ -7,7 +7,7 @@ export function PublicMandalCommittee({ onOpenLogin }) {
   const { organizers } = useAuth();
 
   return (
-    <div className="flex flex-col w-full gap-4.5 pb-24 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif] max-w-md mx-auto">
+    <div className="flex flex-col w-full gap-6 sm:gap-7 pb-24 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif] max-w-md mx-auto">
       
       {/* =========================================================================
           MANDAL HERO CARD (LOGO, NAME, ESTB 1998, 28 YEARS)

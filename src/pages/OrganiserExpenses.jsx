@@ -1,19 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
+import { useAuth } from '../context/AuthContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport }) {
   const { expenses, deleteExpense, stats } = useMandalData();
+  const { organizers } = useAuth();
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
+
+  // Organiser-wise expense totals based on 'paidBy' / loggedBy (active organisers with total > 0 only)
+  const organiserExpenseTotals = useMemo(() => {
+    const map = {};
+
+    // Aggregate expenses per payer
+    (expenses || []).forEach((item) => {
+      const payer = (item.paidBy || item.loggedBy || item.lastEditedBy || '').trim();
+      if (payer && !['mandal', 'mandal fund', 'paid via mandal', 'cash', 'upi'].includes(payer.toLowerCase())) {
+        map[payer] = (map[payer] || 0) + (Number(item.amount) || 0);
+      }
+    });
+
+    return Object.entries(map)
+      .map(([name, total]) => ({ name, total }))
+      .filter(({ total }) => total > 0)
+      .sort((a, b) => b.total - a.total);
+  }, [expenses]);
 
   const categories = [
-    { id: 'All', label: 'All / सर्व' },
-    { id: 'Decoration', label: 'Decoration / मंडप व सजावट' },
-    { id: 'Mahaprasad', label: 'Mahaprasad / महाप्रसाद' },
-    { id: 'Programs', label: 'Programs / कार्यक्रम' },
-    { id: 'Misc', label: 'Misc / इतर' }
+    { id: 'All', label: 'All' },
+    { id: 'Decoration', label: 'Decoration' },
+    { id: 'Mahaprasad', label: 'Mahaprasad' },
+    { id: 'Programs', label: 'Programs' },
+    { id: 'Misc', label: 'Misc' }
   ];
 
   const filteredExpenses = expenses.filter((item) => {
@@ -23,7 +44,8 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
       const matchTitle = (item.title || item.description || '').toLowerCase().includes(q);
       const matchVendor = (item.vendor || '').toLowerCase().includes(q);
       const matchCat = (item.category || '').toLowerCase().includes(q);
-      return matchTitle || matchVendor || matchCat;
+      const matchNotes = (item.notes || '').toLowerCase().includes(q);
+      return matchTitle || matchVendor || matchCat || matchNotes;
     }
     return true;
   });
@@ -42,12 +64,19 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
     }
   };
 
+  const handleDelete = async () => {
+    if (deleteConfirmItem) {
+      await deleteExpense(deleteConfirmItem.id);
+      setDeleteConfirmItem(null);
+    }
+  };
+
   const budget = stats.totalReceived > 0 ? stats.totalReceived : 220000;
   const utilizedPercent = Math.min(100, Math.round((stats.totalExpenses / (budget || 1)) * 100));
   const remaining = Math.max(0, budget - stats.totalExpenses);
 
   return (
-    <div className="flex flex-col w-full px-4 max-w-xl mx-auto pb-20 space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in pt-1">
+    <div className="flex flex-col w-full px-4 max-w-xl mx-auto pb-20 space-y-6 sm:space-y-7 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in pt-1">
 
       {/* Total Outflow Progress Card */}
       <section className="w-full rounded-2xl bg-white/95 border border-[#F0DFD5] p-4 text-[#241913] shadow-xs relative overflow-hidden">
@@ -80,7 +109,7 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
           </div>
           <div className="pt-1">
             <button
-              onClick={onOpenAddExpense}
+              onClick={() => onOpenAddExpense && onOpenAddExpense(null)}
               className="w-full rounded-xl py-3 bg-[#8B2616] text-white font-semibold text-xs shadow-xs hover:bg-[#731E11] active:scale-[0.99] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               id="quickAddBtn"
               type="button"
@@ -91,6 +120,25 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
           </div>
         </div>
       </section>
+
+      {/* Organiser-wise Expense Cards */}
+      {organiserExpenseTotals.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full">
+          {organiserExpenseTotals.map(({ name, total }) => (
+            <div
+              key={name}
+              className="bg-white/95 border border-[#F0DFD5] rounded-xl px-3 py-2 shadow-2xs flex items-center justify-between gap-2"
+            >
+              <span className="text-xs font-semibold text-[#241913] truncate" title={name}>
+                {name}
+              </span>
+              <span className="text-xs font-bold text-[#8B2616] shrink-0">
+                {formatCurrency(total)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Search and Category Chips */}
       <div className="w-full flex flex-col gap-2.5">
@@ -103,7 +151,7 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full min-h-[48px] pl-10 pr-4 rounded-xl bg-white border border-[#D9C4B7] text-[#241913] text-sm placeholder:text-[#6B5E57] focus:outline-none focus:ring-2 focus:ring-[#8B2616] shadow-xs transition-all"
-            placeholder="Search description or category / खर्च किंवा तपशील शोधा..."
+            placeholder="Search description, vendor or category / खर्च शोधा..."
             type="text"
           />
           {searchQuery && (
@@ -172,6 +220,11 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
                       <span className="text-xs text-[#6B5E57] flex items-center gap-1">
                         <span className="material-symbols-outlined text-[13px]">schedule</span> {formatDate(item.date)}
                       </span>
+                      {item.lastEditedAt && (
+                        <span className="text-[10px] text-[#A23F1A] bg-[#FFEAE0] px-1.5 py-0.2 rounded font-medium">
+                          Edited
+                        </span>
+                      )}
                     </div>
                     <h4 className="text-sm font-semibold text-[#241913] line-clamp-1">
                       {item.title || item.description}
@@ -180,6 +233,11 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
                       <span className="material-symbols-outlined text-[14px] text-[#8B2616]">storefront</span>
                       {item.vendor || 'स्थानिक खरेदी'}
                     </p>
+                    {item.notes && (
+                      <p className="text-[11px] text-[#8B2616] mt-1 bg-[#FFF1EB] px-2 py-0.5 rounded italic">
+                        {item.notes}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end shrink-0">
                     <span className="text-base font-bold text-[#8B2616]">
@@ -200,21 +258,29 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
                     {item.receiptUrl && (
                       <button
                         onClick={() => onOpenProof(item.receiptUrl, `Bill Photo - ${item.title}`)}
-                        className="rounded-xl py-1 px-3 border border-[#D9C4B7] bg-white text-[#8B2616] text-xs font-semibold hover:bg-[#FFF5EE] flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+                        className="rounded-xl py-1 px-2.5 border border-[#D9C4B7] bg-white text-[#8B2616] text-xs font-semibold hover:bg-[#FFF5EE] flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
                         type="button"
+                        title="View Bill Photo"
                       >
                         <span className="material-symbols-outlined text-[15px]">visibility</span>
                         <span>View</span>
                       </button>
                     )}
+
                     <button
-                      onClick={() => {
-                        if (window.confirm('हा खर्च रेकॉर्ड डिलीट करायचा आहे का?')) {
-                          deleteExpense(item.id);
-                        }
-                      }}
-                      className="p-1 rounded-lg text-[#6B5E57] hover:text-red-600 cursor-pointer"
-                      title="Delete"
+                      onClick={() => onOpenAddExpense && onOpenAddExpense(item)}
+                      className="rounded-xl py-1 px-2.5 border border-[#D9C4B7] bg-white text-[#8B2616] text-xs font-semibold hover:bg-[#FFF5EE] flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                      type="button"
+                      title="Edit Expense"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">edit</span>
+                      <span>Edit</span>
+                    </button>
+
+                    <button
+                      onClick={() => setDeleteConfirmItem(item)}
+                      className="p-1 rounded-lg text-[#6B5E57] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      title="Delete Expense"
                       type="button"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -244,6 +310,65 @@ export function OrganiserExpenses({ onOpenAddExpense, onOpenProof, onOpenReport 
           PDF / Excel
         </button>
       </div>
+
+      {/* Delete Expense Confirmation Modal */}
+      {deleteConfirmItem && (
+        <div
+          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setDeleteConfirmItem(null)}
+        >
+          <div
+            className="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-red-100 flex flex-col gap-4 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[22px]">warning</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-[#241913]">Delete Expense Entry?</h4>
+                <p className="text-xs text-[#6B5E57]">हा खर्च रेकॉर्ड हटवायचा आहे का?</p>
+              </div>
+            </div>
+
+            <div className="bg-[#FFF8F6] p-3 rounded-2xl border border-[#F0DFD5] text-xs space-y-1">
+              <div className="flex justify-between">
+                <span className="text-[#6B5E57]">Description:</span>
+                <span className="font-bold text-[#241913] truncate max-w-[180px]">{deleteConfirmItem.title || deleteConfirmItem.description}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6B5E57]">Amount:</span>
+                <span className="font-bold text-[#8B2616]">{formatCurrency(deleteConfirmItem.amount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6B5E57]">Category:</span>
+                <span className="font-medium text-[#241913]">{deleteConfirmItem.category}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-red-700 font-medium">
+              Delete this entry? This can't be undone. Total Spent and Treasury Balance will recalculate immediately.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmItem(null)}
+                className="py-2.5 px-4 rounded-xl border border-[#D9C4B7] bg-white text-[#241913] text-xs font-bold hover:bg-[#FAF4ED] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition-colors cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useMandalData } from '../context/MandalDataContext';
+import { validateUpiId, validateUploadedFile } from '../utils/validators';
 
 export function PaymentDetailsModal({ isOpen, onClose }) {
   const { config, updateMandalConfig } = useMandalData();
 
   const [formData, setFormData] = useState({
-    upiId: config.upiId || 'indrayani-vihar-mitra-mandal@sbi',
-    qrCodeUrl: config.qrCodeUrl || ''
+    upiId: config.upiId || '9673909460@ybl',
+    qrCodeUrl: config.qrCodeUrl || '/payment-qr.png'
   });
 
-  const [previewQr, setPreviewQr] = useState(config.qrCodeUrl || '');
+  const [previewQr, setPreviewQr] = useState(config.qrCodeUrl || '/payment-qr.png');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        upiId: config.upiId || 'indrayani-vihar-mitra-mandal@sbi',
-        qrCodeUrl: config.qrCodeUrl || ''
+        upiId: config.upiId || '9673909460@ybl',
+        qrCodeUrl: config.qrCodeUrl || '/payment-qr.png'
       });
-      setPreviewQr(config.qrCodeUrl || '');
+      setPreviewQr(config.qrCodeUrl || '/payment-qr.png');
       setSaveSuccess(false);
       setErrorMessage('');
     }
@@ -32,14 +33,9 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setErrorMessage('Please select a valid image file (PNG, JPG, WEBP).');
-      return;
-    }
-
-    // Limit size to 1.5MB for snappy sync
-    if (file.size > 1.5 * 1024 * 1024) {
-      setErrorMessage('QR image size should be under 1.5 MB.');
+    const fileVal = validateUploadedFile(file, ['image/jpeg', 'image/png', 'image/webp'], 2 * 1024 * 1024);
+    if (!fileVal.isValid) {
+      setErrorMessage(fileVal.error);
       return;
     }
 
@@ -61,13 +57,14 @@ export function PaymentDetailsModal({ isOpen, onClose }) {
     e.preventDefault();
     setErrorMessage('');
 
-    if (!formData.upiId.trim()) {
-      setErrorMessage('Please enter a valid UPI ID (e.g. mandal@upi).');
+    const upiVal = validateUpiId(formData.upiId);
+    if (!upiVal.isValid) {
+      setErrorMessage(upiVal.error);
       return;
     }
 
     updateMandalConfig({
-      upiId: formData.upiId.trim(),
+      upiId: upiVal.sanitized,
       qrCodeUrl: formData.qrCodeUrl
     });
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { checkRateLimit } from '../utils/security';
+import { PIN_REGEX, validatePhone, validateName } from '../utils/validators';
 
 export function OrganiserLogin({ onBackToPublic }) {
   const { loginWithPin, organizers } = useAuth();
@@ -11,7 +13,10 @@ export function OrganiserLogin({ onBackToPublic }) {
   const [phone, setPhone] = useState(organizers[0]?.phone?.replace('+91', '').trim() || '');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockCountdown, setLockCountdown] = useState(0);
 
+  // Sync selected organizer details
   useEffect(() => {
     if (selectedOrgId) {
       const found = organizers.find((o) => o.id === selectedOrgId);
@@ -21,6 +26,38 @@ export function OrganiserLogin({ onBackToPublic }) {
       }
     }
   }, [organizers, selectedOrgId]);
+
+  // Check rate-limit lockout status
+  useEffect(() => {
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10) || selectedOrgId || 'global';
+    const rl = checkRateLimit(cleanPhone);
+    if (!rl.allowed) {
+      setIsLocked(true);
+      setError(rl.message);
+      setLockCountdown(Math.ceil(rl.lockTimeRemainingMs / 1000));
+    } else {
+      setIsLocked(false);
+      setLockCountdown(0);
+    }
+  }, [phone, selectedOrgId]);
+
+  // Live countdown timer for lockout
+  useEffect(() => {
+    if (!isLocked || lockCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setLockCountdown((prev) => {
+        if (prev <= 1) {
+          setIsLocked(false);
+          setError('');
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLocked, lockCountdown]);
 
   const handleOrgChange = (e) => {
     const orgId = e.target.value;
@@ -37,22 +74,56 @@ export function OrganiserLogin({ onBackToPublic }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (pin.length < 4) {
-      setError('Incorrect PIN / अयोग्य पिन. कृपया योग्य ४-अंकी कोड टाका.');
+    if (isLocked) return;
+
+    if (!PIN_REGEX.test(pin.trim())) {
+      setError('अवैध पिन स्वरूप! कृपया बरोबर ४-अंकी अंकीय पिन टाका (PIN must be exactly 4 digits).');
       return;
     }
 
-    setIsSubmitting(true);
-    const res = loginWithPin(pin, customName, phone, selectedOrgId);
-    setIsSubmitting(false);
-
-    if (!res.success) {
-      setError(res.error || 'Incorrect PIN / अयोग्य पिन. कृपया योग्य ४-अंकी कोड टाका.');
+    if (!selectedOrgId) {
+      const nameVal = validateName(customName, 2, 80);
+      if (!nameVal.isValid) {
+        setError(nameVal.error);
+        return;
+      }
+      const phoneVal = validatePhone(phone);
+      if (!phoneVal.isValid) {
+        setError(phoneVal.error);
+        return;
+      }
     }
+
+    setIsSubmitting(true);
+    try {
+      const res = await loginWithPin(pin.trim(), customName, phone, selectedOrgId);
+      setIsSubmitting(false);
+
+      if (res.success) {
+        window.location.hash = '#/';
+        if (onBackToPublic) onBackToPublic();
+      } else {
+        setError(res.error || 'Incorrect PIN / अयोग्य पिन. कृपया योग्य ४-अंकी कोड टाका.');
+        if (res.isLocked && res.lockTimeRemainingMs) {
+          setIsLocked(true);
+          setLockCountdown(Math.ceil(res.lockTimeRemainingMs / 1000));
+        }
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('लॉगिन करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
+      setIsSubmitting(false);
+    }
+  };
+
+  const formatLockTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -78,7 +149,7 @@ export function OrganiserLogin({ onBackToPublic }) {
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-[#8B2616] flex items-center justify-center shrink-0 shadow-sm">
-            <span className="material-symbols-outlined text-white text-[18px]">person</span>
+            <span className="material-symbols-outlined text-white text-[18px]">security</span>
           </div>
         </div>
       </header>
@@ -95,7 +166,7 @@ export function OrganiserLogin({ onBackToPublic }) {
             </div>
             <h2 className="text-xl font-bold text-[#8B2616] tracking-tight">Organiser Login</h2>
             <p className="text-xs text-[#6B5E57] mt-0.5">
-              Enter details to manage seva
+              Secure PIN-protected seva portal
             </p>
           </div>
 
@@ -175,9 +246,17 @@ export function OrganiserLogin({ onBackToPublic }) {
 
               {/* Mandal PIN */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-[#6B5E57]" htmlFor="organizer-pin">
-                  Mandal PIN
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#6B5E57]" htmlFor="organizer-pin">
+                    Mandal PIN (४-अंकी गुप्त कोड)
+                  </label>
+                  {isLocked && (
+                    <span className="text-[11px] font-bold text-red-600 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">timer</span>
+                      Locked ({formatLockTime(lockCountdown)})
+                    </span>
+                  )}
+                </div>
                 <div className="relative flex items-center">
                   <div className="absolute left-3.5 pointer-events-none text-[#6B5E57]/60 flex items-center">
                     <span className="material-symbols-outlined text-[18px]">lock</span>
@@ -189,16 +268,22 @@ export function OrganiserLogin({ onBackToPublic }) {
                     inputMode="numeric"
                     maxLength={4}
                     value={pin}
+                    disabled={isLocked}
                     onChange={(e) => setPin(e.target.value)}
                     placeholder="••••"
                     required
                     className={`w-full border ${
-                      error ? 'border-red-500 ring-1 ring-red-400' : 'border-[#D9C4B7]'
-                    } bg-white rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#241913] placeholder:text-[#6B5E57]/40 outline-none transition-all focus:border-[#8B2616] focus:ring-1 focus:ring-[#8B2616] tracking-[0.35em] font-bold text-center`}
+                      isLocked
+                        ? 'border-red-400 bg-red-50/50 text-red-700 cursor-not-allowed'
+                        : error
+                        ? 'border-red-500 ring-1 ring-red-400 bg-white'
+                        : 'border-[#D9C4B7] bg-white'
+                    } rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#241913] placeholder:text-[#6B5E57]/40 outline-none transition-all focus:border-[#8B2616] focus:ring-1 focus:ring-[#8B2616] tracking-[0.35em] font-bold text-center`}
                   />
                   <button
                     type="button"
                     aria-label="Toggle PIN visibility"
+                    disabled={isLocked}
                     onClick={() => setShowPin(!showPin)}
                     className="absolute right-3 text-[#6B5E57]/60 hover:text-[#8B2616] flex items-center cursor-pointer"
                   >
@@ -208,11 +293,24 @@ export function OrganiserLogin({ onBackToPublic }) {
                   </button>
                 </div>
 
-                {/* Error Banner */}
+                {/* Error & Rate Limit Banner */}
                 {error && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium mt-1">
-                    <span className="material-symbols-outlined text-[15px]">error</span>
-                    <span>{error}</span>
+                  <div className={`flex items-start gap-2 p-2.5 rounded-xl text-xs font-medium mt-1.5 ${
+                    isLocked
+                      ? 'bg-red-100 border border-red-300 text-red-800'
+                      : 'bg-red-50 border border-red-200 text-red-700'
+                  }`}>
+                    <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">
+                      {isLocked ? 'lock_clock' : 'error'}
+                    </span>
+                    <div className="flex-1 leading-snug">
+                      <span>{error}</span>
+                      {isLocked && lockCountdown > 0 && (
+                        <p className="font-mono font-bold mt-1 text-red-900">
+                          पुन्हा प्रयत्न करू शकता: {formatLockTime(lockCountdown)}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -221,13 +319,27 @@ export function OrganiserLogin({ onBackToPublic }) {
               <button
                 id="submit-btn"
                 type="submit"
-                disabled={isSubmitting}
-                className="mt-1 w-full rounded-xl py-3 bg-[#8B2616] text-white font-semibold text-xs shadow-xs hover:bg-[#731E11] active:scale-[0.99] flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                disabled={isSubmitting || isLocked}
+                className="mt-1 w-full rounded-xl py-3 bg-[#8B2616] text-white font-semibold text-xs shadow-xs hover:bg-[#731E11] active:scale-[0.99] flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{isSubmitting ? 'Logging in...' : 'Login to Portal'}</span>
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <span>
+                  {isSubmitting
+                    ? 'Verifying...'
+                    : isLocked
+                    ? `Locked (${formatLockTime(lockCountdown)})`
+                    : 'Login to Portal'}
+                </span>
+                <span className="material-symbols-outlined text-[16px]">
+                  {isLocked ? 'lock' : 'arrow_forward'}
+                </span>
               </button>
             </form>
+          </div>
+
+          {/* Security Notice */}
+          <div className="mt-4 p-3 rounded-xl bg-white/60 border border-[#F0DFD5] text-[11px] text-[#6B5E57] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#8B2616] text-[16px] shrink-0">verified_user</span>
+            <span>सुरक्षित प्रणाली: ३० दिवसांचे सत्र व अँटी-ब्रूटफोर्स लॉक सक्रिय आहे.</span>
           </div>
 
           {/* Footer chant */}

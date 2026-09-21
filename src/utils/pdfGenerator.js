@@ -5,7 +5,8 @@ import { formatCurrency, formatDate } from './formatters';
 /**
  * Generate full Mandal Financial Audit Statement PDF
  */
-export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseList, stats }) {
+export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseList, stats, language = 'en' }) {
+  const isMarathi = language === 'mr';
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -13,7 +14,6 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
   });
 
   const primaryMaroon = [139, 38, 22]; // Heritage Maroon #8B2616
-  const saffronColor = [232, 115, 74]; // Saffron #E8734A
   const darkColor = [36, 25, 19];
   const greenColor = [45, 106, 79]; // Indrayani Teal #2D6A4F
   const redColor = [185, 28, 28];
@@ -25,18 +25,25 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
   // Mandal Title
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text(mandalInfo?.englishName || 'Indrayani Vihar Mitra Mandal', 105, 14, { align: 'center' });
+  doc.setFontSize(17);
+  doc.text(mandalInfo?.englishName || 'Indrayani Vihar Mitra Mandal', 105, 13, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(
     `${mandalInfo?.location || 'Indrayani Vihar, Lohegaon, Pune'} | Ganesh Utsav ${mandalInfo?.year || 2026}`,
     105,
-    22,
+    21,
     { align: 'center' }
   );
-  doc.text(`Official Financial Audit & Vargani Statement | Generated on ${formatDate(new Date().toISOString())}`, 105, 28, { align: 'center' });
+  doc.text(
+    isMarathi
+      ? `अधिकृत आर्थिक हिशोब व वर्गणी पत्रक (Marathi Statement) | Generated: ${formatDate(new Date().toISOString())}`
+      : `Official Financial Audit & Vargani Statement | Generated on ${formatDate(new Date().toISOString())}`,
+    105,
+    28,
+    { align: 'center' }
+  );
 
   // Summary Metrics Box
   doc.setFillColor(255, 248, 246);
@@ -45,59 +52,63 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
 
   doc.setTextColor(...darkColor);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
+  doc.setFontSize(9.5);
 
   // Column 1: Total Received
-  doc.text('Total Vargani Collected', 22, 50);
+  doc.text(isMarathi ? 'एकूण जमा (Total Collected)' : 'Total Vargani Collected', 20, 50);
   doc.setTextColor(...greenColor);
   doc.setFontSize(13);
-  doc.text(formatCurrency(stats.totalReceived || 0), 22, 58);
+  doc.text(formatCurrency(stats.totalReceived || 0), 20, 58);
   doc.setFontSize(8);
   doc.setTextColor(107, 94, 87);
-  doc.text(`Verified Donors: ${stats.verifiedCount || 0}`, 22, 64);
+  doc.text(isMarathi ? `देणगीदार: ${stats.verifiedCount || 0}` : `Verified Donors: ${stats.verifiedCount || 0}`, 20, 64);
 
   // Column 2: Total Expenses
   doc.setTextColor(...darkColor);
-  doc.setFontSize(10);
-  doc.text('Total Expenses Paid', 85, 50);
+  doc.setFontSize(9.5);
+  doc.text(isMarathi ? 'एकूण खर्च (Total Spent)' : 'Total Expenses Paid', 82, 50);
   doc.setTextColor(...redColor);
   doc.setFontSize(13);
-  doc.text(formatCurrency(stats.totalExpenses || 0), 85, 58);
+  doc.text(formatCurrency(stats.totalExpenses || 0), 82, 58);
   doc.setFontSize(8);
   doc.setTextColor(107, 94, 87);
-  doc.text(`Bills/Vouchers: ${expenseList.length}`, 85, 64);
+  doc.text(isMarathi ? `खर्च बिले: ${expenseList.length}` : `Bills/Vouchers: ${expenseList.length}`, 82, 64);
 
   // Column 3: Net Cash Balance
   doc.setTextColor(...darkColor);
-  doc.setFontSize(10);
-  doc.text('Treasury Net Balance', 148, 50);
+  doc.setFontSize(9.5);
+  doc.text(isMarathi ? 'शिल्लक (Net Balance)' : 'Treasury Net Balance', 144, 50);
   doc.setTextColor(...primaryMaroon);
   doc.setFontSize(13);
-  doc.text(formatCurrency(stats.netBalance || 0), 148, 58);
+  doc.text(formatCurrency(stats.netBalance || 0), 144, 58);
   doc.setFontSize(8);
   doc.setTextColor(107, 94, 87);
-  doc.text(`Pending Verification: ${formatCurrency(stats.totalPending || 0)}`, 148, 64);
+  doc.text(isMarathi ? `प्रलंबित: ${formatCurrency(stats.totalPending || 0)}` : `Pending: ${formatCurrency(stats.totalPending || 0)}`, 144, 64);
 
   // Section 1: Vargani / Contributions Table
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setTextColor(...primaryMaroon);
-  doc.text('1. Vargani (Donations) Summary', 14, 78);
+  doc.text(isMarathi ? '१. जमा वर्गणी तपशील (Vargani Donations Summary)' : '1. Vargani (Donations) Summary', 14, 78);
 
   const varganiRows = varganiList.map((item, idx) => [
     idx + 1,
     item.receiptNo || `#IV-2026-${String(idx + 1).padStart(3, '0')}`,
     item.donorName || 'Devotee',
-    item.wingFlat || item.address || '-',
+    item.collectedBy || item.paidTo || '-',
     item.phone || '-',
     item.mode || 'UPI',
-    item.status === 'verified' ? 'Verified' : 'Pending',
+    isMarathi ? (item.status === 'verified' ? 'स्वीकृत' : 'प्रलंबित') : (item.status === 'verified' ? 'Verified' : 'Pending'),
     formatCurrency(item.amount)
   ]);
 
+  const varganiHeaders = isMarathi
+    ? [['#', 'पावती क्र (Receipt)', 'देणगीदार (Donor)', 'वर्गणी दिली (Paid To)', 'मोबाईल (Mobile)', 'पद्धत (Mode)', 'स्थिती (Status)', 'रक्कम (Amount)']]
+    : [['#', 'Receipt No', 'Donor Name', 'Paid To / Collected By', 'Mobile', 'Mode', 'Status', 'Amount']];
+
   doc.autoTable({
     startY: 82,
-    head: [['#', 'Receipt No', 'Donor Name', 'Flat / Wing', 'Mobile', 'Mode', 'Status', 'Amount']],
+    head: varganiHeaders,
     body: varganiRows,
     theme: 'grid',
     headStyles: {
@@ -117,11 +128,11 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
       0: { cellWidth: 8 },
       1: { cellWidth: 26 },
       2: { cellWidth: 38 },
-      3: { cellWidth: 24 },
+      3: { cellWidth: 28 },
       4: { cellWidth: 24 },
       5: { cellWidth: 16 },
       6: { cellWidth: 18 },
-      7: { cellWidth: 28, halign: 'right', fontStyle: 'bold' }
+      7: { cellWidth: 24, halign: 'right', fontStyle: 'bold' }
     }
   });
 
@@ -133,9 +144,9 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
   }
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setTextColor(...primaryMaroon);
-  doc.text('2. Expense Breakdown & Vendor Payouts', 14, finalY);
+  doc.text(isMarathi ? '२. खर्च व देयके तपशील (Expense Breakdown & Payouts)' : '2. Expense Breakdown & Vendor Payouts', 14, finalY);
 
   const expenseRows = expenseList.map((item, idx) => [
     idx + 1,
@@ -147,9 +158,13 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
     formatCurrency(item.amount)
   ]);
 
+  const expenseHeaders = isMarathi
+    ? [['#', 'तारीख (Date)', 'वर्गवारी (Category)', 'खर्च वर्णन (Description)', 'विक्रेता (Vendor)', 'खर्चकर्ता (Paid By)', 'रक्कम (Amount)']]
+    : [['#', 'Date', 'Category', 'Description', 'Vendor', 'Paid By', 'Amount']];
+
   doc.autoTable({
     startY: finalY + 4,
-    head: [['#', 'Date', 'Category', 'Description', 'Vendor', 'Paid By', 'Amount']],
+    head: expenseHeaders,
     body: expenseRows,
     theme: 'grid',
     headStyles: {
@@ -186,11 +201,11 @@ export function generateMandalStatementPDF({ mandalInfo, varganiList, expenseLis
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(107, 94, 87);
-  doc.text('Generated via Indrayani Vihar Mitra Mandal PWA', 14, signY);
-  doc.text('President (Sachin Joshi): _______________', 85, signY);
-  doc.text('Treasurer (Vijay Pawar): _______________', 148, signY);
+  doc.text('Indrayani Vihar Mitra Mandal • Finance Report', 14, signY);
+  doc.text(`President / अध्यक्ष: _______________`, 85, signY);
+  doc.text(`Treasurer / खजिनदार: _______________`, 148, signY);
 
-  const filename = `Indrayani_Vihar_Mitra_Mandal_Statement_${mandalInfo?.year || 2026}.pdf`;
+  const filename = `Indrayani_Vihar_Mandal_${isMarathi ? 'Marathi_' : ''}Statement_${mandalInfo?.year || 2026}.pdf`;
   doc.save(filename);
 }
 
@@ -225,7 +240,7 @@ export function generateSingleReceiptPDF({ mandalInfo, varganiItem }) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.text(`${mandalInfo?.location || 'Indrayani Vihar, Lohegaon, Pune'} | Ganesh Utsav ${mandalInfo?.year || 2026}`, 105, 26, { align: 'center' });
-  doc.text('OFFICIAL DONATION / VARGANI RECEIPT', 105, 32, { align: 'center' });
+  doc.text('OFFICIAL DONATION / VARGANI RECEIPT (अधिकृत पावती)', 105, 32, { align: 'center' });
 
   // Receipt Number and Date
   doc.setTextColor(...darkColor);
@@ -242,7 +257,7 @@ export function generateSingleReceiptPDF({ mandalInfo, varganiItem }) {
   // Donor Details Block
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  doc.text('Received with thanks from:', 16, 56);
+  doc.text('Received with thanks from (देणगीदाराचे नाव):', 16, 56);
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
@@ -252,8 +267,10 @@ export function generateSingleReceiptPDF({ mandalInfo, varganiItem }) {
   doc.setTextColor(...darkColor);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  if (varganiItem.wingFlat || varganiItem.address) {
-    doc.text(`Flat / Wing: ${varganiItem.wingFlat || varganiItem.address}`, 16, 72);
+  if (varganiItem.collectedBy || varganiItem.paidTo) {
+    doc.text(`Paid To / वर्गणी स्वीकारली: ${varganiItem.collectedBy || varganiItem.paidTo}`, 16, 72);
+  } else if (varganiItem.wingFlat || varganiItem.address) {
+    doc.text(`Address: ${varganiItem.wingFlat || varganiItem.address}`, 16, 72);
   }
   if (varganiItem.phone) {
     doc.text(`Mobile: ${varganiItem.phone}`, 120, 72);
@@ -267,21 +284,21 @@ export function generateSingleReceiptPDF({ mandalInfo, varganiItem }) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(...darkColor);
-  doc.text('Amount Received:', 22, 90);
+  doc.text('Amount Received (रक्कम):', 22, 90);
 
   doc.setFontSize(16);
   doc.setTextColor(...greenColor);
-  doc.text(formatCurrency(varganiItem.amount), 65, 90);
+  doc.text(formatCurrency(varganiItem.amount), 75, 90);
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(107, 94, 87);
-  doc.text(`Mode: ${varganiItem.mode || 'UPI'} | Status: ${varganiItem.status === 'verified' ? 'Verified' : 'Pending'} ${varganiItem.utr ? `| UTR: ${varganiItem.utr}` : ''}`, 22, 97);
+  doc.text(`Mode: ${varganiItem.mode || 'UPI'} | Status: ${varganiItem.status === 'verified' ? 'Verified (स्वीकृत)' : 'Pending'} ${varganiItem.utr ? `| UTR: ${varganiItem.utr}` : ''}`, 22, 97);
 
   // Collector & Footer
   doc.setFontSize(9);
   doc.setTextColor(...darkColor);
-  doc.text(`Collected by: ${varganiItem.collectedBy || 'Organiser'}`, 16, 118);
+  doc.text(`Collected by: ${varganiItem.collectedBy || varganiItem.paidTo || 'Organiser'}`, 16, 118);
   doc.text('Authorized Signatory: _________________', 125, 118);
 
   doc.setFontSize(8);

@@ -5,7 +5,7 @@ import { FESTIVAL_DAYS_CONFIG, getFestivalDayInfo } from '../utils/festivalSched
 const STITCH_CULTURAL_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFng43v9k73E7rH9_KFkaLPsFhywivy85J8itC8lxdWV6PbbDiTMQ4zuDsp-40MxVf7p69j0RNzORcrkvo9PV-HM-fMFEUosY4XmP7cBXoMxoIyLwJlDOn_gVhrSLWHr_veLBht6ul3wciriUrXl17ms6pRuNx_mTfGVGPMzxSJrp4gBCFA1we-j27bWbUIqwIgS5JVzH2Ye9xH2mVXLhTj_MTEDk-RCCV0K1Sb03kFiostkj6M4xMhw';
 
 export function PublicTodaySchedule() {
-  const { publicContent, mankariList, culturalEvents } = useMandalData();
+  const { publicContent, mankariList, culturalEvents, gameWinners } = useMandalData();
   const [selectedDay, setSelectedDay] = useState(1);
   const [reminderSet, setReminderSet] = useState(false);
 
@@ -24,8 +24,19 @@ export function PublicTodaySchedule() {
 
   const dayInfo = getFestivalDayInfo(selectedDay);
 
+  const isGamesDay = selectedDay === 4 ||
+    (eventForDay?.title && /game|sport|competition/i.test(eventForDay.title));
+
+  const validWinnersForSchedule = React.useMemo(() => {
+    if (!isGamesDay) return [];
+    return (gameWinners || []).filter(item => {
+      if (!item || item.isHidden === true) return false;
+      return !!(item.first?.trim() || item.second?.trim() || item.third?.trim() || item.girls || item.boys || item.gameName);
+    });
+  }, [isGamesDay, gameWinners]);
+
   return (
-    <div className="flex flex-col w-full gap-3.5 pb-12 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
+    <div className="flex flex-col w-full gap-6 sm:gap-7 pb-12 animate-fade-in font-['Plus_Jakarta_Sans','Mukta',sans-serif]">
       {/* Date & Title Header Card */}
       <div className="rounded-2xl p-4 bg-white/95 border border-[#F0DFD5] shadow-xs flex flex-col gap-2 relative overflow-hidden">
         <div className="flex items-center justify-between gap-2">
@@ -164,9 +175,8 @@ export function PublicTodaySchedule() {
                     key={mankari.id}
                     className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 bg-[#FFF2EB] border border-[#F5DACB] text-xs font-semibold text-[#8B2616] shadow-xs"
                   >
-                    <span className="material-symbols-outlined text-[14px] text-[#A23F1A]">house</span>
+                    <span className="material-symbols-outlined text-[14px] text-[#A23F1A]">person</span>
                     <span>{mankari.name || mankari.family}</span>
-                    {mankari.flat && <span className="text-[#6B5E57] font-normal">({mankari.flat})</span>}
                   </span>
                 ))}
               </div>
@@ -252,6 +262,72 @@ export function PublicTodaySchedule() {
           </div>
         </div>
       </div>
+
+      {/* Game & Competition Winners Section on Games / Competition Days */}
+      {isGamesDay && validWinnersForSchedule.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm font-bold text-[#8B2616] flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[18px]">emoji_events</span>
+              <span>Game &amp; Competition Results • निकाल</span>
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF2EB] border border-[#F5DACB] text-xs font-bold text-[#8B2616]">
+              {validWinnersForSchedule.length} Records
+            </span>
+          </div>
+
+          <div className="rounded-2xl p-4 bg-white/95 border border-[#F0DFD5] shadow-xs flex flex-col gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {validWinnersForSchedule.map((item) => {
+                const has1st = !!(item.first && item.first !== '—' && item.first !== '-');
+                const has2nd = !!(item.second && item.second !== '—' && item.second !== '-');
+                const has3rd = !!(item.third && item.third !== '—' && item.third !== '-');
+
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-[#FAF6EE] rounded-xl p-3 border border-[#EAE0D2] flex flex-col gap-2 shadow-2xs"
+                  >
+                    <div className="flex items-center justify-between pb-1 border-b border-[#EAE0D2]/60">
+                      <span className="text-xs font-bold text-[#241913] flex items-center gap-1.5 truncate">
+                        <span className="material-symbols-outlined text-[#E65A15] text-[15px]">military_tech</span>
+                        <span>{item.gameName}</span>
+                      </span>
+                      <span className="text-[11px] font-bold text-[#8B2616] bg-[#FFF5EE] px-2 py-0.5 rounded-md border border-[#F0DFD5] shrink-0">
+                        {item.category || 'General'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-1 text-xs">
+                      {has1st && (
+                        <div className="flex items-center justify-between gap-2 bg-[#FFF8EB] px-2 py-0.5 rounded-md border border-[#F7E1B5]">
+                          <span className="font-bold text-[#946200] text-[10px]">🥇 1st</span>
+                          <span className="font-bold text-[#241913] truncate text-right">{item.first}</span>
+                        </div>
+                      )}
+                      {has2nd && (
+                        <div className="flex items-center justify-between gap-2 bg-[#F6F7F9] px-2 py-0.5 rounded-md border border-[#E2E5EB]">
+                          <span className="font-bold text-[#4B5563] text-[10px]">🥈 2nd</span>
+                          <span className="font-semibold text-[#241913] truncate text-right">{item.second}</span>
+                        </div>
+                      )}
+                      {has3rd && (
+                        <div className="flex items-center justify-between gap-2 bg-[#FAF3EB] px-2 py-0.5 rounded-md border border-[#ECD9C6]">
+                          <span className="font-bold text-[#A23F1A] text-[10px]">🥉 3rd</span>
+                          <span className="font-semibold text-[#241913] truncate text-right">{item.third}</span>
+                        </div>
+                      )}
+                      {!has1st && !has2nd && !has3rd && (
+                        <span className="text-[10.5px] text-[#8b716c] italic">निकाल लवकरच घोषित केला जाईल</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer Chant */}
       <div className="text-center py-2">

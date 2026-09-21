@@ -13,399 +13,527 @@ const INITIAL_MANDAL_CONFIG = {
   year: 2026,
   establishedYear: 1995,
   yearsCompleted: 31,
-  upiId: 'indrayanivihar@upi',
-  president: 'Sachin Joshi',
-  treasurer: 'Vijay Pawar',
+  upiId: '9673909460@ybl',
+  president: '',
+  treasurer: '',
   targetGoal: 250000,
   driveUrl: 'https://drive.google.com/drive/folders/1rzx_qCusszWSmDoCKxi4mjw53ebjHPao?usp=sharing',
-  qrCodeUrl: '',
-  helplinePhone: '9820011223'
+  qrCodeUrl: '/payment-qr.png',
+  helplinePhone: ''
 };
 
 const INITIAL_PUBLIC_CONTENT = {
   morningAartiTime: '10:00 AM',
   morningAartiMarathiTime: 'सकाळी १०:००',
   morningAartiTitle: 'Morning Aarti (सकाळची आरती)',
-  morningAartiNote: 'Modak prasad distribution',
+  morningAartiNote: '',
   eveningAartiTime: '8:00 PM',
   eveningAartiMarathiTime: 'रात्री ८:००',
   eveningAartiTitle: 'Evening Maha Aarti (संध्याकाळची महाआरती)',
-  eveningAartiNote: '101 Deepa Maha Aarti',
-  todayEventName: 'Bal Gopal Competition',
-  todayEventMarathiName: 'बाल गोपाळ नृत्य स्पर्धा',
-  todayEventTime: '6:00 PM',
-  todayEventLocation: 'Main Stage (मुख्य मंडप)',
-  todayEventDay: 'Day 4 • चतुर्थी',
+  eveningAartiNote: '',
+  todayEventName: '',
+  todayEventMarathiName: '',
+  todayEventTime: '',
+  todayEventLocation: '',
+  todayEventDay: '',
   varganiMessage: 'सहकार्य आणि भक्तीभावाने उत्सव साजरा करूया.',
-  announcementTitle: 'Grand Mahaprasad on Anant Chaturdashi',
-  announcementSub: 'Collect tokens from society office'
+  announcementTitle: '',
+  announcementSub: ''
 };
 
 const INITIAL_CULTURAL_EVENTS = [
   {
     id: 'ce-1',
     day: 1,
-    dayLabel: 'Day 1 • 14 Sep • गणेश चतुर्थी',
+    dayLabel: 'Day 1 • 14 Sep • Mon (सोम.) • गणेश चतुर्थी',
     date: '14 Sep',
-    title: 'Ganesh Stapan & Atharvashirsha Pathan',
-    marathiTitle: 'गणेश स्थापना व सामूहिक अथर्वशीर्ष पठण',
+    title: 'Ganesh Stapan & Aarti',
+    marathiTitle: 'श्री गणेश स्थापना व महाआरती',
     time: '06:00 PM',
     location: 'Main Stage (मुख्य मंडप)',
-    performers: 'Indrayani Mahila Mandal & Kids',
-    description: 'सामूहिक अथर्वशीर्ष २१ आवर्तने व बालकलाकारांचे स्वागत गीत'
+    performers: '',
+    description: 'श्रींची प्राणप्रतिष्ठापना व सामूहिक आरती'
   },
   {
     id: 'ce-2',
     day: 2,
-    dayLabel: 'Day 2 • 15 Sep • ऋषीपंचमी',
+    dayLabel: 'Day 2 • 15 Sep • Tue (मंगळ.) • ऋषीपंचमी',
     date: '15 Sep',
-    title: 'Drawing & Modak Making Competition',
-    marathiTitle: 'बाल चित्रकला व पर्यावरणपूरक मोदक स्पर्धा',
-    time: '05:30 PM',
-    location: 'Society Community Hall',
-    performers: 'Society Children (Age 5-15)',
-    description: 'गणेशोत्सव संकल्पना चित्रकला व हस्तकला प्रदर्शन'
+    title: 'Cultural Program & Aarti',
+    marathiTitle: 'सांस्कृतिक कार्यक्रम व आरती',
+    time: '06:00 PM',
+    location: 'Main Stage (मुख्य मंडप)',
+    performers: '',
+    description: 'सांस्कृतिक कार्यक्रम व महाआरती'
   },
   {
     id: 'ce-3',
     day: 3,
-    dayLabel: 'Day 3 • 16 Sep • तृतीया',
+    dayLabel: 'Day 3 • 16 Sep • Wed (बुध.) • तृतीया',
     date: '16 Sep',
-    title: 'Mahila Bhajan Mandal & Traditional Songs',
-    marathiTitle: 'महिला भजन मंडळ व पारंपरिक भक्तीगीते',
+    title: 'Bhajan Sandhya & Aarti',
+    marathiTitle: 'भजन संध्या व महाआरती',
     time: '06:30 PM',
     location: 'Main Stage (मुख्य मंडप)',
-    performers: 'Indrayani Swar Tarang Group',
-    description: 'अभंग, भारुड व पारंपरिक गवळणींचे सुश्राव्य सादरीकरण'
+    performers: '',
+    description: 'महिला भजन मंडळ व पारंपरिक भक्तीगीते'
   },
   {
     id: 'ce-4',
     day: 4,
-    dayLabel: 'Day 4 • 17 Sep • चतुर्थी',
+    dayLabel: 'Day 4 • 17 Sep • Thu (गुरु.)',
     date: '17 Sep',
-    title: 'Children Dance, Drama & Skits',
-    marathiTitle: 'बाल गोपाळ नृत्य, नाटिका व कलाविष्कार',
+    title: 'Games',
+    marathiTitle: '🎮 Games (खेळ व स्पर्धा)',
     time: '06:00 PM',
-    location: 'Main Stage (मुख्य मंडप)',
-    performers: 'Indrayani Bal Kala Manch',
-    description: 'इंद्रायणी विहार बाल कलाकार सादरीकरण व नृत्य स्पर्धा'
+    location: 'Main Mandap & Ground',
+    performers: '',
+    description: 'विविध खेळ व मनोरंजक स्पर्धांचे आयोजन'
   },
   {
     id: 'ce-5',
     day: 5,
-    dayLabel: 'Day 5 • 18 Sep • पंचमी',
+    dayLabel: 'Day 5 • 18 Sep • Fri (शुक्र.)',
     date: '18 Sep',
-    title: 'Musical Night & Classical Sugam Sangeet',
-    marathiTitle: 'सुगम संगीत संध्या व वाद्यवृंद',
+    title: 'Devotional Movie',
+    marathiTitle: '🎬 धार्मिक Movie',
     time: '07:00 PM',
     location: 'Main Stage (मुख्य मंडप)',
-    performers: 'Sur Sargam Music Troupe',
-    description: 'नाट्यसंगीत, भावगीते व भक्तीरचनांची सुरेल मैफल'
+    performers: '',
+    description: 'धार्मिक चित्रपट प्रदर्शन'
   },
   {
     id: 'ce-6',
     day: 6,
-    dayLabel: 'Day 6 • 19 Sep • गौरी आगमन',
+    dayLabel: 'Day 6 • 19 Sep • Sat (शनि.)',
     date: '19 Sep',
-    title: 'Fancy Dress Competition (Historical & Saints)',
-    marathiTitle: 'भव्य वेशभूषा स्पर्धा (संत व क्रांतिकारक)',
-    time: '05:30 PM',
+    title: 'Dance & Fancy Dress Competition',
+    marathiTitle: '💃 Dance & Fancy Dress Competition',
+    time: '06:00 PM',
     location: 'Main Stage (मुख्य मंडप)',
-    performers: 'All Society Kids & Youth',
-    description: 'ऐतिहासिक व्यक्तिमत्त्व व संतांच्या वेषातील संवाद सादरीकरण'
+    performers: '',
+    description: 'नृत्य व फॅन्सी ड्रेस स्पर्धा'
   },
   {
     id: 'ce-7',
     day: 7,
-    dayLabel: 'Day 7 • 20 Sep • गौरी पूजन',
+    dayLabel: 'Day 7 • 20 Sep • Sun (रवि.)',
     date: '20 Sep',
-    title: 'Family Antakshari & Fun Cultural Games',
-    marathiTitle: 'कौटुंबिक अंताक्षरी व सांस्कृतिक खेळ',
+    title: 'Home Minister',
+    marathiTitle: '🎤 Home Minister',
     time: '06:30 PM',
-    location: 'Society Amphitheatre',
-    performers: 'All Residents & Families',
-    description: 'सोसायटीतील सर्व विंग्समधील कुटुंबियांची महा-अंताक्षरी'
+    location: 'Main Stage (मुख्य मंडप)',
+    performers: '',
+    description: 'Home Minister (Anchor Available असल्यास)'
   },
   {
     id: 'ce-8',
     day: 8,
-    dayLabel: 'Day 8 • 21 Sep • गौरी विसर्जन',
+    dayLabel: 'Day 8 • 21 Sep • Mon (सोम.)',
     date: '21 Sep',
-    title: 'Dhol-Tasha & Traditional Lezim Showcase',
-    marathiTitle: 'ढोल-ताशा व पारंपरिक लेझीम प्रात्यक्षिक',
+    title: 'Event will be announced soon',
+    marathiTitle: '🔸 कार्यक्रम लवकरच कळवण्यात येईल',
     time: '06:00 PM',
-    location: 'Main Ground / मुख्य प्रांगण',
-    performers: 'Indrayani Yuva Dhol Pathak',
-    description: 'भव्य वादन प्रात्यक्षिक व शिवकालीन युद्धकला लेझीम'
+    location: 'Main Stage (मुख्य मंडप)',
+    performers: '',
+    description: 'कार्यक्रमाची माहिती लवकरच प्रसिद्ध केली जाईल.'
   },
   {
     id: 'ce-9',
     day: 9,
-    dayLabel: 'Day 9 • 22 Sep • नवमी',
+    dayLabel: 'Day 9 • 22 Sep • Tue (मंगळ.)',
     date: '22 Sep',
-    title: 'Shree Satyanarayan Pooja & Bhajan Sandhya',
-    marathiTitle: 'श्री सत्यनारायण महापूजा व महाप्रसाद',
-    time: '05:00 PM',
-    location: 'Main Mandap & Stage',
-    performers: 'Panditji & Bhaktimandal',
-    description: 'सामूहिक महापूजा, सत्यनारायण कथा व महाप्रसाद वाटप'
+    title: 'Event will be announced soon',
+    marathiTitle: '🔸 कार्यक्रम लवकरच कळवण्यात येईल',
+    time: '06:00 PM',
+    location: 'Main Stage (मुख्य मंडप)',
+    performers: '',
+    description: 'कार्यक्रमाची माहिती लवकरच प्रसिद्ध केली जाईल.'
   },
   {
     id: 'ce-10',
     day: 10,
-    dayLabel: 'Day 10 • 23 Sep • दशमी',
+    dayLabel: 'Day 10 • 23 Sep • Wed (बुध.)',
     date: '23 Sep',
-    title: 'Mega Drama & Cultural Orchestra',
-    marathiTitle: 'महा-नाट्य व संगीत रजनी',
+    title: 'Event will be announced soon',
+    marathiTitle: '🔸 कार्यक्रम लवकरच कळवण्यात येईल',
     time: '06:00 PM',
     location: 'Main Stage (मुख्य मंडप)',
-    performers: 'Indrayani Natya Mandal',
-    description: 'भव्य सांस्कृतिक महानाट्य व संगीत सादरीकरण'
+    performers: '',
+    description: 'कार्यक्रमाची माहिती लवकरच प्रसिद्ध केली जाईल.'
   },
   {
     id: 'ce-11',
     day: 11,
-    dayLabel: 'Day 11 • 25 Sep • अनंत चतुर्दशी',
+    dayLabel: 'Day 11 • 24 Sep • Thu (गुरु.)',
+    date: '24 Sep',
+    title: 'Mangla Gauri',
+    marathiTitle: '🌺 Mangla Gauri (मंगळागौरी)',
+    time: '05:30 PM',
+    location: 'Main Stage (मुख्य मंडप)',
+    performers: '',
+    description: 'मंगळागौरीचे पारंपरिक खेळ व पूजा'
+  },
+  {
+    id: 'ce-12',
+    day: 12,
+    dayLabel: 'Day 12 • 25 Sep • Fri (शुक्र.) • अनंत चतुर्दशी',
     date: '25 Sep',
-    title: 'Grand Farewell Miravnuk & Visarjan Aarti',
-    marathiTitle: 'भव्य विसर्जन मिरवणूक व निरोप आरती',
+    title: 'Satyanarayan Pooja, Mahaprasad & Miravnuk / Visarjan',
+    marathiTitle: '🙏 सत्यनारायण पूजा • 🍛 महाप्रसाद • 🪔 Miravnuk & Visarjan',
     time: '04:00 PM',
     location: 'Indrayani Vihar to Visarjan Ghat',
-    performers: 'Entire Indrayani Vihar Family',
-    description: 'गुलाल, पुष्पवृष्टी व ढोल-ताशा गजरात बाप्पाला भावपूर्ण निरोप'
+    performers: '',
+    description: 'सत्यनारायण पूजा, महाप्रसाद आणि विसर्जन मिरवणूक'
   }
 ];
 
 const INITIAL_MANKARI_LIST = [
-  { id: 'mk-1', day: 'Day 1', date: '14 Sep', family: 'कदम परिवार', flat: 'A-102', aarti: 'Evening' },
-  { id: 'mk-2', day: 'Day 1', date: '14 Sep', family: 'पाटील कुटुंब', flat: 'B-304', aarti: 'Evening' },
-  { id: 'mk-3', day: 'Day 2', date: '15 Sep', family: 'पवार परिवार', flat: 'C-201', aarti: 'Evening' },
-  { id: 'mk-4', day: 'Day 3', date: '16 Sep', family: 'जोशी कुटुंब', flat: 'A-504', aarti: 'Evening' },
-  { id: 'mk-5', day: 'Day 4', date: '17 Sep', family: 'श्रीमंत कदम परिवार', flat: 'A-102', aarti: 'Evening' },
-  { id: 'mk-6', day: 'Day 4', date: '17 Sep', family: 'पाटील कुटुंब', flat: 'B-304', aarti: 'Evening' },
-  { id: 'mk-7', day: 'Day 4', date: '17 Sep', family: 'देशमुख परिवार', flat: 'C-201', aarti: 'Evening' },
-  { id: 'mk-8', day: 'Day 5', date: '18 Sep', family: 'जोशी कुटुंब', flat: 'A-504', aarti: 'Evening' },
-  { id: 'mk-9', day: 'Day 6', date: '19 Sep', family: 'सावंत परिवार', flat: 'B-101', aarti: 'Evening' },
-  { id: 'mk-10', day: 'Day 7', date: '20 Sep', family: 'कुलकर्णी परिवार', flat: 'D-302', aarti: 'Evening' },
-  { id: 'mk-11', day: 'Day 8', date: '21 Sep', family: 'शिंदे परिवार', flat: 'B-202', aarti: 'Evening' },
-  { id: 'mk-12', day: 'Day 9', date: '22 Sep', family: 'गायकवाड कुटुंब', flat: 'C-405', aarti: 'Evening' },
-  { id: 'mk-13', day: 'Day 10', date: '23 Sep', family: 'मोरे परिवार', flat: 'A-301', aarti: 'Evening' },
-  { id: 'mk-14', day: 'Day 11', date: '25 Sep', family: 'समस्त इंद्रायणी विहार रहिवासी', flat: 'All Wings', aarti: 'Maha Aarti' }
+  // Day 1 • 14 Sept • Mon (सोम.)
+  { id: 'mk-1-1', day: 1, name: 'श्री. केसरकर' },
+  { id: 'mk-1-2', day: 1, name: 'श्री. जाधव (बबन)' },
+  { id: 'mk-1-3', day: 1, name: 'श्री. भोर (सुदाम)' },
+  { id: 'mk-1-4', day: 1, name: 'श्री. पाटील (सुभाष)' },
+  { id: 'mk-1-5', day: 1, name: 'श्री. ठुबे' },
+  { id: 'mk-1-6', day: 1, name: 'श्री. घनवट' },
+  { id: 'mk-1-7', day: 1, name: 'श्री. हिंगे' },
+
+  // Day 2 • 15 Sept • Tue (मंगळ.)
+  { id: 'mk-2-1', day: 2, name: 'श्री. कराड' },
+  { id: 'mk-2-2', day: 2, name: 'श्री. वाबळे' },
+  { id: 'mk-2-3', day: 2, name: 'श्री. उमाशंकर' },
+  { id: 'mk-2-4', day: 2, name: 'श्री. चासकर' },
+  { id: 'mk-2-5', day: 2, name: 'श्री. आवळे' },
+
+  // Day 3 • 16 Sept • Wed (बुध.)
+  { id: 'mk-3-1', day: 3, name: 'श्री. वानखेडे' },
+  { id: 'mk-3-2', day: 3, name: 'श्री. जाधव (बळीराम)' },
+  { id: 'mk-3-3', day: 3, name: 'श्री. पाटील (शहाजी)' },
+  { id: 'mk-3-4', day: 3, name: 'श्री. पिसाळ' },
+  { id: 'mk-3-5', day: 3, name: 'श्री. देव' },
+  { id: 'mk-3-6', day: 3, name: 'श्री. देवकर' },
+  { id: 'mk-3-7', day: 3, name: 'श्री. सिंग (एस. पी.)' },
+
+  // Day 4 • 17 Sept • Thu (गुरु.)
+  { id: 'mk-4-1', day: 4, name: 'श्री. गावडे' },
+  { id: 'mk-4-2', day: 4, name: 'श्री. दुधाळे' },
+  { id: 'mk-4-3', day: 4, name: 'श्री. माने (गुरुजी)' },
+  { id: 'mk-4-4', day: 4, name: 'श्री. काळे' },
+  { id: 'mk-4-5', day: 4, name: 'श्री. सिंग (आर.पी.)' },
+  { id: 'mk-4-6', day: 4, name: 'श्री. तळेकर' },
+
+  // Day 5 • 18 Sept • Fri (शुक्र.)
+  { id: 'mk-5-1', day: 5, name: 'श्री. काटे' },
+  { id: 'mk-5-2', day: 5, name: 'श्री. मोटे' },
+  { id: 'mk-5-3', day: 5, name: 'श्री. घोडेकर' },
+  { id: 'mk-5-4', day: 5, name: 'श्री. दाते' },
+  { id: 'mk-5-5', day: 5, name: 'श्री. भोर (चंद्रकांत)' },
+  { id: 'mk-5-6', day: 5, name: 'श्री. माने (सोपान)' },
+  { id: 'mk-5-7', day: 5, name: 'श्री. साळुंखे' },
+
+  // Day 6 • 19 Sept • Sat (शनि.)
+  { id: 'mk-6-1', day: 6, name: 'श्री. पवार' },
+  { id: 'mk-6-2', day: 6, name: 'श्री. रायकर' },
+  { id: 'mk-6-3', day: 6, name: 'श्री. चिकणे' },
+  { id: 'mk-6-4', day: 6, name: 'श्री. खांदवे (श्रीहरी)' },
+  { id: 'mk-6-5', day: 6, name: 'श्री. लांडगे' },
+  { id: 'mk-6-6', day: 6, name: 'श्री. बहिरट' },
+  { id: 'mk-6-7', day: 6, name: 'श्री. पटाडे' },
+
+  // Day 7 • 20 Sept • Sun (रवि.)
+  { id: 'mk-7-1', day: 7, name: 'श्री. वाळुंज' },
+  { id: 'mk-7-2', day: 7, name: 'श्री. नवले' },
+  { id: 'mk-7-3', day: 7, name: 'श्री. कांबळे (अशोक)' },
+  { id: 'mk-7-4', day: 7, name: 'श्री. नायर' },
+  { id: 'mk-7-5', day: 7, name: 'श्री. हल्लाळे' },
+  { id: 'mk-7-6', day: 7, name: 'श्री. प्रभुणे' },
+  { id: 'mk-7-7', day: 7, name: 'श्री. राऊळ' },
+
+  // Day 8 • 21 Sept • Mon (सोम.)
+  { id: 'mk-8-1', day: 8, name: 'श्री. बागल' },
+  { id: 'mk-8-2', day: 8, name: 'पाचपुते काकू' },
+  { id: 'mk-8-3', day: 8, name: 'श्री. ढाणे संतोष' },
+  { id: 'mk-8-4', day: 8, name: 'श्री. जाधव (सुरज)' },
+  { id: 'mk-8-5', day: 8, name: 'श्री. खालकर' },
+  { id: 'mk-8-6', day: 8, name: 'श्री. यादव' },
+  { id: 'mk-8-7', day: 8, name: 'श्री. आवारी' },
+
+  // Day 9 • 22 Sept • Tue (मंगळ.)
+  { id: 'mk-9-1', day: 9, name: 'श्री. रोमण' },
+  { id: 'mk-9-2', day: 9, name: 'श्री. कांबळे (एस. एल.)' },
+  { id: 'mk-9-3', day: 9, name: 'श्री. गावडे (विकी)' },
+  { id: 'mk-9-4', day: 9, name: 'श्री. मुंगसे' },
+  { id: 'mk-9-5', day: 9, name: 'श्री. गोरे' },
+
+  // Day 10 • 23 Sept • Wed (बुध.)
+  { id: 'mk-10-1', day: 10, name: 'श्री. गायकवाड' },
+  { id: 'mk-10-2', day: 10, name: 'श्री. वायदंडे' },
+  { id: 'mk-10-3', day: 10, name: 'श्री. लवंगे' },
+  { id: 'mk-10-4', day: 10, name: 'श्री. भोईटे' },
+  { id: 'mk-10-5', day: 10, name: 'श्री. देसाई' },
+
+  // Day 11 • 24 Sept • Thu (गुरु.)
+  { id: 'mk-11-1', day: 11, name: 'मंडळातील सर्व युवा कार्यकर्ते' },
+
+  // Day 12 • 25 Sept • Fri (शुक्र.)
+  { id: 'mk-12-1', day: 12, name: 'महाप्रसाद व विसर्जन मिरवणूक' }
 ];
 
-const INITIAL_VARGANI = [
-  {
-    id: 'v-1',
-    receiptNo: '#IV-2026-089',
-    donorName: 'Santosh Kulkarni',
-    wingFlat: 'B-402',
-    phone: '9820123456',
-    amount: 2100,
-    mode: 'UPI',
-    status: 'verified',
-    utr: '428901234567',
-    screenshotUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&auto=format&fit=crop&q=60',
-    collectedBy: 'Vijay Pawar (Treasurer)',
-    createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
-    notes: 'Aarti sponsorship & special puja'
-  },
-  {
-    id: 'v-2',
-    receiptNo: '#IV-2026-088',
-    donorName: 'Deepak & Sunita Deshmukh',
-    wingFlat: 'A-104',
-    phone: '9819876543',
-    amount: 5001,
-    mode: 'UPI',
-    status: 'verified',
-    utr: '428812349876',
-    screenshotUrl: 'https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=400&auto=format&fit=crop&q=60',
-    collectedBy: 'Sachin Joshi (President)',
-    createdAt: new Date(Date.now() - 3600000 * 18).toISOString(),
-    notes: 'Annual building vargani'
-  },
-  {
-    id: 'v-3',
-    receiptNo: '#IV-2026-087',
-    donorName: 'Mahesh Jewellers (Sponsor)',
-    wingFlat: 'Shop No 4',
-    phone: '9892345678',
-    amount: 25000,
-    mode: 'Bank Transfer',
-    status: 'verified',
-    utr: '428756473829',
-    screenshotUrl: '',
-    collectedBy: 'Vijay Pawar (Treasurer)',
-    createdAt: new Date(Date.now() - 3600000 * 10).toISOString(),
-    notes: 'Main Stage & Lighting banner sponsor'
-  },
-  {
-    id: 'v-4',
-    receiptNo: '#IV-2026-086',
-    donorName: 'Anil Jadhav',
-    wingFlat: 'C-302',
-    phone: '9833445566',
-    amount: 1001,
-    mode: 'UPI',
-    status: 'pending',
-    utr: '428612345098',
-    screenshotUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&auto=format&fit=crop&q=60',
-    collectedBy: 'Online Portal',
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    notes: 'Submitted via Public Portal'
-  },
-  {
-    id: 'v-5',
-    receiptNo: '#IV-2026-085',
-    donorName: 'Priya & Rajesh Sharma',
-    wingFlat: 'D-601',
-    phone: '9821001122',
-    amount: 3500,
-    mode: 'Cash',
-    status: 'verified',
-    utr: '',
-    screenshotUrl: '',
-    collectedBy: 'Amit Kadam',
-    createdAt: new Date().toISOString(),
-    notes: 'Modak Prasad contribution'
-  }
-];
+const INITIAL_VARGANI = [];
 
-const INITIAL_EXPENSES = [
-  {
-    id: 'e-1',
-    title: 'Eco-Friendly Pandal & Stage Mandap',
-    category: 'Decoration',
-    amount: 28000,
-    vendor: 'Shiv Mandap Decorators',
-    paidBy: 'Vijay Pawar',
-    date: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
-    receiptUrl: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=400&auto=format&fit=crop&q=60',
-    notes: 'Full pandal & floral entrance'
-  },
-  {
-    id: 'e-2',
-    title: 'Sound System, DJ & Lighting Setup',
-    category: 'Sound & Lights',
-    amount: 18500,
-    vendor: 'Om Sound & Vision',
-    paidBy: 'Vijay Pawar',
-    date: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
-    receiptUrl: '',
-    notes: 'Sound equipment for 10 days'
-  },
-  {
-    id: 'e-3',
-    title: 'Shree Ganpati Murti Advance & Poojan Items',
-    category: 'Murti',
-    amount: 15000,
-    vendor: 'Pen Clay Sculptors',
-    paidBy: 'Sachin Joshi (President)',
-    date: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
-    receiptUrl: '',
-    notes: 'Eco-friendly clay murti'
-  },
-  {
-    id: 'e-4',
-    title: 'Maha Prasad & Modak Distribution (Day 1)',
-    category: 'Mahaprasad',
-    amount: 8200,
-    vendor: 'Shree Krishna Sweets',
-    paidBy: 'Amit Kadam (Secretary)',
-    date: new Date().toISOString(),
-    receiptUrl: '',
-    notes: 'Prasad for 600 devotees'
-  }
-];
+const INITIAL_EXPENSES = [];
 
-const INITIAL_TASKS = [
-  { id: 't-1', title: 'Morning Aarti (सकाळची आरती व नैवेद्य)', time: '07:30 AM', assignedTo: 'Sachin Joshi', status: 'done', category: 'Ritual' },
-  { id: 't-2', title: 'Prasad Distribution Counter Setup', time: '11:00 AM', assignedTo: 'Sunita Deshmukh', status: 'done', category: 'Seva' },
-  { id: 't-3', title: 'Collect Vargani from Wing C & D', time: '04:30 PM', assignedTo: 'Amit Kadam', status: 'todo', category: 'Vargani' },
-  { id: 't-4', title: 'Evening Maha Aarti & Dhol Tasha Pathak', time: '08:00 PM', assignedTo: 'Pranav Patil', status: 'todo', category: 'Ritual' },
-  { id: 't-5', title: 'Daily Cash Counting & Tally with Treasurer', time: '10:30 PM', assignedTo: 'Vijay Pawar', status: 'todo', category: 'Accounts' }
-];
+const INITIAL_TASKS = [];
 
 const INITIAL_DHOL_INVENTORY = {
-  dhol: 24,
-  tasha: 12,
-  dhwaja: 8,
-  tol: 16
+  dhol: 0,
+  tasha: 0,
+  dhwaja: 0,
+  tol: 0
 };
 
-const INITIAL_DHOL_MAINTENANCE = [
+const INITIAL_DHOL_MAINTENANCE = [];
+
+const INITIAL_DHOL_STORAGE = [];
+
+const INITIAL_GAME_WINNERS = [
+  // 1. Musical Chair
   {
-    id: 'dm-1',
-    instrumentType: 'Dhol Leather Tightening & Strings',
-    amount: 4200,
-    servicedBy: 'Kolhapur Vadya Kendra',
-    date: new Date(Date.now() - 3600000 * 24 * 10).toISOString(),
-    notes: 'Tightened leather rings and replaced 6 cords'
+    id: 'gw-mc-kaku',
+    gameName: 'Musical Chair',
+    category: 'Kaku',
+    first: 'Mote Kaku',
+    second: 'Deokar Kaku',
+    third: 'Bhor Kaku',
+    createdAt: '2026-09-17T00:00:00.000Z'
   },
   {
-    id: 'dm-2',
-    instrumentType: 'Tasha Snare Wire & Brass Polish',
-    amount: 2800,
-    servicedBy: 'Pune Vadya Shala',
-    date: new Date(Date.now() - 3600000 * 24 * 4).toISOString(),
-    notes: 'Replaced 4 snare wires and balanced heads'
+    id: 'gw-mc-vahini',
+    gameName: 'Musical Chair',
+    category: 'Vahini',
+    first: 'Navele Vahini',
+    second: 'Samudre Vahini',
+    third: 'Salunkhe Vahini',
+    createdAt: '2026-09-17T00:01:00.000Z'
   },
   {
-    id: 'dm-3',
-    instrumentType: 'Dhwaja Brass Rings & Silk Banners',
-    amount: 1500,
-    servicedBy: 'Maharashtrian Flag Works',
-    date: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
-    notes: 'Ironed saffron flags and lubricated poles'
+    id: 'gw-mc-girlskids',
+    gameName: 'Musical Chair',
+    category: 'Girls (Kids)',
+    first: 'Panjali',
+    second: 'Advika Salunkhe',
+    third: 'Jui Bhor',
+    createdAt: '2026-09-17T00:02:00.000Z'
+  },
+  {
+    id: 'gw-mc-girls',
+    gameName: 'Musical Chair',
+    category: 'Girls',
+    first: 'Vedika Salunkhe',
+    second: 'Tanvi Kate',
+    third: 'Anushka Kesarkar',
+    createdAt: '2026-09-17T00:03:00.000Z'
+  },
+  {
+    id: 'gw-mc-boys',
+    gameName: 'Musical Chair',
+    category: 'Boys',
+    first: 'Shivansh',
+    second: 'Param Jadhav',
+    third: 'Om Kate',
+    createdAt: '2026-09-17T00:04:00.000Z'
+  },
+  {
+    id: 'gw-mc-boys2',
+    gameName: 'Musical Chair',
+    category: 'Boys (Group 2)',
+    first: '',
+    second: '',
+    third: 'Vivan Singh',
+    createdAt: '2026-09-17T00:05:00.000Z'
+  },
+  {
+    id: 'gw-mc-mens',
+    gameName: 'Musical Chair',
+    category: 'Mens',
+    first: 'Akshay Bhor',
+    second: 'Praveen Dhanwat',
+    third: 'Sushil Bhor',
+    createdAt: '2026-09-17T00:06:00.000Z'
+  },
+
+  // 2. Slow Cycling
+  {
+    id: 'gw-sc-boys',
+    gameName: 'Slow Cycling',
+    category: 'Boys',
+    first: 'Shivansh Khandve',
+    second: '',
+    third: '',
+    createdAt: '2026-09-17T00:07:00.000Z'
+  },
+  {
+    id: 'gw-sc-girls',
+    gameName: 'Slow Cycling',
+    category: 'Girls',
+    first: 'Isha Khandve',
+    second: '',
+    third: '',
+    createdAt: '2026-09-17T00:08:00.000Z'
+  },
+
+  // 3. Chamcha Limbu
+  {
+    id: 'gw-cl-girls',
+    gameName: 'Chamcha Limbu',
+    category: 'Girls',
+    first: 'Panjali',
+    second: 'Prisha Phatade',
+    third: 'Ira Walunj',
+    createdAt: '2026-09-17T00:09:00.000Z'
+  },
+  {
+    id: 'gw-cl-boys',
+    gameName: 'Chamcha Limbu',
+    category: 'Boys',
+    first: 'Malhar',
+    second: 'Param Jadhav',
+    third: 'Anvit Deokar',
+    createdAt: '2026-09-17T00:10:00.000Z'
+  },
+  {
+    id: 'gw-cl-boys-girls',
+    gameName: 'Chamcha Limbu',
+    category: 'Boys & Girls',
+    first: 'Darsh Date',
+    second: 'Isha Khandve',
+    third: 'Vedika Salunkhe',
+    createdAt: '2026-09-17T00:11:00.000Z'
+  },
+
+  // 4. Plate Game
+  {
+    id: 'gw-pg-girls',
+    gameName: 'Plate Game',
+    category: 'Girls',
+    first: 'Ira Walunj',
+    second: 'Jui Bhor',
+    third: 'Prisha Phatade',
+    createdAt: '2026-09-17T00:12:00.000Z'
+  },
+  {
+    id: 'gw-pg-boys-till4th',
+    gameName: 'Plate Game',
+    category: 'Boys (Till 4th)',
+    first: 'Yugansh Khandve',
+    second: 'Krishna Yadav',
+    third: 'Varad Bhor',
+    createdAt: '2026-09-17T00:13:00.000Z'
+  },
+  {
+    id: 'gw-pg-boys-group2',
+    gameName: 'Plate Game',
+    category: 'Boys (Group 2)',
+    first: 'Om Kate',
+    second: 'Anvit Deokar',
+    third: 'Advik Khandve',
+    createdAt: '2026-09-17T00:14:00.000Z'
+  },
+  {
+    id: 'gw-pg-kids',
+    gameName: 'Plate Game',
+    category: 'Kids',
+    first: 'Vignesh Joshi',
+    second: 'Adesh Kesarkar',
+    third: 'Neel Bhor',
+    createdAt: '2026-09-17T00:15:00.000Z'
+  },
+  {
+    id: 'gw-pg-boys-group3',
+    gameName: 'Plate Game',
+    category: 'Boys (Group 3)',
+    first: 'Shivansh Khandve',
+    second: 'Yash Hallald',
+    third: 'Vivan Singh',
+    createdAt: '2026-09-17T00:16:00.000Z'
+  },
+  {
+    id: 'gw-pg-girls-group2',
+    gameName: 'Plate Game',
+    category: 'Girls (Group 2)',
+    first: 'Tanvi Kamra',
+    second: 'Rahi Walunj',
+    third: '',
+    createdAt: '2026-09-17T00:17:00.000Z'
+  },
+
+  // 5. Jump Game
+  {
+    id: 'gw-jg-girls',
+    gameName: 'Jump Game',
+    category: 'Girls',
+    first: 'Ira',
+    second: 'Rachana',
+    third: 'Advika',
+    createdAt: '2026-09-17T00:18:00.000Z'
+  },
+  {
+    id: 'gw-jg-boys',
+    gameName: 'Jump Game',
+    category: 'Boys',
+    first: 'Anvit Deokar',
+    second: 'Param',
+    third: 'Mayank',
+    createdAt: '2026-09-17T00:19:00.000Z'
+  },
+  {
+    id: 'gw-jg-girls-group2',
+    gameName: 'Jump Game',
+    category: 'Girls (Group 2)',
+    first: 'Parisha',
+    second: 'Panjali',
+    third: 'Purva',
+    createdAt: '2026-09-17T00:20:00.000Z'
+  },
+
+  // 6. Balloon Competition
+  {
+    id: 'gw-bc-girls',
+    gameName: 'Balloon Competition',
+    category: 'Girls',
+    first: 'Vedika',
+    second: '',
+    third: '',
+    createdAt: '2026-09-17T00:21:00.000Z'
+  },
+  {
+    id: 'gw-bc-boys',
+    gameName: 'Balloon Competition',
+    category: 'Boys',
+    first: 'Aaryan Chandra',
+    second: '',
+    third: '',
+    createdAt: '2026-09-17T00:22:00.000Z'
+  },
+  {
+    id: 'gw-bc-boys-group2',
+    gameName: 'Balloon Competition',
+    category: 'Boys (Group 2)',
+    first: 'Vedant Awale',
+    second: 'Prathmesh Mote',
+    third: '',
+    createdAt: '2026-09-17T00:23:00.000Z'
   }
 ];
 
-const INITIAL_DHOL_STORAGE = [
-  {
-    id: 'ds-1',
-    personName: 'Sachin Joshi',
-    phone: '9820011223',
-    location: 'A-Wing Parking Storage',
-    dholCount: 8,
-    tashaCount: 4,
-    status: 'In Storage',
-    date: '2026-09-01',
-    notes: 'Includes 8 pairs of sticks & 4 stands'
-  },
-  {
-    id: 'ds-2',
-    personName: 'Vijay Pawar',
-    phone: '9820044556',
-    location: 'B-Wing Ground Floor Society Store',
-    dholCount: 10,
-    tashaCount: 5,
-    status: 'In Storage',
-    date: '2026-09-01',
-    notes: 'Covered with waterproof tarp'
-  },
-  {
-    id: 'ds-3',
-    personName: 'Ramesh Shinde',
-    phone: '9820022334',
-    location: 'C-Wing Basement Room',
-    dholCount: 6,
-    tashaCount: 3,
-    status: 'In Storage',
-    date: '2026-09-02',
-    notes: 'Kept with Dhwaja & poles'
-  }
-];
+const INITIAL_SCHEDULE = [];
 
-const INITIAL_SCHEDULE = [
-  { id: 'sc-1', time: '07:30 AM', title: 'Morning Aarti & Abhishek', marathiTitle: 'सकाळची मंगल आरती व अभिषेक', type: 'aarti', priest: 'Pandit Sharma', mankari: 'Deshmukh Family (A-102)' },
-  { id: 'sc-2', time: '10:00 AM', title: 'Devotee Darshan & Bhajana Mandal', marathiTitle: 'भाविकांचे दर्शन व महिला भजन मंडळ', type: 'darshan', mankari: 'Mahila Bhajan Mandal' },
-  { id: 'sc-3', time: '01:00 PM', title: 'Maha Prasad Distribution', marathiTitle: 'महाप्रसाद वाटप व अन्नदान', type: 'prasad', mankari: 'Pawar Family (C-201)' },
-  { id: 'sc-4', time: '05:30 PM', title: 'Children Drawing & Modak Competition', marathiTitle: 'बालचित्रकला व मोदक स्पर्धा', type: 'cultural', mankari: 'Youth Wing' },
-  { id: 'sc-5', time: '08:00 PM', title: 'Evening Grand Maha Aarti & Dhol-Tasha', marathiTitle: 'संध्याकाळची महाआरती व ढोल-ताशा गजर', type: 'aarti', priest: 'All Organizers', mankari: 'Kulkarni Family (B-404)' },
-  { id: 'sc-6', time: '10:30 PM', title: 'Daily Darshan Close & Accounts Tally', marathiTitle: 'दर्शन समाप्ती व हिशोब तपासणी', type: 'accounts', mankari: 'Vijay Pawar & Sachin Joshi' }
-];
+import { useAuth } from './AuthContext';
+import { logSecurityEvent } from '../utils/securityLogger';
 
 export function MandalDataProvider({ children }) {
+  const { isAuthenticated } = useAuth();
+
   const [config, setConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('iv_mandal_config');
@@ -423,6 +551,7 @@ export function MandalDataProvider({ children }) {
   });
 
   const [vargani, setVargani] = useState(() => {
+    if (!isAuthenticated) return INITIAL_VARGANI;
     try {
       const saved = localStorage.getItem('iv_mandal_vargani');
       return saved ? JSON.parse(saved) : INITIAL_VARGANI;
@@ -432,6 +561,7 @@ export function MandalDataProvider({ children }) {
   });
 
   const [expenses, setExpenses] = useState(() => {
+    if (!isAuthenticated) return INITIAL_EXPENSES;
     try {
       const saved = localStorage.getItem('iv_mandal_expenses');
       return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
@@ -441,6 +571,7 @@ export function MandalDataProvider({ children }) {
   });
 
   const [tasks, setTasks] = useState(() => {
+    if (!isAuthenticated) return INITIAL_TASKS;
     try {
       const saved = localStorage.getItem('iv_mandal_tasks');
       return saved ? JSON.parse(saved) : INITIAL_TASKS;
@@ -450,6 +581,7 @@ export function MandalDataProvider({ children }) {
   });
 
   const [dholInventory, setDholInventory] = useState(() => {
+    if (!isAuthenticated) return INITIAL_DHOL_INVENTORY;
     try {
       const saved = localStorage.getItem('iv_dhol_inventory');
       return saved ? JSON.parse(saved) : INITIAL_DHOL_INVENTORY;
@@ -459,6 +591,7 @@ export function MandalDataProvider({ children }) {
   });
 
   const [dholMaintenance, setDholMaintenance] = useState(() => {
+    if (!isAuthenticated) return INITIAL_DHOL_MAINTENANCE;
     try {
       const saved = localStorage.getItem('iv_dhol_maintenance');
       return saved ? JSON.parse(saved) : INITIAL_DHOL_MAINTENANCE;
@@ -468,6 +601,7 @@ export function MandalDataProvider({ children }) {
   });
 
   const [dholStorage, setDholStorage] = useState(() => {
+    if (!isAuthenticated) return INITIAL_DHOL_STORAGE;
     try {
       const saved = localStorage.getItem('iv_dhol_storage');
       return saved ? JSON.parse(saved) : INITIAL_DHOL_STORAGE;
@@ -497,7 +631,11 @@ export function MandalDataProvider({ children }) {
   const [mankariList, setMankariList] = useState(() => {
     try {
       const saved = localStorage.getItem('iv_mankari_list');
-      return saved ? JSON.parse(saved) : INITIAL_MANKARI_LIST;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return INITIAL_MANKARI_LIST;
     } catch {
       return INITIAL_MANKARI_LIST;
     }
@@ -516,36 +654,25 @@ export function MandalDataProvider({ children }) {
     }
   });
 
+  const [gameWinners, setGameWinners] = useState(() => {
+    try {
+      const saved = localStorage.getItem('iv_game_winners');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return INITIAL_GAME_WINNERS;
+    } catch {
+      return INITIAL_GAME_WINNERS;
+    }
+  });
+
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
-  // Sync to localStorage
+  // Sync public config & schedules to localStorage
   useEffect(() => {
     localStorage.setItem('iv_mandal_config', JSON.stringify(config));
   }, [config]);
-
-  useEffect(() => {
-    localStorage.setItem('iv_mandal_vargani', JSON.stringify(vargani));
-  }, [vargani]);
-
-  useEffect(() => {
-    localStorage.setItem('iv_mandal_expenses', JSON.stringify(expenses));
-  }, [expenses]);
-
-  useEffect(() => {
-    localStorage.setItem('iv_mandal_tasks', JSON.stringify(tasks));
-  }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem('iv_dhol_inventory', JSON.stringify(dholInventory));
-  }, [dholInventory]);
-
-  useEffect(() => {
-    localStorage.setItem('iv_dhol_maintenance', JSON.stringify(dholMaintenance));
-  }, [dholMaintenance]);
-
-  useEffect(() => {
-    localStorage.setItem('iv_dhol_storage', JSON.stringify(dholStorage));
-  }, [dholStorage]);
 
   useEffect(() => {
     localStorage.setItem('iv_schedule', JSON.stringify(schedule));
@@ -563,6 +690,40 @@ export function MandalDataProvider({ children }) {
     localStorage.setItem('iv_cultural_events', JSON.stringify(culturalEvents));
   }, [culturalEvents]);
 
+  useEffect(() => {
+    localStorage.setItem('iv_game_winners', JSON.stringify(gameWinners));
+  }, [gameWinners]);
+
+  // Sync private organiser-only data ONLY when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      localStorage.setItem('iv_mandal_vargani', JSON.stringify(vargani));
+      localStorage.setItem('iv_mandal_expenses', JSON.stringify(expenses));
+      localStorage.setItem('iv_mandal_tasks', JSON.stringify(tasks));
+      localStorage.setItem('iv_dhol_inventory', JSON.stringify(dholInventory));
+      localStorage.setItem('iv_dhol_maintenance', JSON.stringify(dholMaintenance));
+      localStorage.setItem('iv_dhol_storage', JSON.stringify(dholStorage));
+    }
+  }, [isAuthenticated, vargani, expenses, tasks, dholInventory, dholMaintenance, dholStorage]);
+
+  // Clean up private state on logout only
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.removeItem('iv_mandal_vargani');
+      localStorage.removeItem('iv_mandal_expenses');
+      localStorage.removeItem('iv_mandal_tasks');
+      localStorage.removeItem('iv_dhol_inventory');
+      localStorage.removeItem('iv_dhol_maintenance');
+      localStorage.removeItem('iv_dhol_storage');
+      setVargani([]);
+      setExpenses([]);
+      setTasks([]);
+      setDholInventory(INITIAL_DHOL_INVENTORY);
+      setDholMaintenance([]);
+      setDholStorage([]);
+    }
+  }, [isAuthenticated]);
+
   // Online / Offline window listeners
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -577,12 +738,12 @@ export function MandalDataProvider({ children }) {
     };
   }, []);
 
-  // Comprehensive Live Firestore Real-Time Subscriptions Across All Entities
+  // 1. Public Content Live Subscriptions (Open to both public & organisers)
   useEffect(() => {
     if (!isConfigured || !db) return;
 
     try {
-      // 1. Mandal Config
+      // Mandal Config
       const unsubConfig = onSnapshot(doc(db, 'mandalConfig', 'main'), (snapshot) => {
         if (snapshot.exists()) {
           setConfig(prev => ({ ...INITIAL_MANDAL_CONFIG, ...snapshot.data() }));
@@ -591,7 +752,7 @@ export function MandalDataProvider({ children }) {
         }
       }, (err) => console.warn('Firestore Config listener:', err));
 
-      // 2. Public Content (Aarti times, announcements, banners)
+      // Public Content (Aarti times, announcements, banners)
       const unsubPublicContent = onSnapshot(doc(db, 'publicContent', 'main'), (snapshot) => {
         if (snapshot.exists()) {
           setPublicContent(prev => ({ ...INITIAL_PUBLIC_CONTENT, ...snapshot.data() }));
@@ -600,25 +761,36 @@ export function MandalDataProvider({ children }) {
         }
       }, (err) => console.warn('Firestore PublicContent listener:', err));
 
-      // 3. Cultural Events (Day 1-11 Performances)
+      // Cultural Events (Day 1-12 Performances)
       const unsubCultural = onSnapshot(doc(db, 'culturalEvents', 'main'), (snapshot) => {
-        if (snapshot.exists() && Array.isArray(snapshot.data()?.events)) {
-          setCulturalEvents(snapshot.data().events);
-        } else {
-          setDoc(doc(db, 'culturalEvents', 'main'), { events: INITIAL_CULTURAL_EVENTS }, { merge: true }).catch(() => {});
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          const list = data?.events || data?.list;
+          if (Array.isArray(list) && list.length > 0) {
+            setCulturalEvents(list);
+            localStorage.setItem('iv_cultural_events', JSON.stringify(list));
+            return;
+          }
         }
+        setDoc(doc(db, 'culturalEvents', 'main'), { events: INITIAL_CULTURAL_EVENTS, list: INITIAL_CULTURAL_EVENTS }, { merge: true }).catch(() => {});
+        setCulturalEvents(INITIAL_CULTURAL_EVENTS);
       }, (err) => console.warn('Firestore CulturalEvents listener:', err));
 
-      // 4. Mankari List
+      // Mankari List
       const unsubMankari = onSnapshot(doc(db, 'mankariList', 'main'), (snapshot) => {
-        if (snapshot.exists() && Array.isArray(snapshot.data()?.list)) {
-          setMankariList(snapshot.data().list);
-        } else {
-          setDoc(doc(db, 'mankariList', 'main'), { list: INITIAL_MANKARI_LIST }, { merge: true }).catch(() => {});
+        if (snapshot.exists()) {
+          const list = snapshot.data()?.list;
+          if (Array.isArray(list) && list.length > 0) {
+            setMankariList(list);
+            localStorage.setItem('iv_mankari_list', JSON.stringify(list));
+            return;
+          }
         }
+        setDoc(doc(db, 'mankariList', 'main'), { list: INITIAL_MANKARI_LIST }, { merge: true }).catch(() => {});
+        setMankariList(INITIAL_MANKARI_LIST);
       }, (err) => console.warn('Firestore MankariList listener:', err));
 
-      // 5. Schedule
+      // Schedule
       const unsubSchedule = onSnapshot(doc(db, 'schedule', 'main'), (snapshot) => {
         if (snapshot.exists() && Array.isArray(snapshot.data()?.list)) {
           setSchedule(snapshot.data().list);
@@ -627,65 +799,20 @@ export function MandalDataProvider({ children }) {
         }
       }, (err) => console.warn('Firestore Schedule listener:', err));
 
-      // 6. Vargani Collection
-      const unsubVargani = onSnapshot(collection(db, 'vargani'), (snapshot) => {
-        if (!snapshot.empty) {
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          setVargani(list);
-        } else {
-          INITIAL_VARGANI.forEach(v => {
-            setDoc(doc(db, 'vargani', v.id), v, { merge: true }).catch(() => {});
-          });
+      // Game Winners List
+      const unsubWinners = onSnapshot(doc(db, 'gameWinners', 'main'), (snapshot) => {
+        if (snapshot.exists()) {
+          const list = snapshot.data()?.list || snapshot.data()?.winners || snapshot.data()?.items;
+          if (Array.isArray(list) && list.length > 0) {
+            setGameWinners(list);
+            localStorage.setItem('iv_game_winners', JSON.stringify(list));
+            return;
+          }
         }
-      }, (err) => console.warn('Firestore Vargani listener:', err));
-
-      // 7. Expenses Collection
-      const unsubExpenses = onSnapshot(collection(db, 'expenses'), (snapshot) => {
-        if (!snapshot.empty) {
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          setExpenses(list);
-        } else {
-          INITIAL_EXPENSES.forEach(e => {
-            setDoc(doc(db, 'expenses', e.id), e, { merge: true }).catch(() => {});
-          });
-        }
-      }, (err) => console.warn('Firestore Expenses listener:', err));
-
-      // 8. Tasks Collection
-      const unsubTasks = onSnapshot(collection(db, 'tasks'), (snapshot) => {
-        if (!snapshot.empty) {
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          setTasks(list);
-        } else {
-          INITIAL_TASKS.forEach(t => {
-            setDoc(doc(db, 'tasks', t.id), t, { merge: true }).catch(() => {});
-          });
-        }
-      }, (err) => console.warn('Firestore Tasks listener:', err));
-
-      // 9. Dhol Storage Collection
-      const unsubDholStorage = onSnapshot(collection(db, 'dholStorage'), (snapshot) => {
-        if (!snapshot.empty) {
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          setDholStorage(list);
-        } else {
-          INITIAL_DHOL_STORAGE.forEach(ds => {
-            setDoc(doc(db, 'dholStorage', ds.id), ds, { merge: true }).catch(() => {});
-          });
-        }
-      }, (err) => console.warn('Firestore DholStorage listener:', err));
-
-      // 10. Dhol Maintenance Collection
-      const unsubDholMaint = onSnapshot(collection(db, 'dholMaintenance'), (snapshot) => {
-        if (!snapshot.empty) {
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          setDholMaintenance(list);
-        } else {
-          INITIAL_DHOL_MAINTENANCE.forEach(dm => {
-            setDoc(doc(db, 'dholMaintenance', dm.id), dm, { merge: true }).catch(() => {});
-          });
-        }
-      }, (err) => console.warn('Firestore DholMaintenance listener:', err));
+        setDoc(doc(db, 'gameWinners', 'main'), { list: INITIAL_GAME_WINNERS }, { merge: true }).catch(() => {});
+        setGameWinners(INITIAL_GAME_WINNERS);
+        localStorage.setItem('iv_game_winners', JSON.stringify(INITIAL_GAME_WINNERS));
+      }, (err) => console.warn('Firestore GameWinners listener:', err));
 
       return () => {
         unsubConfig();
@@ -693,6 +820,108 @@ export function MandalDataProvider({ children }) {
         unsubCultural();
         unsubMankari();
         unsubSchedule();
+        unsubWinners();
+      };
+    } catch (e) {
+      console.warn('Firestore public subscription fallback:', e);
+    }
+  }, []);
+
+  // 2. Private Organiser-Only Live Subscriptions (Active ONLY when isAuthenticated === true)
+  useEffect(() => {
+    if (!isAuthenticated || !isConfigured || !db) return;
+
+    try {
+      // Vargani Collection (Organiser View)
+      const unsubVargani = onSnapshot(collection(db, 'vargani'), (snapshot) => {
+        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const seen = new Set();
+        const deduplicated = list.filter(item => {
+          if (!item?.id) return true;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+        setVargani(deduplicated);
+      }, (err) => {
+        console.warn('Firestore Vargani listener error:', err);
+        logSecurityEvent({
+          type: 'FIRESTORE_PERMISSION_DENIED',
+          severity: 'WARN',
+          message: `Firestore vargani subscription error: ${err?.code || err?.message}`,
+          details: { errorCode: err?.code }
+        });
+      });
+
+      // Expenses Collection (Organiser View)
+      const unsubExpenses = onSnapshot(collection(db, 'expenses'), (snapshot) => {
+        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const seen = new Set();
+        const deduplicated = list.filter(item => {
+          if (!item?.id) return true;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+        setExpenses(deduplicated);
+      }, (err) => {
+        console.warn('Firestore Expenses listener error:', err);
+        logSecurityEvent({
+          type: 'FIRESTORE_PERMISSION_DENIED',
+          severity: 'WARN',
+          message: `Firestore expenses subscription error: ${err?.code || err?.message}`,
+          details: { errorCode: err?.code }
+        });
+      });
+
+      // Tasks Collection (Organiser View)
+      const unsubTasks = onSnapshot(collection(db, 'tasks'), (snapshot) => {
+        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const seen = new Set();
+        const deduplicated = list.filter(item => {
+          if (!item?.id) return true;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+        setTasks(deduplicated);
+      }, (err) => {
+        console.warn('Firestore Tasks listener error:', err);
+        logSecurityEvent({
+          type: 'FIRESTORE_PERMISSION_DENIED',
+          severity: 'WARN',
+          message: `Firestore tasks subscription error: ${err?.code || err?.message}`,
+          details: { errorCode: err?.code }
+        });
+      });
+
+      // Dhol Storage Collection (Organiser View)
+      const unsubDholStorage = onSnapshot(collection(db, 'dholStorage'), (snapshot) => {
+        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const seen = new Set();
+        const deduplicated = list.filter(item => {
+          if (!item?.id) return true;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+        setDholStorage(deduplicated);
+      }, (err) => console.warn('Firestore DholStorage listener error:', err));
+
+      // Dhol Maintenance Collection (Organiser View)
+      const unsubDholMaint = onSnapshot(collection(db, 'dholMaintenance'), (snapshot) => {
+        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const seen = new Set();
+        const deduplicated = list.filter(item => {
+          if (!item?.id) return true;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+        setDholMaintenance(deduplicated);
+      }, (err) => console.warn('Firestore DholMaintenance listener error:', err));
+
+      return () => {
         unsubVargani();
         unsubExpenses();
         unsubTasks();
@@ -700,13 +929,16 @@ export function MandalDataProvider({ children }) {
         unsubDholMaint();
       };
     } catch (e) {
-      console.warn('Firestore live subscription fallback:', e);
+      console.warn('Firestore organiser subscription fallback:', e);
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  // Add Vargani
+  // Add Vargani (Public Write or Organiser Manual Add)
   const addVargani = async (data) => {
-    const nextReceiptNo = generateReceiptNumber(vargani.length + 1, config.year);
+    const nextReceiptNo = generateReceiptNumber(
+      (vargani?.length || Math.floor(Math.random() * 8000) + 1000) + 1,
+      config.year
+    );
     const newEntry = {
       ...data,
       receiptNo: data.receiptNo || nextReceiptNo,
@@ -722,25 +954,35 @@ export function MandalDataProvider({ children }) {
       } catch (e) {
         console.warn('Firestore addDoc fallback:', e);
         newEntry.id = `v-${Date.now()}`;
+        if (isAuthenticated) {
+          setVargani(prev => prev.some(x => x.id === newEntry.id) ? prev : [newEntry, ...prev]);
+        }
       }
     } else {
       newEntry.id = `v-${Date.now()}`;
+      if (isAuthenticated) {
+        setVargani(prev => prev.some(x => x.id === newEntry.id) ? prev : [newEntry, ...prev]);
+      }
     }
 
-    setVargani(prev => [newEntry, ...prev]);
     return newEntry;
   };
 
-  // Update Vargani (e.g. Verify / Unverify)
+  // Update Vargani (e.g. Verify / Edit / Unverify)
   const updateVargani = async (id, updatedData) => {
+    const enrichedData = {
+      ...updatedData,
+      lastEditedAt: new Date().toISOString()
+    };
+
     setVargani(prev =>
-      prev.map(item => (item.id === id ? { ...item, ...updatedData } : item))
+      prev.map(item => (item.id === id ? { ...item, ...enrichedData } : item))
     );
 
     if (isConfigured && db) {
       try {
         const currentItem = vargani.find(v => v.id === id) || {};
-        await setDoc(doc(db, 'vargani', id), { ...currentItem, ...updatedData }, { merge: true });
+        await setDoc(doc(db, 'vargani', id), { ...currentItem, ...enrichedData }, { merge: true });
       } catch (e) {
         console.warn('Firestore updateVargani setDoc error:', e);
       }
@@ -775,13 +1017,36 @@ export function MandalDataProvider({ children }) {
       } catch (e) {
         console.warn('Firestore expense addDoc error:', e);
         newEntry.id = `e-${Date.now()}`;
+        setExpenses(prev => prev.some(x => x.id === newEntry.id) ? prev : [newEntry, ...prev]);
       }
     } else {
       newEntry.id = `e-${Date.now()}`;
+      setExpenses(prev => prev.some(x => x.id === newEntry.id) ? prev : [newEntry, ...prev]);
     }
 
-    setExpenses(prev => [newEntry, ...prev]);
     return newEntry;
+  };
+
+  // Update Expense (Edit Existing Expense)
+  const updateExpense = async (id, updatedData) => {
+    const enrichedData = {
+      ...updatedData,
+      amount: updatedData.amount !== undefined ? Number(updatedData.amount) : undefined,
+      lastEditedAt: new Date().toISOString()
+    };
+
+    setExpenses(prev =>
+      prev.map(item => (item.id === id ? { ...item, ...enrichedData } : item))
+    );
+
+    if (isConfigured && db) {
+      try {
+        const currentItem = expenses.find(e => e.id === id) || {};
+        await setDoc(doc(db, 'expenses', id), { ...currentItem, ...enrichedData }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updateExpense setDoc error:', e);
+      }
+    }
   };
 
   // Delete Expense
@@ -828,11 +1093,12 @@ export function MandalDataProvider({ children }) {
         newTask.id = docRef.id;
       } catch (e) {
         newTask.id = `t-${Date.now()}`;
+        setTasks(prev => prev.some(x => x.id === newTask.id) ? prev : [newTask, ...prev]);
       }
     } else {
       newTask.id = `t-${Date.now()}`;
+      setTasks(prev => prev.some(x => x.id === newTask.id) ? prev : [newTask, ...prev]);
     }
-    setTasks(prev => [newTask, ...prev]);
     return newTask;
   };
 
@@ -860,11 +1126,12 @@ export function MandalDataProvider({ children }) {
         newEntry.id = docRef.id;
       } catch (e) {
         newEntry.id = `dm-${Date.now()}`;
+        setDholMaintenance(prev => prev.some(x => x.id === newEntry.id) ? prev : [newEntry, ...prev]);
       }
     } else {
       newEntry.id = `dm-${Date.now()}`;
+      setDholMaintenance(prev => prev.some(x => x.id === newEntry.id) ? prev : [newEntry, ...prev]);
     }
-    setDholMaintenance(prev => [newEntry, ...prev]);
     return newEntry;
   };
 
@@ -956,7 +1223,6 @@ export function MandalDataProvider({ children }) {
       day: item.day || 'Day 1',
       date: item.date || '07 Sept',
       family: item.family || 'नवीन परिवार',
-      flat: item.flat || 'A-101',
       aarti: item.aarti || 'Evening'
     };
     const updated = [newItem, ...mankariList];
@@ -985,18 +1251,37 @@ export function MandalDataProvider({ children }) {
 
   // Cultural Events Day-Wise Management (Synced live to Firestore doc culturalEvents/main)
   const updateCulturalEvent = async (dayNum, updatedData) => {
-    const updatedList = culturalEvents.map(evt => {
+    const targetDay = Number(dayNum);
+    const existingList = Array.isArray(culturalEvents) && culturalEvents.length > 0 
+      ? [...culturalEvents] 
+      : [...INITIAL_CULTURAL_EVENTS];
+
+    let found = false;
+    const updatedList = existingList.map(evt => {
       const evtDay = Number(evt.day);
-      const targetDay = Number(dayNum);
-      if (evtDay === targetDay || evt.id === updatedData?.id) {
-        return { ...evt, ...updatedData, day: targetDay };
+      if (evtDay === targetDay || evt.id === updatedData?.id || evt.id === `ce-${targetDay}`) {
+        found = true;
+        return { ...evt, ...updatedData, day: targetDay, id: evt.id || `ce-${targetDay}` };
       }
       return evt;
     });
+
+    if (!found && updatedData) {
+      updatedList.push({
+        id: updatedData.id || `ce-${targetDay}`,
+        day: targetDay,
+        ...updatedData
+      });
+    }
+
+    updatedList.sort((a, b) => Number(a.day) - Number(b.day));
+
     setCulturalEvents(updatedList);
+    localStorage.setItem('iv_cultural_events', JSON.stringify(updatedList));
+
     if (isConfigured && db) {
       try {
-        await setDoc(doc(db, 'culturalEvents', 'main'), { events: updatedList }, { merge: true });
+        await setDoc(doc(db, 'culturalEvents', 'main'), { events: updatedList, list: updatedList }, { merge: true });
       } catch (e) {
         console.warn('Firestore updateCulturalEvent error:', e);
       }
@@ -1006,9 +1291,10 @@ export function MandalDataProvider({ children }) {
   const updateAllCulturalEvents = async (newList) => {
     if (Array.isArray(newList) && newList.length > 0) {
       setCulturalEvents(newList);
+      localStorage.setItem('iv_cultural_events', JSON.stringify(newList));
       if (isConfigured && db) {
         try {
-          await setDoc(doc(db, 'culturalEvents', 'main'), { events: newList }, { merge: true });
+          await setDoc(doc(db, 'culturalEvents', 'main'), { events: newList, list: newList }, { merge: true });
         } catch (e) {
           console.warn('Firestore updateAllCulturalEvents error:', e);
         }
@@ -1064,7 +1350,6 @@ export function MandalDataProvider({ children }) {
       }
     }
   };
-
   const deleteDholStorage = async (id) => {
     setDholStorage(prev => prev.filter(item => item.id !== id));
     if (isConfigured && db) {
@@ -1072,6 +1357,118 @@ export function MandalDataProvider({ children }) {
         await deleteDoc(doc(db, 'dholStorage', id));
       } catch (e) {
         console.warn('Firestore deleteDholStorage error:', e);
+      }
+    }
+  };
+
+  // Game Winners Management
+  const addGameWinner = async (item) => {
+    const newItem = {
+      id: item.id || `gw-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      gameName: item.gameName?.trim() || 'Competition',
+      category: item.category?.trim() || 'General',
+      first: item.first !== undefined ? (item.first?.trim() || '') : (item.girls?.first?.trim() || item.boys?.first?.trim() || ''),
+      second: item.second !== undefined ? (item.second?.trim() || '') : (item.girls?.second?.trim() || item.boys?.second?.trim() || ''),
+      third: item.third !== undefined ? (item.third?.trim() || '') : (item.girls?.third?.trim() || item.boys?.third?.trim() || ''),
+      isHidden: item.isHidden === true,
+      createdAt: item.createdAt || new Date().toISOString()
+    };
+    if (item.girls) newItem.girls = item.girls;
+    if (item.boys) newItem.boys = item.boys;
+
+    const updated = [newItem, ...gameWinners];
+    const sanitized = JSON.parse(JSON.stringify(updated));
+    setGameWinners(sanitized);
+    localStorage.setItem('iv_game_winners', JSON.stringify(sanitized));
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'gameWinners', 'main'), { list: sanitized }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore addGameWinner error:', e);
+      }
+    }
+    return newItem;
+  };
+
+  const updateGameWinner = async (id, updatedFields) => {
+    const updated = gameWinners.map(item => {
+      if (item.id === id) {
+        const merged = { ...item, ...updatedFields };
+        if (updatedFields.first !== undefined) merged.first = updatedFields.first?.trim() || '';
+        if (updatedFields.second !== undefined) merged.second = updatedFields.second?.trim() || '';
+        if (updatedFields.third !== undefined) merged.third = updatedFields.third?.trim() || '';
+        if (updatedFields.isHidden !== undefined) merged.isHidden = updatedFields.isHidden === true;
+        return merged;
+      }
+      return item;
+    });
+    const sanitized = JSON.parse(JSON.stringify(updated));
+    setGameWinners(sanitized);
+    localStorage.setItem('iv_game_winners', JSON.stringify(sanitized));
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'gameWinners', 'main'), { list: sanitized }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore updateGameWinner error:', e);
+      }
+    }
+  };
+
+  const toggleGameWinnerVisibility = async (id) => {
+    const target = gameWinners.find(item => item.id === id);
+    if (!target) return;
+    const newIsHidden = !target.isHidden;
+    await updateGameWinner(id, { isHidden: newIsHidden });
+    return newIsHidden;
+  };
+
+  const toggleGameGroupVisibility = async (gameName, setHidden) => {
+    const updated = gameWinners.map(item => {
+      if ((item.gameName || '').trim().toLowerCase() === (gameName || '').trim().toLowerCase()) {
+        return {
+          ...item,
+          isHidden: setHidden !== undefined ? setHidden : !item.isHidden
+        };
+      }
+      return item;
+    });
+    const sanitized = JSON.parse(JSON.stringify(updated));
+    setGameWinners(sanitized);
+    localStorage.setItem('iv_game_winners', JSON.stringify(sanitized));
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'gameWinners', 'main'), { list: sanitized }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore toggleGameGroupVisibility error:', e);
+      }
+    }
+  };
+
+  const deleteGameWinner = async (id) => {
+    const updated = gameWinners.filter(item => item.id !== id);
+    const sanitized = JSON.parse(JSON.stringify(updated));
+    setGameWinners(sanitized);
+    localStorage.setItem('iv_game_winners', JSON.stringify(sanitized));
+    if (isConfigured && db) {
+      try {
+        await setDoc(doc(db, 'gameWinners', 'main'), { list: sanitized }, { merge: true });
+      } catch (e) {
+        console.warn('Firestore deleteGameWinner error:', e);
+      }
+    }
+  };
+
+  const updateAllGameWinners = async (newList) => {
+    if (Array.isArray(newList)) {
+      const sanitized = JSON.parse(JSON.stringify(newList));
+      setGameWinners(sanitized);
+      localStorage.setItem('iv_game_winners', JSON.stringify(sanitized));
+      if (isConfigured && db) {
+        try {
+          await setDoc(doc(db, 'gameWinners', 'main'), { list: sanitized }, { merge: true });
+        } catch (e) {
+          console.warn('Firestore updateAllGameWinners error:', e);
+        }
       }
     }
   };
@@ -1090,6 +1487,7 @@ export function MandalDataProvider({ children }) {
         publicContent,
         mankariList,
         culturalEvents,
+        gameWinners,
         stats,
         isOnline,
         isConfigured,
@@ -1097,6 +1495,7 @@ export function MandalDataProvider({ children }) {
         updateVargani,
         deleteVargani,
         addExpense,
+        updateExpense,
         deleteExpense,
         toggleTask,
         addTask,
@@ -1112,7 +1511,13 @@ export function MandalDataProvider({ children }) {
         addMankari,
         deleteMankari,
         updateCulturalEvent,
-        updateAllCulturalEvents
+        updateAllCulturalEvents,
+        addGameWinner,
+        updateGameWinner,
+        toggleGameWinnerVisibility,
+        toggleGameGroupVisibility,
+        deleteGameWinner,
+        updateAllGameWinners
       }}
     >
       {children}

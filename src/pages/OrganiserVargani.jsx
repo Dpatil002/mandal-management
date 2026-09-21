@@ -1,16 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
+import { useAuth } from '../context/AuthContext';
 import { formatCurrency, formatDate, buildWhatsAppShareUrl } from '../utils/formatters';
 import { generateSingleReceiptPDF } from '../utils/pdfGenerator';
 import { PaymentDetailsModal } from '../components/PaymentDetailsModal';
 
 export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
   const { vargani, config, updateVargani, deleteVargani, stats } = useMandalData();
+  const { organizers } = useAuth();
 
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'pending', 'verified'
   const [searchQuery, setSearchQuery] = useState('');
   const [unverifyConfirmId, setUnverifyConfirmId] = useState(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
   const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
+
+  // Organiser-wise vargani totals based on 'Paid To' / 'collectedBy' (active organisers with total > 0 only)
+  const organiserVarganiTotals = useMemo(() => {
+    const map = {};
+
+    // Aggregate vargani per collector/paidTo (both organiser-entered and public online attributed during verification)
+    (vargani || []).forEach((item) => {
+      if (item.status === 'verified' || !item.status) {
+        const collector = (item.collectedBy || item.paidTo || '').trim();
+        if (collector && !['online portal', 'mandal', 'direct upi', 'self', 'portal'].includes(collector.toLowerCase())) {
+          map[collector] = (map[collector] || 0) + (Number(item.amount) || 0);
+        }
+      }
+    });
+
+    return Object.entries(map)
+      .map(([name, total]) => ({ name, total }))
+      .filter(({ total }) => total > 0)
+      .sort((a, b) => b.total - a.total);
+  }, [vargani]);
 
   const filteredList = vargani.filter((item) => {
     if (activeFilter === 'pending' && item.status !== 'pending') return false;
@@ -19,10 +42,11 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = (item.donorName || '').toLowerCase().includes(q);
+      const matchCollector = (item.collectedBy || item.paidTo || '').toLowerCase().includes(q);
       const matchFlat = (item.wingFlat || item.address || '').toLowerCase().includes(q);
       const matchUtr = (item.utr || '').toLowerCase().includes(q);
       const matchReceipt = (item.receiptNo || '').toLowerCase().includes(q);
-      return matchName || matchFlat || matchUtr || matchReceipt;
+      return matchName || matchCollector || matchFlat || matchUtr || matchReceipt;
     }
 
     return true;
@@ -37,10 +61,39 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
     setUnverifyConfirmId(null);
   };
 
+  const handleDelete = async () => {
+    if (deleteConfirmItem) {
+      await deleteVargani(deleteConfirmItem.id);
+      setDeleteConfirmItem(null);
+    }
+  };
+
   const handleWhatsAppShare = (item) => {
-    const msg = `🚩 *इंद्रायणी विहार मित्र मंडळ - गणेशोत्सव २०२६* 🚩\n\nसस्नेह नमस्कार, *${item.donorName}*!\nआपली *${formatCurrency(item.amount)}* वर्गणी यशस्वीरित्या प्राप्त झाली असून पावती क्र. *${item.receiptNo}* नोंदवली गेली आहे.\n\nमंडळाच्या वतीने आपले मनःपूर्वक आभार! गणपती बाप्पा आपल्या परिवारास सुख, समृद्धी आणि उत्तम आरोग्य देवो हीच श्रींच्या चरणी प्रार्थना.\n\n📍 *पत्ता:* ${config.location}\n🙏 *गणपती बाप्पा मोरया!*`;
+    const msg = `🙏 *${config.name || 'इंद्रायणी विहार मित्र मंडळ'}* 🙏\n` +
+      `🚩 *सार्वजनिक गणेशोत्सव २०२६ • अधिकृत पावती* 🚩\n\n` +
+      `सस्नेह नमस्कार, *${item.donorName}*!\n\n` +
+      `आपली वर्गणी यशस्वीरित्या प्राप्त झाली असून अधिकृत पावती मंजूर करण्यात आली आहे:\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📄 *पावती क्र (Receipt No):* ${item.receiptNo || 'IVMM-2026'}\n` +
+      `💰 *वर्गणी रक्कम (Amount):* ${formatCurrency(item.amount)}\n` +
+      `💳 *पेमेंट पद्धत (Mode):* ${item.mode || 'UPI'} (स्वीकृत / Verified)\n` +
+      `📅 *दिनांक (Date):* ${formatDate(item.createdAt)}\n` +
+      (item.collectedBy || item.paidTo ? `👤 *वर्गणी स्वीकारली (Paid To):* ${item.collectedBy || item.paidTo}\n` : '') +
+      (item.wingFlat || item.address ? `🏠 *पत्ता (Address):* ${item.wingFlat || item.address}\n` : '') +
+      (item.utr ? `🔢 *UTR / Ref No:* ${item.utr}\n` : '') +
+      `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `मंडळाच्या उत्सवात आपले बहुमूल्य योगदान दिल्याबद्दल मनःपूर्वक धन्यवाद!\n` +
+      `श्री गणपती बाप्पा आपल्या परिवारास सुख, समृद्धी आणि उत्तम आरोग्य देवो हीच प्रार्थना.\n\n` +
+      `📍 *पत्ता:* ${config.location || 'Indrayani Vihar, Lohegaon, Pune'}\n` +
+      `🌺 *गणपती बाप्पा मोरया!* 🌺`;
+
     const url = buildWhatsAppShareUrl(item.phone, msg);
     window.open(url, '_blank');
+  };
+
+  const handleVerifyAndShare = async (item) => {
+    await updateVargani(item.id, { status: 'verified' });
+    handleWhatsAppShare({ ...item, status: 'verified' });
   };
 
   const handleDownloadSinglePDF = (item) => {
@@ -51,7 +104,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
   };
 
   return (
-    <div className="flex flex-col w-full px-4 pb-20 max-w-xl mx-auto font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in space-y-4">
+    <div className="flex flex-col w-full px-4 pb-20 max-w-xl mx-auto font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in space-y-6 sm:space-y-7">
       {/* Top Action Bar with live pending count & action buttons */}
       <div className="w-full pt-1 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
@@ -70,7 +123,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
               <span>QR Details</span>
             </button>
             <button
-              onClick={onOpenAddVargani}
+              onClick={() => onOpenAddVargani && onOpenAddVargani(null)}
               className="flex items-center justify-center gap-1 rounded-xl px-3 py-2 bg-[#8B2616] text-white font-bold text-xs shadow-xs hover:bg-[#731E11] active:scale-95 transition-all cursor-pointer"
               type="button"
             >
@@ -98,6 +151,25 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
             <span className="text-[11px] text-[#6B5E57] mt-0.5">{stats.verifiedCount} Donors</span>
           </div>
         </div>
+
+        {/* Organiser-wise Collected Totals */}
+        {organiserVarganiTotals.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full pt-1">
+            {organiserVarganiTotals.map(({ name, total }) => (
+              <div
+                key={name}
+                className="bg-white/95 border border-[#F0DFD5] rounded-xl px-3 py-2 shadow-2xs flex items-center justify-between gap-2"
+              >
+                <span className="text-xs font-semibold text-[#241913] truncate" title={name}>
+                  {name}
+                </span>
+                <span className="text-xs font-bold text-[#6b0e03] shrink-0">
+                  {formatCurrency(total)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Filter Pills */}
@@ -111,7 +183,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
           }`}
           type="button"
         >
-          <span>सर्व नोंदी</span>
+          <span>All</span>
           <span className={`${activeFilter === 'all' ? 'bg-white/20' : 'bg-[#fae4da] text-[#241913]'} px-2 py-0.5 rounded-full text-[11px] font-bold`}>
             {vargani.length}
           </span>
@@ -127,7 +199,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
           type="button"
         >
           <span className="w-2 h-2 rounded-full bg-[#FD8359] animate-pulse"></span>
-          <span>प्रलंबित पडताळणी</span>
+          <span>Pending</span>
           <span className={`${activeFilter === 'pending' ? 'bg-white/20' : 'bg-[#FD8359]/30 text-[#6F2000]'} px-2 py-0.5 rounded-full text-[11px] font-bold`}>
             {stats.pendingCount}
           </span>
@@ -143,7 +215,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
           type="button"
         >
           <span className="material-symbols-outlined text-[16px] text-emerald-700">check_circle</span>
-          <span>मंजूर पावती</span>
+          <span>Verified</span>
           <span className={`${activeFilter === 'verified' ? 'bg-white/20' : 'bg-[#b1f0ce] text-[#002114]'} px-2 py-0.5 rounded-full text-[11px] font-bold`}>
             {stats.verifiedCount}
           </span>
@@ -161,7 +233,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by donor name / नाव किंवा पावती क्र. शोधा..."
+            placeholder="Search by donor, paid to, receipt / नाव किंवा कार्यकर्ता शोधा..."
             className="w-full pl-10 pr-9 py-2.5 bg-white/90 border border-[#D9C4B7] rounded-xl text-xs text-[#241913] placeholder:text-[#6B5E57]/70 focus:outline-none focus:border-[#6b0e03] shadow-xs transition-colors"
           />
           {searchQuery && (
@@ -192,10 +264,12 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
         ) : (
           filteredList.map((item) => {
             const isVerified = item.status === 'verified';
+            const collectorName = item.collectedBy || item.paidTo;
+
             return (
               <div
                 key={item.id}
-                className="w-full rounded-2xl p-4 bg-white/95 border border-[#F0DFD5] shadow-xs flex flex-col gap-2.5"
+                className="w-full rounded-2xl p-4 bg-white/95 border border-[#F0DFD5] shadow-xs flex flex-col gap-2.5 relative hover:shadow-sm transition-shadow"
               >
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-2">
@@ -214,25 +288,36 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
                         <span className="font-bold text-sm text-[#241913] leading-tight truncate">
                           {item.donorName}
                         </span>
-                        <span className="bg-[#ffeae0] text-[#57423e] text-[11px] font-bold px-2 py-0.5 rounded">
-                          {item.wingFlat || item.address || 'सदनिका'}
-                        </span>
+                        {collectorName && (
+                          <span className="bg-[#FFF1EB] text-[#8B2616] border border-[#F0DFD5] text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[12px]">how_to_reg</span>
+                            <span>Paid To: {collectorName}</span>
+                          </span>
+                        )}
                       </div>
-                      <span className="text-xs text-[#6B5E57] mt-0.5">
-                        {item.mode || 'UPI Transfer'} • {formatDate(item.createdAt)}
-                      </span>
+                      <div className="flex items-center gap-2 text-xs text-[#6B5E57] mt-1 flex-wrap">
+                        <span>{item.mode || 'UPI Transfer'}</span>
+                        <span>•</span>
+                        <span>{formatDate(item.createdAt)}</span>
+                        {item.lastEditedAt && (
+                          <span className="text-[10px] text-[#A23F1A] bg-[#FFEAE0] px-1.5 py-0.2 rounded font-medium">
+                            Edited
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+
                   <div className="flex flex-col items-end shrink-0">
                     <span className="text-base font-bold text-[#6b0e03]">
                       {formatCurrency(item.amount)}
                     </span>
                     {isVerified ? (
-                      <span className="text-[11px] text-[#003d28] font-bold flex items-center gap-0.5">
+                      <span className="text-[11px] text-[#003d28] font-bold flex items-center gap-0.5 mt-0.5">
                         <span className="material-symbols-outlined text-[14px]">check_circle</span> स्वीकृत
                       </span>
                     ) : (
-                      <span className="text-[10px] bg-[#FD8359]/20 text-[#6f2000] font-bold px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] bg-[#FD8359]/20 text-[#6f2000] font-bold px-1.5 py-0.5 rounded mt-0.5">
                         Pending
                       </span>
                     )}
@@ -253,7 +338,7 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
                           className="text-xs text-[#a23f1a] font-semibold hover:underline flex items-center gap-0.5 cursor-pointer"
                           type="button"
                         >
-                          <span>मोठी पावती पाहा</span>
+                          <span>View Proof</span>
                           <span className="material-symbols-outlined text-[14px]">open_in_new</span>
                         </button>
                       )}
@@ -272,31 +357,77 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className="text-xs text-[#241913] font-bold truncate">Receipt_Proof.png</span>
-                          <span className="text-[11px] text-[#6B5E57]">मोबाईल स्क्रीनशॉट पडताळणी</span>
+                          <span className="text-[11px] text-[#6B5E57]">Mobile Screenshot</span>
                           <span className="text-[11px] text-[#003d28] flex items-center gap-1 mt-0.5 font-medium">
-                            <span className="material-symbols-outlined text-[13px]">verified</span> QR स्कॅन करून जमा
+                            <span className="material-symbols-outlined text-[13px]">verified</span> QR Scanned Payment
                           </span>
                         </div>
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      <button
-                        onClick={() => handleVerify(item.id)}
-                        className="rounded-xl py-2 px-3 bg-[#003d28] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                        <span>मान्य करा (Verify)</span>
-                      </button>
-                      <button
-                        onClick={() => handleWhatsAppShare(item)}
-                        className="rounded-xl py-2 px-3 border border-[#D9C4B7] bg-white text-[#8B2616] text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">chat</span>
-                        <span>संपर्क साधा</span>
-                      </button>
+                    <div className="flex flex-col gap-2 mt-1">
+                      {item.phone && item.phone.trim() ? (
+                        <>
+                          <button
+                            onClick={() => handleVerifyAndShare(item)}
+                            className="w-full rounded-xl py-2.5 px-3 bg-[#1B5E20] hover:bg-[#144A18] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                            type="button"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">verified</span>
+                            <span>Verify &amp; Share on WhatsApp</span>
+                          </button>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => handleVerify(item.id)}
+                              className="rounded-xl py-2 px-3 bg-[#003d28] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                              type="button"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                              <span>Verify Only</span>
+                            </button>
+                            <button
+                              onClick={() => handleWhatsAppShare(item)}
+                              className="rounded-xl py-2 px-3 border border-[#D9C4B7] bg-white text-[#8B2616] text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                              type="button"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">chat</span>
+                              <span>WhatsApp Contact</span>
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleVerify(item.id)}
+                          className="w-full rounded-xl py-2.5 px-3 bg-[#003d28] hover:bg-[#002b1c] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                          <span>Verify Entry</span>
+                        </button>
+                      )}
+
+                      {/* Edit and Delete Actions for Pending Items */}
+                      <div className="flex items-center justify-end gap-2 pt-1 border-t border-[#F0DFD5]/60">
+                        <button
+                          onClick={() => onOpenAddVargani && onOpenAddVargani(item)}
+                          className="px-2.5 py-1 text-xs font-semibold text-[#8B2616] hover:bg-[#FFEAE0] rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                          type="button"
+                          title="Edit Vargani entry"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">edit</span>
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmItem(item)}
+                          className="px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                          type="button"
+                          title="Delete Vargani entry"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">delete</span>
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -309,23 +440,44 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-                      <button
-                        onClick={() => handleWhatsAppShare(item)}
-                        className="h-7 px-2.5 flex items-center gap-1 bg-white border border-[#D9C4B7] text-[#6b0e03] hover:bg-[#ffeae0] rounded-lg text-[11px] font-bold transition-colors cursor-pointer"
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-[14px]">share</span>
-                        <span>WhatsApp</span>
-                      </button>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
+                      {item.phone && item.phone.trim() && (
+                        <button
+                          onClick={() => handleWhatsAppShare(item)}
+                          className="h-8 px-2.5 sm:px-3 flex items-center gap-1 bg-[#25D366] hover:bg-[#1EBE5D] text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                          type="button"
+                          title="Share official receipt on WhatsApp"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">share</span>
+                          <span>Share Receipt</span>
+                        </button>
+                      )}
 
                       <button
                         onClick={() => handleDownloadSinglePDF(item)}
-                        className="w-7 h-7 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#241913] hover:bg-[#ffeae0] rounded-lg text-xs transition-colors cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#241913] hover:bg-[#ffeae0] rounded-lg text-xs transition-colors cursor-pointer"
                         title="Download PDF"
                         type="button"
                       >
-                        <span className="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+                        <span className="material-symbols-outlined text-[15px]">picture_as_pdf</span>
+                      </button>
+
+                      <button
+                        onClick={() => onOpenAddVargani && onOpenAddVargani(item)}
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#8B2616] hover:bg-[#FFEAE0] rounded-lg text-xs transition-colors cursor-pointer"
+                        title="Edit entry"
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">edit</span>
+                      </button>
+
+                      <button
+                        onClick={() => setDeleteConfirmItem(item)}
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#6B5E57] hover:text-red-600 hover:bg-red-50 rounded-lg text-xs transition-colors cursor-pointer"
+                        title="Delete entry"
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">delete</span>
                       </button>
 
                       {unverifyConfirmId === item.id ? (
@@ -334,16 +486,16 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
                           className="px-2 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold cursor-pointer"
                           title="Confirm Un-verify"
                         >
-                          Confirm
+                          Confirm Un-verify
                         </button>
                       ) : (
                         <button
                           onClick={() => setUnverifyConfirmId(item.id)}
-                          className="w-7 h-7 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#6B5E57] hover:text-red-600 rounded-lg text-xs transition-colors cursor-pointer"
-                          title="Un-verify"
+                          className="w-8 h-8 flex items-center justify-center bg-white border border-[#D9C4B7] text-[#6B5E57] hover:text-amber-700 rounded-lg text-xs transition-colors cursor-pointer"
+                          title="Un-verify to Pending"
                           type="button"
                         >
-                          <span className="material-symbols-outlined text-[14px]">undo</span>
+                          <span className="material-symbols-outlined text-[15px]">undo</span>
                         </button>
                       )}
                     </div>
@@ -390,7 +542,67 @@ export function OrganiserVargani({ onOpenAddVargani, onOpenProof }) {
         isOpen={isPaymentDetailsOpen}
         onClose={() => setIsPaymentDetailsOpen(false)}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmItem && (
+        <div
+          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setDeleteConfirmItem(null)}
+        >
+          <div
+            className="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-red-100 flex flex-col gap-4 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[22px]">warning</span>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-[#241913]">Delete Vargani Entry?</h4>
+                <p className="text-xs text-[#6B5E57]">वर्गणी नोंद कायमची हटवायची आहे का?</p>
+              </div>
+            </div>
+
+            <div className="bg-[#FFF8F6] p-3 rounded-2xl border border-[#F0DFD5] text-xs space-y-1">
+              <div className="flex justify-between">
+                <span className="text-[#6B5E57]">Donor Name:</span>
+                <span className="font-bold text-[#241913]">{deleteConfirmItem.donorName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6B5E57]">Amount:</span>
+                <span className="font-bold text-[#8B2616]">{formatCurrency(deleteConfirmItem.amount)}</span>
+              </div>
+              {deleteConfirmItem.receiptNo && (
+                <div className="flex justify-between">
+                  <span className="text-[#6B5E57]">Receipt:</span>
+                  <span className="font-mono text-[#241913]">{deleteConfirmItem.receiptNo}</span>
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-red-700 font-medium">
+              Delete this entry? This can't be undone. Total Collected will be recalculated immediately.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmItem(null)}
+                className="py-2.5 px-4 rounded-xl border border-[#D9C4B7] bg-white text-[#241913] text-xs font-bold hover:bg-[#FAF4ED] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition-colors cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

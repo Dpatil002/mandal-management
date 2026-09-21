@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { useAuth } from '../context/AuthContext';
+import { validateTaskTitle, sanitizeText } from '../utils/validators';
 
 export function OrganiserTasks() {
   const { tasks, toggleTask, addTask, deleteTask } = useMandalData();
@@ -8,7 +9,8 @@ export function OrganiserTasks() {
 
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'todo', 'done'
   const [newTitle, setNewTitle] = useState('');
-  const [newAssignee, setNewAssignee] = useState(organizers[0]?.name || 'Sachin Joshi');
+  const [newAssignee, setNewAssignee] = useState(organizers[0]?.name || 'All Organizers');
+  const [taskError, setTaskError] = useState('');
 
   const filteredTasks = tasks.filter((t) => {
     if (activeFilter === 'todo') return t.status !== 'done';
@@ -18,12 +20,18 @@ export function OrganiserTasks() {
 
   const handleCreateTask = (e) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    setTaskError('');
+
+    const titleVal = validateTaskTitle(newTitle);
+    if (!titleVal.isValid) {
+      setTaskError(titleVal.error);
+      return;
+    }
 
     addTask({
-      title: newTitle.trim(),
+      title: titleVal.sanitized,
       time: 'Today',
-      assignedTo: newAssignee,
+      assignedTo: sanitizeText(newAssignee) || 'All Organizers',
       category: 'Seva'
     });
 
@@ -37,7 +45,7 @@ export function OrganiserTasks() {
   const doneTasks = filteredTasks.filter((t) => t.status === 'done');
 
   return (
-    <div className="flex flex-col w-full px-4 pt-1 pb-20 max-w-xl mx-auto space-y-4 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
+    <div className="flex flex-col w-full px-4 pt-1 pb-20 max-w-xl mx-auto space-y-6 sm:space-y-7 font-['Plus_Jakarta_Sans','Mukta',sans-serif] animate-fade-in">
       {/* Quick Add Card with live counts */}
       <div className="flex flex-col bg-white rounded-2xl p-4 border border-[#F0DFD5] shadow-xs">
         <div className="flex items-center justify-between gap-3 pb-2 border-b border-[#F0DFD5]/60">
@@ -52,6 +60,12 @@ export function OrganiserTasks() {
 
         {/* Quick Add Inline Form */}
         <div className="mt-2.5">
+          {taskError && (
+            <div className="mb-2 p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px]">error</span>
+              <span>{taskError}</span>
+            </div>
+          )}
           <form className="flex items-center gap-2" onSubmit={handleCreateTask}>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
               <div className="flex-1 flex items-center bg-white border border-[#D9C4B7] rounded-xl px-3.5 py-2.5">
@@ -89,7 +103,7 @@ export function OrganiserTasks() {
                   type="submit"
                 >
                   <span className="material-symbols-outlined text-[16px]">add</span>
-                  <span>Add / जोडा</span>
+                  <span>Add Task</span>
                 </button>
               </div>
             </div>

@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { useAuth } from '../context/AuthContext';
 import { formatCurrency, generateReceiptNumber } from '../utils/formatters';
+import { validateName, validatePhone, validateAmount, validateUploadedFile, sanitizeText } from '../utils/validators';
+import { UpiPaymentPlugin } from './UpiPaymentPlugin';
 
-export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
-  const { addVargani, config, vargani, isOnline } = useMandalData();
-  const { currentOrganizer } = useAuth();
+export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt, editItem = null }) {
+  const { addVargani, updateVargani, config, vargani, isOnline } = useMandalData();
+  const { currentOrganizer, organizers } = useAuth();
 
   const [donorName, setDonorName] = useState('');
-  const [wingFlat, setWingFlat] = useState('');
+  const [paidTo, setPaidTo] = useState('');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
   const [mode, setMode] = useState('UPI');
@@ -16,15 +18,48 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
   const [notes, setNotes] = useState('');
   const [screenshotPreview, setScreenshotPreview] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUpiPlugin, setShowUpiPlugin] = useState(false);
   const [error, setError] = useState('');
+
+  // Sync state whenever drawer opens or editItem changes
+  useEffect(() => {
+    if (isOpen) {
+      if (editItem) {
+        setDonorName(editItem.donorName || '');
+        setPaidTo(editItem.collectedBy || editItem.paidTo || currentOrganizer?.name || organizers[0]?.name || 'Digambar Patil');
+        setPhone(editItem.phone || '');
+        setAmount(editItem.amount ? String(editItem.amount) : '');
+        setMode(editItem.mode || 'UPI');
+        setUtr(editItem.utr || '');
+        setNotes(editItem.notes || '');
+        setScreenshotPreview(editItem.screenshotUrl || '');
+      } else {
+        setDonorName('');
+        setPaidTo(currentOrganizer?.name || organizers[0]?.name || 'Digambar Patil');
+        setPhone('');
+        setAmount('');
+        setMode('UPI');
+        setUtr('');
+        setNotes('');
+        setScreenshotPreview('');
+      }
+      setError('');
+    }
+  }, [isOpen, editItem, currentOrganizer, organizers]);
 
   if (!isOpen) return null;
 
-  const presetAmounts = [501, 1001, 2100, 5001, 11000];
+  const presetAmounts = [501, 1001, 2501];
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      const fileVal = validateUploadedFile(file, ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+      if (!fileVal.isValid) {
+        setError(fileVal.error);
+        return;
+      }
+      setError('');
       const reader = new FileReader();
       reader.onloadend = () => {
         setScreenshotPreview(reader.result);
@@ -35,45 +70,74 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError('');
 
-    if (!donorName.trim()) {
-      setError('कृपया देणगीदाराचे नाव टाका (Please enter donor name)');
+    const nameVal = validateName(donorName, 2, 100);
+    if (!nameVal.isValid) {
+      setError(nameVal.error);
       return;
     }
-    if (!amount || Number(amount) <= 0) {
-      setError('कृपया योग्य वर्गणी रक्कम टाका (Please enter valid amount)');
+
+    const amtVal = validateAmount(amount, 1, 1000000);
+    if (!amtVal.isValid) {
+      setError(amtVal.error);
       return;
     }
+
+    let cleanPhone = '';
+    if (phone.trim()) {
+      const phoneVal = validatePhone(phone);
+      if (!phoneVal.isValid) {
+        setError(phoneVal.error);
+        return;
+      }
+      cleanPhone = phoneVal.cleanPhone;
+    }
+
+    const selectedCollector = paidTo.trim() || currentOrganizer?.name || organizers[0]?.name || 'Organiser';
 
     setIsSubmitting(true);
     try {
-      const newEntry = await addVargani({
-        donorName: donorName.trim(),
-        wingFlat: wingFlat.trim(),
-        phone: phone.trim(),
-        amount: Number(amount),
-        mode,
-        status: 'verified', // Organiser added directly is verified
-        utr: utr.trim(),
-        notes: notes.trim(),
-        screenshotUrl: screenshotPreview,
-        collectedBy: currentOrganizer ? currentOrganizer.name : 'Organiser'
-      });
+      if (editItem?.id) {
+        // Edit existing entry
+        await updateVargani(editItem.id, {
+          donorName: nameVal.sanitized,
+          collectedBy: selectedCollector,
+          paidTo: selectedCollector,
+          phone: cleanPhone,
+          amount: amtVal.value,
+          mode,
+          utr: sanitizeText(utr),
+          notes: sanitizeText(notes),
+          screenshotUrl: screenshotPreview,
+          lastEditedBy: currentOrganizer ? currentOrganizer.name : 'Organiser',
+          lastEditedAt: new Date().toISOString()
+        });
 
-      // Reset
-      setDonorName('');
-      setWingFlat('');
-      setPhone('');
-      setAmount('');
-      setUtr('');
-      setNotes('');
-      setScreenshotPreview('');
-      setIsSubmitting(false);
-      onClose();
+        setIsSubmitting(false);
+        onClose();
+      } else {
+        // Add new entry
+        const newEntry = await addVargani({
+          donorName: nameVal.sanitized,
+          collectedBy: selectedCollector,
+          paidTo: selectedCollector,
+          phone: cleanPhone,
+          amount: amtVal.value,
+          mode,
+          status: 'verified', // Organiser added directly is verified
+          utr: sanitizeText(utr),
+          notes: sanitizeText(notes),
+          screenshotUrl: screenshotPreview
+        });
 
-      if (onOpenReceipt && newEntry) {
-        onOpenReceipt(newEntry);
+        setIsSubmitting(false);
+        onClose();
+
+        if (onOpenReceipt && newEntry) {
+          onOpenReceipt(newEntry);
+        }
       }
     } catch (err) {
       setError('Error saving vargani entry. Please try again.');
@@ -93,13 +157,17 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
               ₹
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-[#241913]">नवीन वर्गणी नोंद (Add Vargani)</h3>
-              <p className="text-xs text-[#6B5E57]">Next Receipt: {generateReceiptNumber(vargani.length + 1, config.year)}</p>
+              <h3 className="text-base font-extrabold text-[#241913]">
+                {editItem ? 'वर्गणी नोंद संपादित करा (Edit Vargani)' : 'नवीन वर्गणी नोंद (Add Vargani)'}
+              </h3>
+              <p className="text-xs text-[#6B5E57]">
+                {editItem ? `Receipt: ${editItem.receiptNo || 'IVMM-2026'}` : `Next Receipt: ${generateReceiptNumber(vargani.length + 1, config.year)}`}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-[#6B5E57] hover:text-[#241913] hover:bg-[#FAF4ED]"
+            className="p-1.5 rounded-full text-[#6B5E57] hover:text-[#241913] hover:bg-[#FAF4ED] cursor-pointer"
           >
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
@@ -123,19 +191,19 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
           {/* Preset Amounts */}
           <div>
             <label className="block text-xs font-bold text-[#6B5E57] mb-1.5">रक्कम निवडा किंवा टाका (Amount)</label>
-            <div className="grid grid-cols-5 gap-1.5 mb-2">
+            <div className="grid grid-cols-3 gap-2 mb-2">
               {presetAmounts.map((p) => (
                 <button
                   type="button"
                   key={p}
                   onClick={() => setAmount(String(p))}
-                  className={`py-2 px-1 text-xs font-bold rounded-xl border transition-all ${
+                  className={`py-2 px-2 text-xs sm:text-sm font-bold rounded-xl border transition-all cursor-pointer ${
                     Number(amount) === p
                       ? 'bg-[#8B2616] text-white border-[#8B2616] shadow-sm'
                       : 'bg-white text-[#241913] border-[#D9C4B7] hover:border-[#8B2616]'
                   }`}
                 >
-                  ₹{p}
+                  ₹{p.toLocaleString('en-IN')}
                 </button>
               ))}
             </div>
@@ -159,33 +227,60 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
               type="text"
               value={donorName}
               onChange={(e) => setDonorName(e.target.value)}
-              placeholder="e.g. Ramesh Kulkarni"
+              placeholder="उदा. रमेश कुलकर्णी (Ramesh Kulkarni)"
               required
               className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm text-[#241913] focus:outline-hidden focus:border-[#8B2616]"
             />
           </div>
 
-          {/* Flat/Wing & Mobile */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Paid To / Vargani Given To Dropdown & Mobile */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#6B5E57] mb-1">फ्लॅट / विंग (Flat/Wing)</label>
-              <input
-                type="text"
-                value={wingFlat}
-                onChange={(e) => setWingFlat(e.target.value)}
-                placeholder="e.g. B-402 / Row House 4"
-                className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm text-[#241913] focus:outline-hidden focus:border-[#8B2616]"
-              />
+              <label className="block text-xs font-bold text-[#6B5E57] mb-1">
+                वर्गणी कोणाकडे दिली (Paid To) *
+              </label>
+              <div className="relative">
+                <select
+                  value={paidTo}
+                  onChange={(e) => setPaidTo(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm text-[#241913] font-semibold focus:outline-hidden focus:border-[#8B2616] appearance-none pr-8 cursor-pointer"
+                >
+                  {organizers && organizers.length > 0 ? (
+                    organizers.map((org) => (
+                      <option key={org.id || org.name} value={org.name}>
+                        {org.name} {org.phone ? `(${org.phone})` : ''}
+                      </option>
+                    ))
+                  ) : (
+                    <option value={currentOrganizer?.name || 'Digambar Patil'}>
+                      {currentOrganizer?.name || 'Digambar Patil'}
+                    </option>
+                  )}
+                  {/* Keep previous custom name if not in list */}
+                  {paidTo && !organizers.some(o => o.name === paidTo) && (
+                    <option value={paidTo}>{paidTo}</option>
+                  )}
+                </select>
+                <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6B5E57] pointer-events-none text-[20px]">
+                  expand_more
+                </span>
+              </div>
+              <p className="text-[10px] text-[#6B5E57] mt-0.5">ज्या कार्यकर्त्याकडे रोख/UPI दिले</p>
             </div>
+
             <div>
-              <label className="block text-xs font-bold text-[#6B5E57] mb-1">मोबाईल नंबर (WhatsApp)</label>
+              <label className="block text-xs font-bold text-[#6B5E57] mb-1">
+                मोबाईल नंबर / WhatsApp (Optional / ऐच्छिक)
+              </label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="10-digit number"
+                placeholder="10-digit number (नंबर नसल्यास रिक्त ठेवा)"
                 className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm text-[#241913] focus:outline-hidden focus:border-[#8B2616]"
               />
+              <p className="text-[10px] text-[#6B5E57] mt-0.5">नंबर दिल्यास WhatsApp वर पावती पाठवता येईल</p>
             </div>
           </div>
 
@@ -198,7 +293,7 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
                   type="button"
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`py-2 px-2 text-xs font-bold rounded-xl border transition-all ${
+                  className={`py-2 px-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                     mode === m
                       ? 'bg-[#2D6A4F] text-white border-[#2D6A4F] shadow-sm'
                       : 'bg-white text-[#241913] border-[#D9C4B7]'
@@ -208,6 +303,19 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
                 </button>
               ))}
             </div>
+
+            {mode === 'UPI' && !editItem && (
+              <div className="mt-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowUpiPlugin(true)}
+                  className="w-full py-2.5 px-3 bg-[#FFF1EB] border border-[#F0DFD5] hover:bg-[#FFEAE0] text-[#8B2616] text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
+                  <span>Open Live UPI Payment Plugin / QR (₹{amount || '1001'})</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* UTR / Reference */}
@@ -224,6 +332,18 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
             </div>
           )}
 
+          {/* Notes */}
+          <div>
+            <label className="block text-xs font-bold text-[#6B5E57] mb-1">विशेष नोंद / टीप (Notes - Optional)</label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="उदा. हार-फुलांसाठी किंवा विशेष देणगी"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm text-[#241913] focus:outline-hidden focus:border-[#8B2616]"
+            />
+          </div>
+
           {/* Screenshot Proof */}
           <div>
             <label className="block text-xs font-bold text-[#6B5E57] mb-1">पेमेंट स्क्रीनशॉट / पावती फोटो (Optional)</label>
@@ -239,7 +359,7 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
                 <button
                   type="button"
                   onClick={() => setScreenshotPreview('')}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center text-xs"
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center text-xs cursor-pointer"
                 >
                   ×
                 </button>
@@ -252,13 +372,33 @@ export function AddVarganiDrawer({ isOpen, onClose, onOpenReceipt }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 rounded-2xl bg-[#8B2616] text-white font-extrabold text-sm shadow-md hover:bg-[#731E11] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 rounded-2xl bg-[#8B2616] text-white font-extrabold text-sm shadow-md hover:bg-[#731E11] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">check_circle</span>
-              <span>{isSubmitting ? 'नोंदणी सुरू आहे...' : 'वर्गणी नोंदवा व पावती द्या (Save & Issue Receipt)'}</span>
+              <span>{isSubmitting ? 'Saving...' : (editItem ? 'Save Changes' : 'Save & Issue Receipt')}</span>
             </button>
           </div>
         </form>
+
+        {/* UPI Payment Plugin Modal */}
+        {showUpiPlugin && (
+          <div 
+            className="fixed inset-0 z-60 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setShowUpiPlugin(false)}
+          >
+            <div 
+              className="bg-white w-full max-w-md rounded-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <UpiPaymentPlugin
+                initialAmount={Number(amount) || 2501}
+                embedded={true}
+                showDirectForm={false}
+                onClose={() => setShowUpiPlugin(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

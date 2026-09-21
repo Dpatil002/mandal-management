@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { useAuth } from '../context/AuthContext';
+import { validateName, validateAmount, validateUploadedFile, sanitizeText } from '../utils/validators';
 
-export function AddExpenseDrawer({ isOpen, onClose }) {
-  const { addExpense, isOnline } = useMandalData();
-  const { currentOrganizer } = useAuth();
+export function AddExpenseDrawer({ isOpen, onClose, editItem = null }) {
+  const { addExpense, updateExpense, isOnline } = useMandalData();
+  const { currentOrganizer, organizers } = useAuth();
 
   const [title, setTitle] = useState('');
+  const [paidBy, setPaidBy] = useState('');
   const [category, setCategory] = useState('Decoration');
   const [amount, setAmount] = useState('');
   const [vendor, setVendor] = useState('');
@@ -15,6 +17,31 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
   const [receiptPhoto, setReceiptPhoto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (editItem) {
+        setTitle(editItem.title || editItem.description || '');
+        setPaidBy(editItem.paidBy || editItem.lastEditedBy || currentOrganizer?.name || organizers[0]?.name || 'Digambar Patil');
+        setCategory(editItem.category || 'Decoration');
+        setAmount(editItem.amount ? String(editItem.amount) : '');
+        setVendor(editItem.vendor || '');
+        setDate(editItem.date ? editItem.date.slice(0, 10) : new Date().toISOString().slice(0, 10));
+        setNotes(editItem.notes || '');
+        setReceiptPhoto(editItem.receiptUrl || '');
+      } else {
+        setTitle('');
+        setPaidBy(currentOrganizer?.name || organizers[0]?.name || 'Digambar Patil');
+        setCategory('Decoration');
+        setAmount('');
+        setVendor('');
+        setDate(new Date().toISOString().slice(0, 10));
+        setNotes('');
+        setReceiptPhoto('');
+      }
+      setError('');
+    }
+  }, [isOpen, editItem, currentOrganizer, organizers]);
 
   if (!isOpen) return null;
 
@@ -31,6 +58,12 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      const fileVal = validateUploadedFile(file, ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+      if (!fileVal.isValid) {
+        setError(fileVal.error);
+        return;
+      }
+      setError('');
       const reader = new FileReader();
       reader.onloadend = () => {
         setReceiptPhoto(reader.result);
@@ -41,35 +74,49 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError('');
 
-    if (!title.trim()) {
-      setError('कृपया खर्चाचे कारण किंवा वर्णन टाका (Please enter expense description)');
+    const titleVal = validateName(title, 2, 200);
+    if (!titleVal.isValid) {
+      setError(titleVal.error);
       return;
     }
-    if (!amount || Number(amount) <= 0) {
-      setError('कृपया योग्य खर्च रक्कम टाका (Please enter valid amount)');
+
+    const amtVal = validateAmount(amount, 1, 10000000);
+    if (!amtVal.isValid) {
+      setError(amtVal.error);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await addExpense({
-        title: title.trim(),
-        category,
-        amount: Number(amount),
-        vendor: vendor.trim(),
-        date,
-        notes: notes.trim(),
-        receiptUrl: receiptPhoto,
-        paidBy: currentOrganizer ? currentOrganizer.name : 'Organiser'
-      });
+      if (editItem?.id) {
+        await updateExpense(editItem.id, {
+          title: titleVal.sanitized,
+          category: sanitizeText(category) || 'Misc',
+          amount: amtVal.value,
+          vendor: sanitizeText(vendor),
+          date: date || new Date().toISOString().slice(0, 10),
+          notes: sanitizeText(notes),
+          receiptUrl: receiptPhoto,
+          paidBy: sanitizeText(paidBy) || currentOrganizer?.name || 'Digambar Patil',
+          lastEditedBy: currentOrganizer ? currentOrganizer.name : 'Organiser',
+          lastEditedAt: new Date().toISOString()
+        });
+      } else {
+        await addExpense({
+          title: titleVal.sanitized,
+          category: sanitizeText(category) || 'Misc',
+          amount: amtVal.value,
+          vendor: sanitizeText(vendor),
+          date: date || new Date().toISOString().slice(0, 10),
+          notes: sanitizeText(notes),
+          receiptUrl: receiptPhoto,
+          paidBy: sanitizeText(paidBy) || currentOrganizer?.name || 'Digambar Patil'
+        });
+      }
 
-      setTitle('');
-      setAmount('');
-      setVendor('');
-      setNotes('');
-      setReceiptPhoto('');
       setIsSubmitting(false);
       onClose();
     } catch (err) {
@@ -90,13 +137,15 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
               <span className="material-symbols-outlined text-[18px]">receipt_long</span>
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-[#241913]">नवीन खर्च नोंद (Record Expense)</h3>
+              <h3 className="text-base font-extrabold text-[#241913]">
+                {editItem ? 'खर्च नोंद संपादित करा (Edit Expense)' : 'नवीन खर्च नोंद (Record Expense)'}
+              </h3>
               <p className="text-xs text-[#6B5E57]">Auto updates Treasury Balance</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-[#6B5E57] hover:text-[#241913] hover:bg-[#FAF4ED]"
+            className="p-1.5 rounded-full text-[#6B5E57] hover:text-[#241913] hover:bg-[#FAF4ED] cursor-pointer"
           >
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
@@ -155,7 +204,7 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
                   type="button"
                   key={c}
                   onClick={() => setCategory(c)}
-                  className={`py-1.5 px-3 text-xs font-bold rounded-xl border transition-all ${
+                  className={`py-1.5 px-3 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                     category === c
                       ? 'bg-[#8B2616] text-white border-[#8B2616]'
                       : 'bg-white text-[#241913] border-[#D9C4B7] hover:border-[#8B2616]'
@@ -190,6 +239,34 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
             </div>
           </div>
 
+          {/* Paid By Organiser Dropdown */}
+          <div>
+            <label className="block text-xs font-bold text-[#6B5E57] mb-1">खर्च कोणाकडून झाला / Paid By *</label>
+            <select
+              value={paidBy}
+              onChange={(e) => setPaidBy(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm font-semibold text-[#241913] focus:outline-hidden focus:border-[#8B2616] cursor-pointer"
+            >
+              {organizers.map((o) => (
+                <option key={o.id} value={o.name}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-xs font-bold text-[#6B5E57] mb-1">टीप / तपशील (Notes - Optional)</label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="उदा. बिल क्रमांक किंवा पेमेंट पद्धत"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#D9C4B7] rounded-xl text-sm text-[#241913] focus:outline-hidden focus:border-[#8B2616]"
+            />
+          </div>
+
           {/* Bill / Receipt Photo */}
           <div>
             <label className="block text-xs font-bold text-[#6B5E57] mb-1">बिलाचा फोटो / पावती (Upload Bill Photo)</label>
@@ -205,7 +282,7 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
                 <button
                   type="button"
                   onClick={() => setReceiptPhoto('')}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center text-xs"
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center text-xs cursor-pointer"
                 >
                   ×
                 </button>
@@ -218,10 +295,10 @@ export function AddExpenseDrawer({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 rounded-2xl bg-[#E8734A] text-white font-extrabold text-sm shadow-md hover:bg-[#d6653e] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 rounded-2xl bg-[#E8734A] text-white font-extrabold text-sm shadow-md hover:bg-[#d6653e] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">save</span>
-              <span>{isSubmitting ? 'नोंद होत आहे...' : 'खर्च नोंदवा (Save Expense)'}</span>
+              <span>{isSubmitting ? 'Saving...' : (editItem ? 'Save Changes' : 'Save Expense')}</span>
             </button>
           </div>
         </form>

@@ -6,8 +6,8 @@ export const FESTIVAL_DAYS_CONFIG = [
     fullDate: '14 Sept 2026',
     tithi: 'गणेश चतुर्थी (स्थापना)',
     marathiLabel: '१४ सप्टें • गणेश चतुर्थी',
-    defaultTitle: 'Ganesh Stapan & Atharvashirsha Pathan',
-    defaultMarathiTitle: 'गणेश स्थापना व सामूहिक अथर्वशीर्ष पठण'
+    defaultTitle: 'Ganesh Stapan & Aarti',
+    defaultMarathiTitle: 'गणेश स्थापना व महाआरती'
   },
   {
     day: 2,
@@ -16,8 +16,8 @@ export const FESTIVAL_DAYS_CONFIG = [
     fullDate: '15 Sept 2026',
     tithi: 'ऋषीपंचमी',
     marathiLabel: '१५ सप्टें • ऋषीपंचमी',
-    defaultTitle: 'Drawing & Modak Making Competition',
-    defaultMarathiTitle: 'बाल चित्रकला व पर्यावरणपूरक मोदक स्पर्धा'
+    defaultTitle: 'Cultural Program & Aarti',
+    defaultMarathiTitle: 'सांस्कृतिक कार्यक्रम व आरती'
   },
   {
     day: 3,
@@ -26,8 +26,8 @@ export const FESTIVAL_DAYS_CONFIG = [
     fullDate: '16 Sept 2026',
     tithi: 'तृतीया',
     marathiLabel: '१६ सप्टें • तृतीया',
-    defaultTitle: 'Mahila Bhajan Mandal & Traditional Songs',
-    defaultMarathiTitle: 'महिला भजन मंडळ व पारंपरिक भक्तीगीते'
+    defaultTitle: 'Bhajan Sandhya & Aarti',
+    defaultMarathiTitle: 'भजन संध्या व महाआरती'
   },
   {
     day: 4,
@@ -35,9 +35,9 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '१७ सप्टें',
     fullDate: '17 Sept 2026',
     tithi: 'चतुर्थी',
-    marathiLabel: '१७ सप्टें • चतुर्थी',
-    defaultTitle: 'Children Dance, Drama & Skits',
-    defaultMarathiTitle: 'बाल गोपाळ नृत्य, नाटिका व कलाविष्कार'
+    marathiLabel: '१७ सप्टें • गुरुवार',
+    defaultTitle: 'Games',
+    defaultMarathiTitle: '🎮 Games (खेळ)'
   },
   {
     day: 5,
@@ -45,9 +45,9 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '१८ सप्टें',
     fullDate: '18 Sept 2026',
     tithi: 'पंचमी',
-    marathiLabel: '१८ सप्टें • पंचमी',
-    defaultTitle: 'Musical Night & Classical Sugam Sangeet',
-    defaultMarathiTitle: 'सुगम संगीत संध्या व वाद्यवृंद'
+    marathiLabel: '१८ सप्टें • शुक्रवार',
+    defaultTitle: 'Devotional Movie',
+    defaultMarathiTitle: '🎬 धार्मिक Movie'
   },
   {
     day: 6,
@@ -55,9 +55,9 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '१९ सप्टें',
     fullDate: '19 Sept 2026',
     tithi: 'षष्ठी • गौरी आगमन',
-    marathiLabel: '१९ सप्टें • गौरी आगमन',
-    defaultTitle: 'Fancy Dress Competition (Historical & Saints)',
-    defaultMarathiTitle: 'भव्य वेशभूषा स्पर्धा (संत व क्रांतिकारक)'
+    marathiLabel: '१९ सप्टें • शनिवार',
+    defaultTitle: 'Dance & Fancy Dress Competition',
+    defaultMarathiTitle: '💃 Dance & Fancy Dress Competition'
   },
   {
     day: 7,
@@ -65,9 +65,9 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '२० सप्टें',
     fullDate: '20 Sept 2026',
     tithi: 'सप्तमी • गौरी पूजन',
-    marathiLabel: '२० सप्टें • गौरी पूजन',
-    defaultTitle: 'Family Antakshari & Fun Cultural Games',
-    defaultMarathiTitle: 'कौटुंबिक अंताक्षरी व सांस्कृतिक खेळ'
+    marathiLabel: '२० सप्टें • रविवार',
+    defaultTitle: 'Home Minister',
+    defaultMarathiTitle: '🎤 Home Minister'
   },
   {
     day: 8,
@@ -75,9 +75,9 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '२१ सप्टें',
     fullDate: '21 Sept 2026',
     tithi: 'अष्टमी • गौरी विसर्जन',
-    marathiLabel: '२१ सप्टें • गौरी विसर्जन',
-    defaultTitle: 'Dhol-Tasha & Traditional Lezim Showcase',
-    defaultMarathiTitle: 'ढोल-ताशा व पारंपरिक लेझीम प्रात्यक्षिक'
+    marathiLabel: '२१ सप्टें • सोमवार',
+    defaultTitle: 'Event will be announced soon',
+    defaultMarathiTitle: '🔸 कार्यक्रम लवकरच कळवण्यात येईल'
   },
   {
     day: 9,
@@ -85,9 +85,9 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '२२ सप्टें',
     fullDate: '22 Sept 2026',
     tithi: 'नवमी',
-    marathiLabel: '२२ सप्टें • नवमी',
-    defaultTitle: 'Shree Satyanarayan Pooja & Bhajan Sandhya',
-    defaultMarathiTitle: 'श्री सत्यनारायण महापूजा व महाप्रसाद'
+    marathiLabel: '२२ सप्टें • मंगळवार',
+    defaultTitle: 'Event will be announced soon',
+    defaultMarathiTitle: '🔸 कार्यक्रम लवकरच कळवण्यात येईल'
   },
   {
     day: 10,
@@ -95,19 +95,29 @@ export const FESTIVAL_DAYS_CONFIG = [
     marathiDate: '२३ सप्टें',
     fullDate: '23 Sept 2026',
     tithi: 'दशमी',
-    marathiLabel: '२३ सप्टें • दशमी',
-    defaultTitle: 'Mega Drama & Cultural Orchestra',
-    defaultMarathiTitle: 'महा-नाट्य व संगीत रजनी'
+    marathiLabel: '२३ सप्टें • बुधवार',
+    defaultTitle: 'Event will be announced soon',
+    defaultMarathiTitle: '🔸 कार्यक्रम लवकरच कळवण्यात येईल'
   },
   {
     day: 11,
+    date: '24 Sep',
+    marathiDate: '२४ सप्टें',
+    fullDate: '24 Sept 2026',
+    tithi: 'एकादशी',
+    marathiLabel: '२४ सप्टें • गुरुवार',
+    defaultTitle: 'Mangla Gauri',
+    defaultMarathiTitle: '🌺 Mangla Gauri'
+  },
+  {
+    day: 12,
     date: '25 Sep',
     marathiDate: '२५ सप्टें',
     fullDate: '25 Sept 2026',
     tithi: 'अनंत चतुर्दशी (विसर्जन)',
-    marathiLabel: '२५ सप्टें • अनंत चतुर्दशी (विसर्जन)',
-    defaultTitle: 'Grand Farewell Miravnuk & Visarjan Aarti',
-    defaultMarathiTitle: 'भव्य विसर्जन मिरवणूक व निरोप आरती'
+    marathiLabel: '२५ सप्टें • शुक्रवार',
+    defaultTitle: 'Satyanarayan Pooja, Mahaprasad & Miravnuk / Visarjan',
+    defaultMarathiTitle: '🙏 सत्यनारायण पूजा • 🍛 महाप्रसाद • 🪔 Miravnuk & Visarjan'
   }
 ];
 

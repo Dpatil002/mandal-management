@@ -10,8 +10,9 @@ export function UpiQrModal({ isOpen, onClose, mandalConfig, defaultAmount = '' }
 
   if (!isOpen) return null;
 
-  const upiId = mandalConfig?.upiId || 'mandal@upi';
-  const mandalName = mandalConfig?.name || 'Mandal Festival Fund';
+  const upiId = mandalConfig?.upiId || '9673909460@ybl';
+  const mandalName = mandalConfig?.name || 'Indrayani Vihar Mitra Mandal';
+  const qrImage = mandalConfig?.qrCodeUrl || '/payment-qr.png';
 
   const upiUrl = buildUpiString({
     vpa: upiId,
@@ -93,14 +94,22 @@ export function UpiQrModal({ isOpen, onClose, mandalConfig, defaultAmount = '' }
             <h4 className="text-sm font-black text-slate-900 truncate px-2">{mandalName}</h4>
           </div>
 
-          <div className="py-4">
-            <QRCodeSVG
-              value={upiUrl}
-              size={180}
-              level="H"
-              includeMargin={false}
-              fgColor="#0F172A"
-            />
+          <div className="py-3 flex items-center justify-center">
+            {qrImage ? (
+              <img
+                src={qrImage}
+                alt="Official Mandal Payment QR"
+                className="w-48 h-48 object-contain rounded-xl border border-slate-200 shadow-inner"
+              />
+            ) : (
+              <QRCodeSVG
+                value={upiUrl}
+                size={180}
+                level="H"
+                includeMargin={false}
+                fgColor="#0F172A"
+              />
+            )}
           </div>
 
           {amount && Number(amount) > 0 && (

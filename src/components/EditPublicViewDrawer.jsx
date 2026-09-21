@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMandalData } from '../context/MandalDataContext';
 import { extractTextFromPdf, parseMankariListFromLines } from '../utils/mankariPdfParser';
 import { FESTIVAL_DAYS_CONFIG, getFestivalDayInfo } from '../utils/festivalSchedule';
+import { validateGoogleDriveUrl, validateUploadedFile, validateName, sanitizeText } from '../utils/validators';
 
 export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' }) {
   const {
@@ -22,6 +23,7 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
   const [driveUrlInput, setDriveUrlInput] = useState(config.driveUrl || '');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Day-Wise Cultural Performance State
   const [selectedCulturalDay, setSelectedCulturalDay] = useState(1);
@@ -74,12 +76,21 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
   React.useEffect(() => {
     if (isOpen && initialTab) {
       setActiveTab(initialTab);
+      setErrorMessage('');
     }
   }, [isOpen, initialTab]);
 
   const handleSaveDriveLink = (e) => {
     e.preventDefault();
-    updateMandalConfig({ driveUrl: driveUrlInput.trim() });
+    setErrorMessage('');
+
+    const driveVal = validateGoogleDriveUrl(driveUrlInput);
+    if (!driveVal.isValid) {
+      setErrorMessage(driveVal.error);
+      return;
+    }
+
+    updateMandalConfig({ driveUrl: driveVal.sanitized });
     setSuccessMessage('Centralised Google Drive link updated for Public View!');
     setSaveSuccess(true);
     setTimeout(() => {
@@ -98,7 +109,6 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
     day: 'Day 4',
     date: '10 Sept',
     family: '',
-    flat: '',
     aarti: 'Evening'
   });
 
@@ -111,7 +121,17 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
 
   const handleSaveSchedule = (e) => {
     e.preventDefault();
-    updatePublicContent(formData);
+    setErrorMessage('');
+
+    const sanitizedData = {
+      ...formData,
+      morningAartiTime: sanitizeText(formData.morningAartiTime) || '10:00 AM',
+      eveningAartiTime: sanitizeText(formData.eveningAartiTime) || '8:00 PM',
+      varganiMessage: sanitizeText(formData.varganiMessage),
+      announcementTitle: sanitizeText(formData.announcementTitle)
+    };
+
+    updatePublicContent(sanitizedData);
     setSuccessMessage('Aarti timings & messages updated!');
     setSaveSuccess(true);
     setTimeout(() => {
@@ -125,20 +145,50 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
     setCulturalForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveCulturalEvent = (e) => {
+  const handleSaveCulturalEvent = async (e) => {
     e.preventDefault();
-    updateCulturalEvent(selectedCulturalDay, culturalForm);
-    setSuccessMessage(`Day ${selectedCulturalDay} Cultural Performance saved!`);
-    setSaveSuccess(true);
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setSuccessMessage('');
-    }, 2000);
+    setErrorMessage('');
+
+    const titleVal = validateName(culturalForm.title, 2, 150);
+    if (!titleVal.isValid) {
+      setErrorMessage('कृपया कार्यक्रमाचे शीर्षक टाका (Please enter valid event title)');
+      return;
+    }
+
+    const sanitizedEvent = {
+      ...culturalForm,
+      day: Number(selectedCulturalDay),
+      title: titleVal.sanitized,
+      marathiTitle: sanitizeText(culturalForm.marathiTitle),
+      time: sanitizeText(culturalForm.time) || '06:00 PM',
+      location: sanitizeText(culturalForm.location) || 'Main Stage (मुख्य मंडप)',
+      performers: sanitizeText(culturalForm.performers),
+      description: sanitizeText(culturalForm.description)
+    };
+
+    try {
+      await updateCulturalEvent(selectedCulturalDay, sanitizedEvent);
+      setSuccessMessage(`Day ${selectedCulturalDay} Performance timings & details saved!`);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setSuccessMessage('');
+      }, 2500);
+    } catch (err) {
+      setErrorMessage('जतन करताना त्रुटी आली (Failed to save event details)');
+    }
   };
 
   const handlePdfUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setErrorMessage('');
+    const fileVal = validateUploadedFile(file, ['application/pdf'], 10 * 1024 * 1024);
+    if (!fileVal.isValid) {
+      setErrorMessage(fileVal.error);
+      return;
+    }
 
     setPdfFileName(file.name);
     setIsParsingPdf(true);
@@ -146,9 +196,15 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
     try {
       const lines = await extractTextFromPdf(file);
       const parsed = parseMankariListFromLines(lines);
-      setParsedReviewList(parsed);
+      // Sanitize extracted strings
+      const sanitizedParsed = parsed.map(item => ({
+        ...item,
+        family: sanitizeText(item.family)
+      }));
+      setParsedReviewList(sanitizedParsed);
     } catch (err) {
       console.error('Failed to parse PDF:', err);
+      setErrorMessage('PDF प्रक्रिया करताना त्रुटी आली (Failed to parse PDF).');
     } finally {
       setIsParsingPdf(false);
     }
@@ -157,7 +213,7 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
   const handleReviewItemChange = (index, field, value) => {
     setParsedReviewList((prev) => {
       const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
+      copy[index] = { ...copy[index], [field]: sanitizeText(value) };
       return copy;
     });
   };
@@ -174,7 +230,6 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
         day: 'Day 4',
         date: '10 Sept',
         family: 'नवीन परिवार',
-        flat: 'A-101',
         aarti: 'Evening'
       }
     ]);
@@ -182,7 +237,11 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
 
   const handleConfirmAndPublishMankaris = () => {
     if (parsedReviewList && parsedReviewList.length > 0) {
-      updateMankariList(parsedReviewList);
+      const cleanedList = parsedReviewList.map(item => ({
+        ...item,
+        family: sanitizeText(item.family)
+      }));
+      updateMankariList(cleanedList);
       setParsedReviewList(null);
       setPdfFileName('');
       setSaveSuccess(true);
@@ -195,13 +254,23 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
 
   const handleAddManualMankari = (e) => {
     e.preventDefault();
-    if (!newMankari.family.trim()) return;
-    addMankari(newMankari);
+    setErrorMessage('');
+
+    const familyVal = validateName(newMankari.family, 2, 100);
+    if (!familyVal.isValid) {
+      setErrorMessage(familyVal.error);
+      return;
+    }
+
+    addMankari({
+      ...newMankari,
+      family: familyVal.sanitized
+    });
+
     setNewMankari({
       day: newMankari.day,
       date: newMankari.date,
       family: '',
-      flat: '',
       aarti: 'Evening'
     });
   };
@@ -285,6 +354,13 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
             <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold rounded-xl flex items-center gap-2 shadow-xs animate-fade-in">
               <span className="material-symbols-outlined text-[18px] text-emerald-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
               <span>{successMessage || 'Changes published to Public View!'}</span>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xs animate-fade-in">
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              <span>{errorMessage}</span>
             </div>
           )}
 
@@ -652,7 +728,7 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                         <select
                           value={item.day}
                           onChange={(e) => handleReviewItemChange(idx, 'day', e.target.value)}
-                          className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-lg px-2 py-1 text-[11px] font-bold text-[#8B2616] outline-none"
+                          className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-lg px-2 py-1 text-[11px] font-bold text-[#8B2616] outline-none shrink-0"
                         >
                           {FESTIVAL_DAYS_CONFIG.map((d) => (
                             <option key={d.day} value={`Day ${d.day}`}>Day {d.day} ({d.date})</option>
@@ -662,20 +738,13 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                           type="text"
                           value={item.family}
                           onChange={(e) => handleReviewItemChange(idx, 'family', e.target.value)}
-                          placeholder="Family name"
+                          placeholder="Family name / कुटुंब नाव"
                           className="flex-1 border border-[#D9C4B7] bg-[#FFF8F6] rounded-lg px-2 py-1 text-xs font-semibold text-[#241913] outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={item.flat}
-                          onChange={(e) => handleReviewItemChange(idx, 'flat', e.target.value)}
-                          placeholder="Flat"
-                          className="w-16 border border-[#D9C4B7] bg-[#FFF8F6] rounded-lg px-2 py-1 text-xs text-[#6B5E57] outline-none"
                         />
                         <button
                           type="button"
                           onClick={() => handleDeleteReviewItem(idx)}
-                          className="text-[#BA1A1A] hover:opacity-80 p-1"
+                          className="text-[#BA1A1A] hover:opacity-80 p-1 shrink-0"
                         >
                           <span className="material-symbols-outlined text-[16px]">delete</span>
                         </button>
@@ -697,38 +766,31 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
               {/* Manual Add Mankari Form */}
               <form onSubmit={handleAddManualMankari} className="bg-white p-3.5 rounded-2xl border border-[#F0DFD5] space-y-2.5">
                 <h4 className="text-xs font-bold text-[#241913]">Add Mankari Manually</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <select
                     value={newMankari.day}
                     onChange={(e) => setNewMankari({ ...newMankari, day: e.target.value })}
-                    className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-2.5 py-2 text-xs font-bold text-[#8B2616] outline-none"
+                    className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-2.5 py-2 text-xs font-bold text-[#8B2616] outline-none sm:w-44 shrink-0"
                   >
                     {FESTIVAL_DAYS_CONFIG.map((d) => (
                       <option key={d.day} value={`Day ${d.day}`}>Day {d.day} ({d.date})</option>
                     ))}
                   </select>
-                  <input
-                    type="text"
-                    value={newMankari.flat}
-                    onChange={(e) => setNewMankari({ ...newMankari, flat: e.target.value })}
-                    placeholder="Flat (e.g. A-102)"
-                    className="border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-2.5 py-2 text-xs text-[#241913] outline-none"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMankari.family}
-                    onChange={(e) => setNewMankari({ ...newMankari, family: e.target.value })}
-                    placeholder="Family name / कुटुंब नाव"
-                    className="flex-1 border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-2.5 py-2 text-xs font-semibold text-[#241913] outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-[#8B2616] text-white text-xs font-bold rounded-xl shrink-0"
-                  >
-                    Add
-                  </button>
+                  <div className="flex flex-1 gap-2">
+                    <input
+                      type="text"
+                      value={newMankari.family}
+                      onChange={(e) => setNewMankari({ ...newMankari, family: e.target.value })}
+                      placeholder="Family name / कुटुंब नाव"
+                      className="flex-1 border border-[#D9C4B7] bg-[#FFF8F6] rounded-xl px-2.5 py-2 text-xs font-semibold text-[#241913] outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-[#8B2616] text-white text-xs font-bold rounded-xl shrink-0 cursor-pointer"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
               </form>
 
@@ -742,15 +804,14 @@ export function EditPublicViewDrawer({ isOpen, onClose, initialTab = 'cultural' 
                 <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
                   {mankariList.map((m) => (
                     <div key={m.id} className="p-2 rounded-xl bg-[#FFF8F6] border border-[#F0DFD5] flex items-center justify-between text-xs">
-                      <div>
-                        <span className="text-[10px] font-bold text-[#8B2616] bg-[#FFEAE0] px-1.5 py-0.5 rounded mr-1.5">{m.day}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-[#8B2616] bg-[#FFEAE0] px-1.5 py-0.5 rounded">{m.day}</span>
                         <span className="font-bold text-[#241913]">{m.family}</span>
-                        <span className="text-[#6B5E57] ml-1">({m.flat})</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => deleteMankari(m.id)}
-                        className="text-[#BA1A1A] hover:opacity-80 p-1"
+                        className="text-[#BA1A1A] hover:opacity-80 p-1 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[16px]">delete</span>
                       </button>

@@ -1,18 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db, isConfigured } from '../firebase';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import {
+  verifyPinHash,
+  checkRateLimit,
+  recordFailedAttempt,
+  resetRateLimit,
+  createSecureSession,
+  validateSession,
+  clearSession
+} from '../utils/security';
+import { logSecurityEvent } from '../utils/securityLogger';
 
 const AuthContext = createContext();
 
-export const MASTER_PIN = '1995';
-
 export const DEFAULT_ORGANIZERS = [
-  { id: 'org-1', name: 'Sachin Joshi', phone: '9820011223', pin: MASTER_PIN },
-  { id: 'org-2', name: 'Vijay Pawar', phone: '9820044556', pin: MASTER_PIN },
-  { id: 'org-3', name: 'Amit Kadam', phone: '9820077889', pin: MASTER_PIN },
-  { id: 'org-4', name: 'Sunita Deshmukh', phone: '9820099001', pin: MASTER_PIN },
-  { id: 'org-5', name: 'Ramesh Shinde', phone: '9820022334', pin: MASTER_PIN },
-  { id: 'org-6', name: 'Pranav Patil', phone: '9820055667', pin: MASTER_PIN }
+  { id: 'org-default-1', name: 'Digambar Patil', phone: '8767977216' }
 ];
 
 export function AuthProvider({ children }) {
@@ -21,7 +24,9 @@ export function AuthProvider({ children }) {
       const saved = localStorage.getItem('mandal_organizers');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return parsed.map(({ role, ...rest }) => ({ ...rest, pin: MASTER_PIN }));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(({ pin, role, ...rest }) => rest);
+        }
       }
       return DEFAULT_ORGANIZERS;
     } catch {
@@ -31,28 +36,34 @@ export function AuthProvider({ children }) {
 
   const [currentOrganizer, setCurrentOrganizer] = useState(() => {
     try {
-      const saved = localStorage.getItem('mandal_active_organizer');
-      if (saved) {
-        const { role, ...rest } = JSON.parse(saved);
-        return { ...rest, pin: MASTER_PIN };
-      }
-      return null;
+      const val = validateSession();
+      return val.isValid ? val.session.organizer : null;
     } catch {
       return null;
     }
   });
 
-  // Local storage persistence fallback
+  // Local storage persistence fallback for organizers directory
   useEffect(() => {
     localStorage.setItem('mandal_organizers', JSON.stringify(organizers));
   }, [organizers]);
 
+  // Periodic and on-focus session expiration check (30-day inactivity TTL)
   useEffect(() => {
-    if (currentOrganizer) {
-      localStorage.setItem('mandal_active_organizer', JSON.stringify(currentOrganizer));
-    } else {
-      localStorage.removeItem('mandal_active_organizer');
-    }
+    const checkSessionExpiration = () => {
+      const val = validateSession();
+      if (!val.isValid && currentOrganizer) {
+        console.warn('Session expired or invalidated:', val.reason);
+        setCurrentOrganizer(null);
+      }
+    };
+
+    const interval = setInterval(checkSessionExpiration, 60000); // Check every minute
+    window.addEventListener('focus', checkSessionExpiration);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', checkSessionExpiration);
+    };
   }, [currentOrganizer]);
 
   // Live Firestore subscription for Organisers list
@@ -61,12 +72,13 @@ export function AuthProvider({ children }) {
 
     try {
       const unsubOrganizers = onSnapshot(doc(db, 'organizers', 'main'), (snapshot) => {
-        if (snapshot.exists() && Array.isArray(snapshot.data()?.list)) {
-          const list = snapshot.data().list.map(o => ({ ...o, pin: MASTER_PIN }));
+        if (snapshot.exists() && Array.isArray(snapshot.data()?.list) && snapshot.data().list.length > 0) {
+          const list = snapshot.data().list.map(({ pin, role, ...rest }) => rest);
           setOrganizers(list);
         } else {
-          // Seed default organizers into Firestore if empty
+          // Seed default organiser Digambar Patil into Firestore if empty
           setDoc(doc(db, 'organizers', 'main'), { list: DEFAULT_ORGANIZERS }, { merge: true }).catch(() => {});
+          setOrganizers(DEFAULT_ORGANIZERS);
         }
       }, (err) => console.warn('Firestore Organizers listener error:', err));
 
@@ -76,50 +88,100 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Login via developer-locked MASTER_PIN (1995) and name/mobile
-  const loginWithPin = (pin, name, phone, selectedOrgId) => {
-    const isValidPin = String(pin).trim() === MASTER_PIN;
-    if (!isValidPin) {
-      return { success: false, error: 'चुकीचा पिन! कृपया योग्य ४ अंकी पिन टाका.' };
-    }
+  // Login via salted SHA-256 PIN hash with Anti-Brute-Force Rate Limiting
+  const loginWithPin = async (pin, name, phone, selectedOrgId) => {
+    const cleanPhone = (phone || '').replace(/\D/g, '').slice(-10) || (selectedOrgId || 'global');
 
-    // Must match an active organizer in the list
-    if (selectedOrgId) {
-      const found = organizers.find(o => o.id === selectedOrgId);
-      if (found) {
-        const userSession = { ...found, phone: phone ? phone.trim() : found.phone, pin: MASTER_PIN };
-        setCurrentOrganizer(userSession);
-        return { success: true, organizer: userSession };
-      } else {
-        return { success: false, error: 'कार्यकर्ता नोंद सापडली नाही. (Organiser profile not found)' };
-      }
-    }
-
-    // Match existing organizer by phone or name
-    const cleanPhone = (phone || '').replace(/\D/g, '').slice(-10);
-    const cleanName = (name || '').trim().toLowerCase();
-
-    let matched = organizers.find(o => {
-      const oPhone = (o.phone || '').replace(/\D/g, '').slice(-10);
-      const oName = (o.name || '').trim().toLowerCase();
-      if (cleanPhone && oPhone && oPhone === cleanPhone) return true;
-      if (cleanName && oName && oName === cleanName) return true;
-      return false;
-    });
-
-    if (!matched) {
+    // 1. Anti-Brute-Force Rate Limiting Check (5 attempts / 15 mins)
+    const rateLimit = checkRateLimit(cleanPhone);
+    if (!rateLimit.allowed) {
+      logSecurityEvent({
+        type: 'RATE_LIMIT_TRIGGERED',
+        severity: 'CRITICAL',
+        message: `Login lockout active on target: ${cleanPhone}. Further attempts blocked.`,
+        details: { phone: cleanPhone, lockTimeRemainingMs: rateLimit.lockTimeRemainingMs }
+      });
       return {
         success: false,
-        error: 'हे नाव किंवा मोबाईल नंबर कार्यकर्ते यादीत नोंद नाही. (Name or mobile not registered as organiser)'
+        error: rateLimit.message,
+        isLocked: true,
+        lockTimeRemainingMs: rateLimit.lockTimeRemainingMs
       };
     }
 
-    const session = { ...matched, pin: MASTER_PIN };
-    setCurrentOrganizer(session);
-    return { success: true, organizer: session };
+    // 2. Cryptographic Salted SHA-256 Hash Verification (Zero plaintext in bundle)
+    const isValidPin = await verifyPinHash(pin);
+    if (!isValidPin) {
+      const failed = recordFailedAttempt(cleanPhone);
+      logSecurityEvent({
+        type: failed.locked ? 'RATE_LIMIT_TRIGGERED' : 'FAILED_LOGIN',
+        severity: failed.locked ? 'CRITICAL' : 'WARN',
+        message: failed.locked
+          ? `Account locked: 5 consecutive invalid PIN attempts on ${cleanPhone}.`
+          : `Failed PIN attempt on ${cleanPhone}.`,
+        details: { phone: cleanPhone, locked: failed.locked, remainingAttempts: 5 }
+      });
+      return {
+        success: false,
+        error: failed.message,
+        isLocked: failed.locked,
+        lockTimeRemainingMs: failed.lockTimeRemainingMs
+      };
+    }
+
+    // 3. Reset rate limit counter on successful authentication
+    resetRateLimit(cleanPhone);
+
+    // 4. Match selected organizer from dropdown
+    let targetOrg = null;
+    if (selectedOrgId) {
+      const found = organizers.find(o => o.id === selectedOrgId);
+      if (found) {
+        targetOrg = { ...found, phone: phone ? phone.trim() : found.phone };
+      }
+    }
+
+    // 5. Match existing organizer by phone or name
+    if (!targetOrg) {
+      const cleanName = (name || '').trim().toLowerCase();
+      targetOrg = organizers.find(o => {
+        const oPhone = (o.phone || '').replace(/\D/g, '').slice(-10);
+        const oName = (o.name || '').trim().toLowerCase();
+        if (cleanPhone && oPhone && oPhone === cleanPhone) return true;
+        if (cleanName && oName && oName === cleanName) return true;
+        return false;
+      });
+    }
+
+    // 6. If not matched, but valid name entered with valid master PIN -> Register and login
+    if (!targetOrg && name && name.trim()) {
+      targetOrg = {
+        id: `org-${Date.now()}`,
+        name: name.trim(),
+        phone: cleanPhone || ''
+      };
+      const updated = [...organizers, targetOrg];
+      setOrganizers(updated);
+      if (isConfigured && db) {
+        setDoc(doc(db, 'organizers', 'main'), { list: updated }, { merge: true }).catch(() => {});
+      }
+    }
+
+    if (!targetOrg) {
+      return {
+        success: false,
+        error: 'कृपया आपले पूर्ण नाव लिहा (Please enter your name).'
+      };
+    }
+
+    // 7. Create secure session with 30-day inactivity TTL and cryptographic token
+    createSecureSession(targetOrg);
+    setCurrentOrganizer(targetOrg);
+    return { success: true, organizer: targetOrg };
   };
 
   const logout = () => {
+    clearSession();
     setCurrentOrganizer(null);
   };
 
@@ -128,8 +190,7 @@ export function AuthProvider({ children }) {
     const newOrg = {
       id: `org-${Date.now()}`,
       name: name.trim(),
-      phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : '',
-      pin: MASTER_PIN
+      phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : ''
     };
     const updated = [...organizers, newOrg];
     setOrganizers(updated);
@@ -150,8 +211,7 @@ export function AuthProvider({ children }) {
         return {
           ...o,
           name: name ? name.trim() : o.name,
-          phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : o.phone,
-          pin: MASTER_PIN
+          phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : o.phone
         };
       }
       return o;
@@ -162,8 +222,7 @@ export function AuthProvider({ children }) {
       setCurrentOrganizer(prev => ({
         ...prev,
         name: name ? name.trim() : prev.name,
-        phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : prev.phone,
-        pin: MASTER_PIN
+        phone: phone ? phone.trim().replace(/\D/g, '').slice(-10) : prev.phone
       }));
     }
 
@@ -180,6 +239,7 @@ export function AuthProvider({ children }) {
     const updated = organizers.filter(o => o.id !== id);
     setOrganizers(updated);
     if (currentOrganizer?.id === id) {
+      clearSession();
       setCurrentOrganizer(null);
     }
 
